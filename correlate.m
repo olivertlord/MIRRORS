@@ -8,7 +8,7 @@ fullframe = double(fullframe);
 [d,a,c,b] = deal(fullframe(1:255,1:382),fullframe(1:255,384:765),fullframe(256:510,1:382),fullframe(256:510,384:765));
 %splits fullframe into quadrants
 
-if auto_flag < 1 && counter_1 == 1
+if auto_flag == 1 || counter_1 == 1
     
     cc = xcorr2(b,a);
     [~, imax] = max(abs(cc(:)));

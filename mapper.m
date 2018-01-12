@@ -41,7 +41,7 @@ if peak_choice == 1
     [~, p] = max(sa(:));
     %find max intensity point
     
-    [pr, pc] = ind2sub(size(sa),p)
+    [pr, pc] = ind2sub(size(sa),p);
     %determine index of highest intensity point
 else
     error(error==0)=NaN;
