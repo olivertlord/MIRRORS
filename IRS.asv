@@ -330,7 +330,7 @@ if auto_flag > 0
     fullframe = imread(strcat(upath,'/',dir_content(1).name));
     a = fullframe(1:255,1:382);
     [~, idx] = max(a(:));
-    [y, x] = ind2sub(size(a),idx)
+    [y, x] = ind2sub(size(a),idx);
     w = 50;
     counter_1 = auto_flag;
 else
