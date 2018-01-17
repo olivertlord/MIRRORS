@@ -101,7 +101,7 @@ function plot_axes(xlab, ylab, title_string, x, y, plot_type, dy, dx, sa, micron
 %updates colors and strings
 function control_colors(flag,handles)
 
-h = [handles.pushbutton1 handles.pushbutton2 handles.pushbutton3 handles.edit2 handles.edit3 handles.text10 handles.text5];
+h = [handles.pushbutton1 handles.pushbutton2 handles.pushbutton3 handles.edit2 handles.edit3 handles.text5];
 %creates object array
 
 for i = 1:5
@@ -117,7 +117,7 @@ if (flag{1} == 1) && (flag{2} == 1) && (flag{4} == 1) && (flag{5} == 1)
 end
 %if all are green, make run green too
 
-for i = 6:9
+for i = 6:8
     set(h(i-2),'string',flag{i});
 end
 
@@ -145,18 +145,13 @@ Icut_100 = num2str(round(Icut*100));
 set(handles.text12,'String',strcat(Icut_100,' %'));
 
 % --- Executes on button press in togglebutton1.
-function togglebutton1_Callback(~, ~, handles)
-
-if get(handles.togglebutton1,'Value') == 0
-    set(handles.togglebutton1,'String','difference')
-else
-    set(handles.togglebutton1,'String','transect')
-end
+function togglebutton1_Callback(~, ~, ~)
 
 % --- Executes on button press in pushbutton1.
 function pushbutton1_Callback(~, ~, handles)
 
-cla;
+arrayfun(@cla,findall(0,'type','axes'))
+fclose('all');
 %clear axes
 
 hfindROI = findobj(gca,'Type','hggroup');    
@@ -208,7 +203,7 @@ for i=1:total
             counter_1 = counter_1+1;
         end
     else
-        if min(max([d(:) a(:) c(:) b(:)])) > noise*2 && max(max([d(:) a(:) c(:) b(:)])) <64000;
+        if (min(max([d(:) a(:) c(:) b(:)])) > noise*2) && (max(max([d(:) a(:) c(:) b(:)])) < 62000);
             good_data(i) = i;
             axes(handles.axes1);
             imagesc(raw)
@@ -295,14 +290,16 @@ control_colors(flag, handles)
 % --- Executes on button press in pushbutton3.
 function pushbutton3_Callback(~, ~, handles)
 
-tic
-
-clear T_hist E_hist acq timestamp elapsedSec timeSec
-
-persistent kiac kibc kicc kidc nw savename videofile writerObj T_hist E_hist acq timestamp elapsedSec timeSec
-
 auto_flag = getappdata(0,'auto_flag');
 dir_content = getappdata(0,'dir_content');
+
+if auto_flag <= 1
+
+    clear T_hist E_hist acq timestamp elapsedSec timeSec difT_metric
+
+end
+    
+persistent kiac kibc kicc kidc nw savename videofile writerObj T_hist E_hist acq timestamp elapsedSec timeSec difT_metric
 
 if auto_flag == 0
     
@@ -319,6 +316,11 @@ if auto_flag == 0
     good_data = getappdata(0,'good_data');
     upath = getappdata(0,'upath');
     %gets list of unknown files files and file path
+    
+    arrayfun(@cla,findall(0,'type','axes'))
+    fclose('all');
+    %clear axes
+    
 end
 
 if auto_flag > 0
@@ -331,7 +333,7 @@ if auto_flag > 0
     a = fullframe(1:255,1:382);
     [~, idx] = max(a(:));
     [y, x] = ind2sub(size(a),idx);
-    w = 50;
+    w = 100;
     counter_1 = auto_flag;
 else
     prefix = strsplit(dir_content(1).name,'-');
@@ -370,7 +372,7 @@ for i=good_data(good_data>=fi & good_data<=fl)
     filename=dir_content(i).name;
     filepath=char(strcat(upath,'/',(filename)));
     %reads unknown file
-    
+   
     fullframe = imread(filepath);
     %opens and reads .TIFF
     
@@ -452,7 +454,7 @@ for i=good_data(good_data>=fi & good_data<=fl)
     plot(elapsedSec,T_hist,'--rs','LineWidth',1,'MarkerEdgeColor','b','MarkerFaceColor','b','MarkerSize',10);
     plot_axes('Elapsed Time (s)', 'Temperature (K)', strcat(num2str(timevector(1,4)),':',num2str(timevector(1,5)),':',num2str(timevector(1,6)),{'  '},num2str(progress),'%'),elapsedSec,T_hist, plot_type, dy, dx, sa, microns);
     
-    if get(handles.togglebutton1,'Value') == 0
+    if get(handles.radiobutton3,'Value') == 1
         %TOP RIGHT PLOT: Difference Metric History
         axes(handles.axes4)
         plot(elapsedSec,difT_metric,'--rs','LineWidth',1,'MarkerEdgeColor','b','MarkerFaceColor','b','MarkerSize',10);
@@ -460,9 +462,9 @@ for i=good_data(good_data>=fi & good_data<=fl)
     else
         %TOP RIGHT PLOT: cross-sections
         axes(handles.axes4)
-        plot(microns,T(dx,(1:length(T))));
+        plot(microns,T(dx,(1:length(T))),'r');
         hold on
-        plot(microns,T(1:length(T),dy));
+        plot(microns,T(1:length(T),dy),'g');
         hold off
         plot_axes('Distance (microns)', 'Temperature (K)', 'Temperature Cross-sections',microns,T(T>0), plot_type, dy, dx, sa, microns);
         legend('horizontal','vertical');
@@ -505,12 +507,11 @@ save (result,'autoresult','-ASCII','-double');
 
 if get(handles.pushbutton4,'Value') == 0
     close(writerObj);
-    delete(hRectangle)
 end
 %closes video file unless in automode
 
 % --- Executes on button press in pushbutton4.
-function pushbutton4_Callback(hObject, eventdata, handles)
+function pushbutton4_Callback(~, ~, handles)
 
 auto_flag = getappdata(0,'auto_flag');
 
@@ -518,18 +519,23 @@ hfindROI = findobj(gca,'Type','hggroup');
 delete(hfindROI)
 %deletes ROI if one already exists
 
+arrayfun(@cla,findall(0,'type','axes'))
+fclose('all');
+%clear axes
+
 [flag(1:5), flag(6:9)] = deal({0},{' '});
 control_colors(flag, handles);
 %initialises flag array and re-initialises colours and strings
 
 if get(handles.pushbutton4,'Value') == 0
-    set(handles.text15,'BackgroundColor',[1.0 0.6 0.784]);
+    set(handles.pushbutton4,'BackgroundColor',[1.0 0.6 0.784]);
     set(handles.pushbutton4,'String','auto off');
     %sets auto mode button to off state
     
     set(handles.pushbutton1,'Enable','on');
     set(handles.pushbutton2,'Enable','on');
     set(handles.pushbutton3,'Enable','on');
+    set(handles.check1,'Enable','on');
     %unlocks other buttons on exit of auto mode
     
     auto_flag = 0;
@@ -539,7 +545,7 @@ if get(handles.pushbutton4,'Value') == 0
     writerObj = getappdata(0,'writerObj');
     close(writerObj);
 else
-    set(handles.text15,'BackgroundColor',[0 0.8 0]);
+    set(handles.pushbutton4,'BackgroundColor',[0 0.8 0]);
     set(handles.pushbutton4,'String','auto on')
     %sets auto mode button to on state
     

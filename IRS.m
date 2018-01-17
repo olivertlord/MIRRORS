@@ -203,7 +203,7 @@ for i=1:total
             counter_1 = counter_1+1;
         end
     else
-        if min(max([d(:) a(:) c(:) b(:)])) > noise*2 && max(max([d(:) a(:) c(:) b(:)])) <64000;
+        if (min(max([d(:) a(:) c(:) b(:)])) > noise*2) && (max(max([d(:) a(:) c(:) b(:)])) < 62000);
             good_data(i) = i;
             axes(handles.axes1);
             imagesc(raw)
@@ -290,8 +290,6 @@ control_colors(flag, handles)
 % --- Executes on button press in pushbutton3.
 function pushbutton3_Callback(~, ~, handles)
 
-tic
-
 auto_flag = getappdata(0,'auto_flag');
 dir_content = getappdata(0,'dir_content');
 
@@ -319,7 +317,6 @@ if auto_flag == 0
     upath = getappdata(0,'upath');
     %gets list of unknown files files and file path
     
-    a = 10
     arrayfun(@cla,findall(0,'type','axes'))
     fclose('all');
     %clear axes
@@ -538,6 +535,7 @@ if get(handles.pushbutton4,'Value') == 0
     set(handles.pushbutton1,'Enable','on');
     set(handles.pushbutton2,'Enable','on');
     set(handles.pushbutton3,'Enable','on');
+    set(handles.checkbox1,'Enable','on');
     %unlocks other buttons on exit of auto mode
     
     auto_flag = 0;
@@ -558,6 +556,8 @@ else
     set(handles.pushbutton1,'Enable','off');
     set(handles.pushbutton2,'Enable','off');
     set(handles.pushbutton3,'Enable','off');
+    set(handles.checkbox1,'Value',1);
+    set(handles.checkbox1,'Enable','off');
     %locks other buttons during auto mode
     
     upath = uigetdir('/Users/oliverlord/Dropbox/Work/EXPERIMENTS/');
