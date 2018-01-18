@@ -34,6 +34,11 @@ end
 %regresses intensity against normalised wavelength for each pixel in
 %subframe
 
+if get(handles.checkbox3,'Value') == 1
+    errorx = error - 2;
+    T = T - ((-0.0216.*(errorx.*errorx))+(17.882.*errorx));
+end
+
 peak_choice = get(handles.radiobutton1,'value');
 %determine radio button state for peak type
 

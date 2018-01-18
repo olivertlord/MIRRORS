@@ -333,7 +333,7 @@ if auto_flag > 0
     a = fullframe(1:255,1:382);
     [~, idx] = max(a(:));
     [y, x] = ind2sub(size(a),idx);
-    w = 100;
+    w = 60;
     counter_1 = auto_flag;
 else
     prefix = strsplit(dir_content(1).name,'-');
@@ -375,6 +375,13 @@ for i=good_data(good_data>=fi & good_data<=fl)
    
     fullframe = imread(filepath);
     %opens and reads .TIFF
+    
+    if (x-w-4 < 1) || (y-w-4 < 1)
+        x = 191;
+        y = 128;
+    end;
+    % resets ROI to center if it would have extended outside of the fullframe
+    % and caused the program to crash
     
     axes(handles.axes1);
     imagesc(fullframe);
@@ -591,3 +598,12 @@ else
         end
     end
 end
+
+
+% --- Executes on button press in checkbox3.
+function checkbox3_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox3
