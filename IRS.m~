@@ -198,7 +198,7 @@ for i=1:total
             good_data(i) = i;
             axes(handles.axes1);
             imagesc(raw)
-            plot_axes('X: pixels', 'Y: pixels', strcat({'DATASET: '},(num2str(i))),[1,757.35],[1,504.9], 0, 0, 0, 0, 0);
+            plot_axes('X: pixels', 'Y: pixels', strcat({'DATASET: '},filename(end-7:end-5)),[1,757.35],[1,504.9], 0, 0, 0, 0, 0);
             flag(1) = {1};
             counter_1 = counter_1+1;
         end
@@ -207,7 +207,7 @@ for i=1:total
             good_data(i) = i;
             axes(handles.axes1);
             imagesc(raw)
-            plot_axes('X: pixels', 'Y: pixels', strcat({'DATASET: '},(num2str(i))),[1,757.35],[1,504.9], 0, 0, 0, 0, 0);
+            plot_axes('X: pixels', 'Y: pixels', strcat({'DATASET: '},filename(end-7:end-5)),[1,757.35],[1,504.9], 0, 0, 0, 0, 0);
             flag(1) = {1};
             counter_1 = counter_1+1;
         end
@@ -227,14 +227,17 @@ setappdata(0,'upath',upath);
 
 function edit2_Callback(~, ~, handles)
 
-fi = eval(get(handles.edit2,'string'));
+i = eval(get(handles.edit2,'string'));
 %gets user entered value of fi
 
-if fi < find(getappdata(0,'good_data'),1)
-    fi = find(getappdata(0,'good_data'),1);
-    set(handles.edit2,'string',fi);
+if i < find(getappdata(0,'good_data'),1)
+    i = find(getappdata(0,'good_data'),1);
 end
 %converts fi to fIRSt good file if user selects earlier file
+
+fi=dir_content(i).name(end-7:end-5);
+set(handles.edit2,'string',fi);
+%gets filename associated with that file sequence number
 
 flag = getappdata(0,'flag');
 flag(4) = {fi};
@@ -243,12 +246,12 @@ control_colors(flag, handles)
 
 function edit3_Callback(~, ~, handles)
 
-fl = eval(get(handles.edit3,'string'));
+i = eval(get(handles.edit3,'string'));
 set(handles.edit3,'Backgroundcolor',[0 .8 0]);
 %gets user entered value of fl
 
-if fl > find(getappdata(0,'good_data'),1,'last')
-    fl = find(getappdata(0,'good_data'),1,'last');
+if i > find(getappdata(0,'good_data'),1,'last')
+    i = find(getappdata(0,'good_data'),1,'last');
     set(handles.edit3,'string',fl);
 elseif fl < eval(get(handles.edit2,'string'))
     fl = eval(get(handles.edit2,'string'));    
@@ -385,12 +388,13 @@ for i=good_data(good_data>=fi & good_data<=fl)
     % resets ROI to center if it would have extended outside of the fullframe
     % and caused the program to crash
     
+    
     axes(handles.axes1);
     imagesc(fullframe);
     hold on
     hRectangle = rectangle('position',[x+384-w y-w w*2 w*2],'EdgeColor','w','LineWidth',2);
     hold off
-    plot_axes('X: pixels', 'Y: pixels', strcat({'DATASET: '},(num2str(i))),[1,757.35],[1,504.9], 0, 0, 0, 0, 0);
+    plot_axes('X: pixels', 'Y: pixels', strcat({'DATASET: '},filename(end-7:end-5)),[1,757.35],[1,504.9], 0, 0, 0, 0, 0);
     %plots fullframe   
     
     [a, b, c, d]= correlate(fullframe, x, y, w, auto_flag, counter_1);
