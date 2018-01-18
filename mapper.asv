@@ -42,19 +42,21 @@ end
 peak_choice = get(handles.radiobutton1,'value');
 %determine radio button state for peak type
 
-if peak_choice == 1   
+if get(handles.radiobutton1,'value') == 1   
     [~, p] = max(sa(:));
     %find max intensity point
     
     [pr, pc] = ind2sub(size(sa),p);
     %determine index of highest intensity point
-else
+elseif get(handles.radiobutton2,'value') == 1
     error(error==0)=NaN;
     [~, p] = min(error(:));
     %find min error point
     
     [pr, pc] = ind2sub(size(error),p);
     %determine index of min error point
+    
+elseif ge(handles.
 end
 
 pr(pr<4) = 5;

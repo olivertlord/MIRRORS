@@ -194,7 +194,7 @@ for i=1:total
     %quarters image: d=tl 670nm, a=tr 750nm, c=bl 850nm, b=br 580nm
 
     if saturate == 1 
-        if min(max([d(:) a(:) c(:) b(:)])) > noise*2;
+        if min(max([d(:) a(:) c(:) b(:)])) > noise;
             good_data(i) = i;
             axes(handles.axes1);
             imagesc(raw)
@@ -203,7 +203,7 @@ for i=1:total
             counter_1 = counter_1+1;
         end
     else
-        if (min(max([d(:) a(:) c(:) b(:)])) > noise*2) && (max(max([d(:) a(:) c(:) b(:)])) < 62000);
+        if (min(max([d(:) a(:) c(:) b(:)])) > noise) && (max(max([d(:) a(:) c(:) b(:)])) < 62000);
             good_data(i) = i;
             axes(handles.axes1);
             imagesc(raw)
