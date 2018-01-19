@@ -48,6 +48,8 @@ function varargout = IRS_OutputFcn(~, ~, handles)
 % Get default command line output from handles structure
 varargout{1} = handles.output;
 
+movegui(gcf,'center');
+
 % --- Executes during object creation, after setting all properties.
 function edit2_CreateFcn(hObject, ~, ~)
 
@@ -342,12 +344,9 @@ if auto_flag > 0
     dir_content(1) = dir_content(length(dir_content));
     prefix = strsplit(dir_content(1).name,'-');
     upath = getappdata(0,'upath');
-    
-    fullframe = imread(strcat(upath,'/',dir_content(1).name));
-    a = fullframe(1:255,384:765);
-    [~, idx] = max(a(:));
-    [y, x] = ind2sub(size(a),idx);
-    w = 60;
+     
+    [y, x] = deal(128,191);
+    w = 80;
     counter_1 = auto_flag;
 else
     prefix = strsplit(dir_content(1).name,'-');
@@ -378,8 +377,6 @@ if auto_flag < 2
     setappdata(0,'writerObj',writerObj);
     %sets up video recording
     
-    window = get(gcf,'position');
-    setappdata(0,'window',window);
 end
 
 for i=good_data(good_data>=fi & good_data<=fl)
@@ -525,8 +522,7 @@ for i=good_data(good_data>=fi & good_data<=fl)
     imagesc(microns,microns,T,[(min(min(T(T>0)))) max(T(:))]);
     plot_axes('Distance (microns)', 'Distance (microns)', 'TEMPERATURE MAP',microns, microns, plot_type, dy, dx, sb, microns);
     
-    window = getappdata(0,'window');
-    set(gcf,'position',window);
+    movegui(gcf,'center')
     frame=getframe(gcf);
     writeVideo(writerObj,frame);
     %writes frame to .avi
