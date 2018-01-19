@@ -74,13 +74,20 @@ end
 %--------------------------------------------------------------------------
 
 %sets plot attributes and is called whenever data is plotted
-function plot_axes(xlab, ylab, title_string, x, y, plot_type, dy, dx, sa, microns)
+function plot_axes(xlab, ylab, title_string, x, y, plot_type, dy, dx, sb, microns)
     x(x==0) = -1;
-    y(y==0) = 1;
+    if strcmp(title_string,'Image difference metric') == 0    
+        y(y==0) = 1;
+    end
     if length(y) == 1
         y(isnan(y)) = 0.00001;
     end
-    ylim ([(nanmin(y(:))-0.01*nanmin(y(:))) (nanmax(y(:))+0.01*nanmax(y(:)))])
+    if strcmp(title_string,'Image difference metric') == 0    
+        ylim ([(nanmin(y(:))-0.01*nanmin(y(:))) (nanmax(y(:))+0.01*nanmax(y(:)))])
+    else
+        ylim ([min(y) max(y+0.00001)])
+    end
+    
     xlim ([(nanmin(x(:))-0.01*nanmin(x(:))) abs((nanmax(x(:))+0.01*nanmax(x(:))))])
     xlabel(xlab, 'FontSize', 16);
     ylabel(ylab, 'FontSize', 16);
@@ -92,7 +99,7 @@ function plot_axes(xlab, ylab, title_string, x, y, plot_type, dy, dx, sa, micron
        colorbar('location','NorthOutside');
        set(gca, 'Position', originalSize);
        hold on
-       contour(microns,microns,sa,10,'k');
+       contour(microns,microns,sb,10,'k');
        plot(microns(dy),microns(dx),'ws','LineWidth',2,'MarkerSize',10,'MarkerEdgeColor','w','MarkerFaceColor','w')
        hold off
     end
@@ -117,8 +124,8 @@ if (flag{1} == 1) && (flag{2} == 1) && (flag{4} == 1) && (flag{5} == 1)
 end
 %if all are green, make run green too
 
-for i = 6:8
-    set(h(i-2),'string',flag{i});
+for i = 4:6
+    set(h(i),'string',flag{i});
 end
 
 setappdata(0,'flag',flag);
@@ -165,7 +172,7 @@ control_colors(flag, handles);
 [upath]=uigetdir('/Users/oliverlord/Dropbox/Work/EXPERIMENTS/');
 dir_content = dir(strcat(upath,'/*.tiff'));
 total=size(dir_content,1);
-
+set(handles.text5,'string',upath);
 %determines number of .TIFF files in directory
 
 good_data = zeros(1,total);
@@ -194,7 +201,7 @@ for i=1:total
     %quarters image: d=tl 670nm, a=tr 750nm, c=bl 850nm, b=br 580nm
 
     if saturate == 1 
-        if min(max([d(:) a(:) c(:) b(:)])) > noise*2;
+        if min(max([d(:) a(:) c(:) b(:)])) > noise;
             good_data(i) = i;
             axes(handles.axes1);
             imagesc(raw)
@@ -203,7 +210,7 @@ for i=1:total
             counter_1 = counter_1+1;
         end
     else
-        if (min(max([d(:) a(:) c(:) b(:)])) > noise*2) && (max(max([d(:) a(:) c(:) b(:)])) < 62000);
+        if (min(max([d(:) a(:) c(:) b(:)])) > noise) && (max(max([d(:) a(:) c(:) b(:)])) < 62000);
             good_data(i) = i;
             axes(handles.axes1);
             imagesc(raw)
@@ -216,7 +223,7 @@ for i=1:total
     %s:n>2 (for fitting saturated images) and if max < 64000 (if not)
 end
 
-[flag(1),flag(8),flag(9)] = deal({1},{total},{upath});
+[flag(1),flag(6)] = deal({1},{upath});
 control_colors(flag, handles)
 %updates colors and strings
 
@@ -237,7 +244,7 @@ end
 %converts fi to fIRSt good file if user selects earlier file
 
 flag = getappdata(0,'flag');
-[flag(4),flag(6)] = deal({1},{fi});
+flag(4) = {fi};
 control_colors(flag, handles)
 %updates colors and strings
 
@@ -257,7 +264,7 @@ end
 %user selects fl < fi
 
 flag = getappdata(0,'flag');
-[flag(5),flag(7)] = deal({1},{fl});
+[flag(3), flag(5)] = deal({1}, {fl});
 control_colors(flag, handles)
 %updates colors and strings
 
@@ -273,8 +280,8 @@ flag(2:3) = {0};
 control_colors(flag, handles)
 %updates colors and strings
 
-ROI = imrect(handles.axes1, [91 28 200 200]);
-fcn = makeConstrainToRectFcn('imrect',[20 362],[20 235]);
+ROI = imrect(handles.axes1, [474 28 200 200]);
+fcn = makeConstrainToRectFcn('imrect',[364 745],[20 235]);
 setPositionConstraintFcn(ROI,fcn);
 setFixedAspectRatioMode(ROI,'True');
 subframe = wait(ROI);
@@ -305,7 +312,7 @@ if auto_flag == 0
     
     subframe = getappdata(0,'subframe');
     w = round(subframe(3)/2);
-    x = round(subframe(1))+w;
+    x = round(subframe(1))+w-384;
     y = round(subframe(2))+w;
     %calculate center and half-width of subframe
     
@@ -324,16 +331,17 @@ if auto_flag == 0
 end
 
 if auto_flag > 0
+    
     [fi,fl,good_data] = deal(1);
     dir_content(1) = dir_content(length(dir_content));
     prefix = strsplit(dir_content(1).name,'-');
     upath = getappdata(0,'upath');
     
     fullframe = imread(strcat(upath,'/',dir_content(1).name));
-    a = fullframe(1:255,1:382);
+    a = fullframe(1:255,384:765);
     [~, idx] = max(a(:));
     [y, x] = ind2sub(size(a),idx);
-    w = 100;
+    w = 60;
     counter_1 = auto_flag;
 else
     prefix = strsplit(dir_content(1).name,'-');
@@ -342,7 +350,7 @@ end
 %removes extension from filename
 
 if auto_flag < 2
-    
+        
     savename=strcat(prefix{1},'IRiS_',date);
     mkdir(upath,savename);
     %creates directory for output
@@ -366,9 +374,10 @@ if auto_flag < 2
     
     window = get(gcf,'position');
     setappdata(0,'window',window);
-end;
+end
 
 for i=good_data(good_data>=fi & good_data<=fl)
+    
     filename=dir_content(i).name;
     filepath=char(strcat(upath,'/',(filename)));
     %reads unknown file
@@ -376,22 +385,41 @@ for i=good_data(good_data>=fi & good_data<=fl)
     fullframe = imread(filepath);
     %opens and reads .TIFF
     
+    noise = mean(mean([fullframe(1:10,1:10) fullframe(1:10,755:765) fullframe(501:510,1:10) fullframe(501:510,755:765)]));
+    %determines background intensity
+    
+    fullframe = fullframe-noise;
+    %subtracts background
+    
+    if (x-w-4 < 1) || (y-w-4 < 1)
+        x = 191;
+        y = 128;
+    end
+    % resets ROI to center if it would have extended outside of the fullframe
+    % and caused the program to crash
+    
     axes(handles.axes1);
     imagesc(fullframe);
     hold on
-    hRectangle = rectangle('position',[x-w y-w w*2 w*2],'EdgeColor','w','LineWidth',2);
+    hRectangle = rectangle('position',[x+384-w y-w w*2 w*2],'EdgeColor','w','LineWidth',2);
     hold off
-    plot_axes('X: pixels', 'Y: pixels', strcat({'DATASET: '},filename(end-7:end-5)),[1,757.35],[1,504.9], 0, 0, 0, 0, 0);
+    plot_axes('X: pixels', 'Y: pixels', strcat({'DATASET: '},(num2str(i))),[1,757.35],[1,504.9], 0, 0, 0, 0, 0);
     %plots fullframe   
     
     [a, b, c, d]= correlate(fullframe, x, y, w, auto_flag, counter_1);
     %determines offsets based on first unknown file
     
-    [Tmax,Emax,T,error,emissivity,umax,slope_max,intercept_max,dx,dy,sa]=mapper(kiac,kibc,kicc,kidc,nw,d,a,c,b,handles);
+    [Tmax,Emax,T,error,emissivity,umax,slope_max,intercept_max,dx,dy,sb]=mapper(kiac,kibc,kicc,kidc,nw,d,a,c,b,handles);
     %calls mapper function to calculate temperature map
   
-    [difT, difT_metric(counter_1)] = difference(T, sa, counter_1, w);
+    [difT, difT_metric(counter_1)] = difference(T, sb, counter_1, w);
     %determines difference map and difference metric
+    
+    if max(sb(:)) < noise*2
+        difT_metric(counter_1) = 0;
+    end
+    
+    assignin('base','difT_metric',difT_metric)
     
     T_hist(counter_1)=Tmax;
     E_hist(counter_1)=Emax;
@@ -441,7 +469,7 @@ for i=good_data(good_data>=fi & good_data<=fl)
     %TOP LEFT PLOT: normalised intensity vs normalised wavelength of hottest pixel
     axes(handles.axes2)
     plot(nw(:,2),umax,'O');
-    plot_axes('Normalised wavelength', 'Normalised intensity', strcat({'Peak temperature: '},(num2str(round(Tmax))),' +/- ',(num2str(round(Emax)))), nw(:,2), umax, plot_type, dy, dx, sa, microns);
+    plot_axes('Normalised wavelength', 'Normalised intensity', strcat({'Peak temperature: '},(num2str(round(Tmax))),' +/- ',(num2str(round(Emax)))), nw(:,2), umax, plot_type, dy, dx, sb, microns);
     hold on
     xline=linspace(min(nw(:,2)),max(nw(:,2)),100);
     yline=intercept_max+(slope_max*xline);
@@ -452,13 +480,13 @@ for i=good_data(good_data>=fi & good_data<=fl)
     %TOP MIDDLE PLOT: Peak Temperature History
     axes(handles.axes3)
     plot(elapsedSec,T_hist,'--rs','LineWidth',1,'MarkerEdgeColor','b','MarkerFaceColor','b','MarkerSize',10);
-    plot_axes('Elapsed Time (s)', 'Temperature (K)', strcat(num2str(timevector(1,4)),':',num2str(timevector(1,5)),':',num2str(timevector(1,6)),{'  '},num2str(progress),'%'),elapsedSec,T_hist, plot_type, dy, dx, sa, microns);
+    plot_axes('Elapsed Time (s)', 'Temperature (K)', strcat(num2str(timevector(1,4)),':',num2str(timevector(1,5)),':',num2str(timevector(1,6)),{'  '},num2str(progress),'%'),elapsedSec,T_hist, plot_type, dy, dx, sb, microns);
     
     if get(handles.radiobutton3,'Value') == 1
         %TOP RIGHT PLOT: Difference Metric History
         axes(handles.axes4)
         plot(elapsedSec,difT_metric,'--rs','LineWidth',1,'MarkerEdgeColor','b','MarkerFaceColor','b','MarkerSize',10);
-        plot_axes('Elapsed Time (s)', 'Image difference metric', 'Image difference metric',elapsedSec,difT_metric, plot_type, dy, dx, sa, microns);
+        plot_axes('Elapsed Time (s)', 'Image difference metric', 'Image difference metric',elapsedSec,difT_metric, plot_type, dy, dx, sb, microns);
     else
         %TOP RIGHT PLOT: cross-sections
         axes(handles.axes4)
@@ -466,7 +494,7 @@ for i=good_data(good_data>=fi & good_data<=fl)
         hold on
         plot(microns,T(1:length(T),dy),'g');
         hold off
-        plot_axes('Distance (microns)', 'Temperature (K)', 'Temperature Cross-sections',microns,T(T>0), plot_type, dy, dx, sa, microns);
+        plot_axes('Distance (microns)', 'Temperature (K)', 'Temperature Cross-sections',microns,T(T>0), plot_type, dy, dx, sb, microns);
         legend('horizontal','vertical');
     end
     
@@ -479,17 +507,17 @@ for i=good_data(good_data>=fi & good_data<=fl)
     [Clim_min(isnan(Clim_min)), Clim_max(isnan(Clim_max))] = deal(0,0.001);
     plot(.18*y-(microns/2)-.18,.18*x-(microns/2)-.18,'ws','LineWidth',2,'MarkerSize',10,'MarkerEdgeColor','w','MarkerFaceColor','w') 
     imagesc(microns,microns,difT,[min(Clim_min) max(Clim_max)]);
-    plot_axes('Distance (microns)', 'Distance (microns)', 'DIFFERENCE MAP',microns, microns, plot_type, dy, dx, sa, microns);
+    plot_axes('Distance (microns)', 'Distance (microns)', 'DIFFERENCE MAP',microns, microns, plot_type, dy, dx, sb, microns);
 
     %BOTTOM MIDDLE PLOT: error map
     axes(handles.axes6)
     imagesc(microns,microns,error,[(min(error(:))) (max(error(:)))]);    
-    plot_axes('Distance (microns)', 'Distance (microns)', 'ERROR MAP',microns, microns, plot_type, dy, dx, sa, microns);
+    plot_axes('Distance (microns)', 'Distance (microns)', 'ERROR MAP',microns, microns, plot_type, dy, dx, sb, microns);
 
     %BOTTOM RIGHT PLOT: temperature map
     axes(handles.axes7)
     imagesc(microns,microns,T,[(min(min(T(T>0)))) max(T(:))]);
-    plot_axes('Distance (microns)', 'Distance (microns)', 'TEMPERATURE MAP',microns, microns, plot_type, dy, dx, sa, microns);
+    plot_axes('Distance (microns)', 'Distance (microns)', 'TEMPERATURE MAP',microns, microns, plot_type, dy, dx, sb, microns);
     
     window = getappdata(0,'window');
     set(gcf,'position',window);
@@ -535,7 +563,7 @@ if get(handles.pushbutton4,'Value') == 0
     set(handles.pushbutton1,'Enable','on');
     set(handles.pushbutton2,'Enable','on');
     set(handles.pushbutton3,'Enable','on');
-    set(handles.check1,'Enable','on');
+    set(handles.checkbox1,'Enable','on');
     %unlocks other buttons on exit of auto mode
     
     auto_flag = 0;
@@ -545,6 +573,8 @@ if get(handles.pushbutton4,'Value') == 0
     writerObj = getappdata(0,'writerObj');
     close(writerObj);
 else
+    upath = uigetdir('/Users/oliverlord/Dropbox/Work/EXPERIMENTS/');
+    
     set(handles.pushbutton4,'BackgroundColor',[0 0.8 0]);
     set(handles.pushbutton4,'String','auto on')
     %sets auto mode button to on state
@@ -556,9 +586,11 @@ else
     set(handles.pushbutton1,'Enable','off');
     set(handles.pushbutton2,'Enable','off');
     set(handles.pushbutton3,'Enable','off');
+    set(handles.checkbox1,'Value',1);
+    set(handles.checkbox1,'Enable','off');
+    set(handles.text5,'string',upath);
     %locks other buttons during auto mode
     
-    upath = uigetdir('/Users/oliverlord/Dropbox/Work/EXPERIMENTS/');
     dir_content = dir(strcat(upath,'/*.tiff'));
     initial_list = {dir_content.name};
     setappdata(0,'upath',upath);
@@ -589,3 +621,12 @@ else
         end
     end
 end
+
+
+% --- Executes on button press in checkbox3.
+function checkbox3_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox3

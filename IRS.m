@@ -74,13 +74,26 @@ end
 %--------------------------------------------------------------------------
 
 %sets plot attributes and is called whenever data is plotted
-function plot_axes(xlab, ylab, title_string, x, y, plot_type, dy, dx, sa, microns)
+function plot_axes(xlab, ylab, title_string, x, y, plot_type, dy, dx, sb, microns)
     x(x==0) = -1;
-    y(y==0) = 1;
+    if strcmp(title_string,'Image difference metric') == 0    
+        y(y==0) = 1;
+    else
+        y(isnan(y)) = 0;
+    end
     if length(y) == 1
         y(isnan(y)) = 0.00001;
     end
-    ylim ([(nanmin(y(:))-0.01*nanmin(y(:))) (nanmax(y(:))+0.01*nanmax(y(:)))])
+    if strcmp(title_string,'Image difference metric') == 0    
+        ylim ([(nanmin(y(:))-0.01*nanmin(y(:))) (nanmax(y(:))+0.01*nanmax(y(:)))])
+    else
+        if isempty(y(y>0)) == 1
+            ylim ([min(y) 0.00001])
+        else
+            ylim ([min(y(y>0)) max(y+0.00001)])
+        end
+    end
+    
     xlim ([(nanmin(x(:))-0.01*nanmin(x(:))) abs((nanmax(x(:))+0.01*nanmax(x(:))))])
     xlabel(xlab, 'FontSize', 16);
     ylabel(ylab, 'FontSize', 16);
@@ -92,7 +105,7 @@ function plot_axes(xlab, ylab, title_string, x, y, plot_type, dy, dx, sa, micron
        colorbar('location','NorthOutside');
        set(gca, 'Position', originalSize);
        hold on
-       contour(microns,microns,sa,10,'k');
+       contour(microns,microns,sb,10,'k');
        plot(microns(dy),microns(dx),'ws','LineWidth',2,'MarkerSize',10,'MarkerEdgeColor','w','MarkerFaceColor','w')
        hold off
     end
@@ -343,7 +356,7 @@ end
 %removes extension from filename
 
 if auto_flag < 2
-    
+        
     savename=strcat(prefix{1},'IRiS_',date);
     mkdir(upath,savename);
     %creates directory for output
@@ -378,6 +391,12 @@ for i=good_data(good_data>=fi & good_data<=fl)
     fullframe = imread(filepath);
     %opens and reads .TIFF
     
+    noise = mean(mean([fullframe(1:10,1:10) fullframe(1:10,755:765) fullframe(501:510,1:10) fullframe(501:510,755:765)]));
+    %determines background intensity
+    
+    fullframe = fullframe-noise;
+    %subtracts background
+    
     if (x-w-4 < 1) || (y-w-4 < 1)
         x = 191;
         y = 128;
@@ -396,11 +415,17 @@ for i=good_data(good_data>=fi & good_data<=fl)
     [a, b, c, d]= correlate(fullframe, x, y, w, auto_flag, counter_1);
     %determines offsets based on first unknown file
     
-    [Tmax,Emax,T,error,emissivity,umax,slope_max,intercept_max,dx,dy,sa]=mapper(kiac,kibc,kicc,kidc,nw,d,a,c,b,handles);
+    [Tmax,Emax,T,error,emissivity,umax,slope_max,intercept_max,dx,dy,sb]=mapper(kiac,kibc,kicc,kidc,nw,d,a,c,b,handles);
     %calls mapper function to calculate temperature map
   
-    [difT, difT_metric(counter_1)] = difference(T, sa, counter_1, w);
+    [difT, difT_metric(counter_1)] = difference(T, sb, counter_1, w);
     %determines difference map and difference metric
+    
+    if max(sb(:)) < noise*2
+        difT_metric(counter_1) = NaN;
+    end
+    
+    assignin('base','difT_metric',difT_metric)
     
     T_hist(counter_1)=Tmax;
     E_hist(counter_1)=Emax;
@@ -450,7 +475,7 @@ for i=good_data(good_data>=fi & good_data<=fl)
     %TOP LEFT PLOT: normalised intensity vs normalised wavelength of hottest pixel
     axes(handles.axes2)
     plot(nw(:,2),umax,'O');
-    plot_axes('Normalised wavelength', 'Normalised intensity', strcat({'Peak temperature: '},(num2str(round(Tmax))),' +/- ',(num2str(round(Emax)))), nw(:,2), umax, plot_type, dy, dx, sa, microns);
+    plot_axes('Normalised wavelength', 'Normalised intensity', strcat({'Peak temperature: '},(num2str(round(Tmax))),' +/- ',(num2str(round(Emax)))), nw(:,2), umax, plot_type, dy, dx, sb, microns);
     hold on
     xline=linspace(min(nw(:,2)),max(nw(:,2)),100);
     yline=intercept_max+(slope_max*xline);
@@ -461,13 +486,13 @@ for i=good_data(good_data>=fi & good_data<=fl)
     %TOP MIDDLE PLOT: Peak Temperature History
     axes(handles.axes3)
     plot(elapsedSec,T_hist,'--rs','LineWidth',1,'MarkerEdgeColor','b','MarkerFaceColor','b','MarkerSize',10);
-    plot_axes('Elapsed Time (s)', 'Temperature (K)', strcat(num2str(timevector(1,4)),':',num2str(timevector(1,5)),':',num2str(timevector(1,6)),{'  '},num2str(progress),'%'),elapsedSec,T_hist, plot_type, dy, dx, sa, microns);
+    plot_axes('Elapsed Time (s)', 'Temperature (K)', strcat(num2str(timevector(1,4)),':',num2str(timevector(1,5)),':',num2str(timevector(1,6)),{'  '},num2str(progress),'%'),elapsedSec,T_hist, plot_type, dy, dx, sb, microns);
     
     if get(handles.radiobutton3,'Value') == 1
         %TOP RIGHT PLOT: Difference Metric History
         axes(handles.axes4)
         plot(elapsedSec,difT_metric,'--rs','LineWidth',1,'MarkerEdgeColor','b','MarkerFaceColor','b','MarkerSize',10);
-        plot_axes('Elapsed Time (s)', 'Image difference metric', 'Image difference metric',elapsedSec,difT_metric, plot_type, dy, dx, sa, microns);
+        plot_axes('Elapsed Time (s)', 'Image difference metric', 'Image difference metric',elapsedSec,difT_metric, plot_type, dy, dx, sb, microns);
     else
         %TOP RIGHT PLOT: cross-sections
         axes(handles.axes4)
@@ -475,7 +500,7 @@ for i=good_data(good_data>=fi & good_data<=fl)
         hold on
         plot(microns,T(1:length(T),dy),'g');
         hold off
-        plot_axes('Distance (microns)', 'Temperature (K)', 'Temperature Cross-sections',microns,T(T>0), plot_type, dy, dx, sa, microns);
+        plot_axes('Distance (microns)', 'Temperature (K)', 'Temperature Cross-sections',microns,T(T>0), plot_type, dy, dx, sb, microns);
         legend('horizontal','vertical');
     end
     
@@ -488,17 +513,17 @@ for i=good_data(good_data>=fi & good_data<=fl)
     [Clim_min(isnan(Clim_min)), Clim_max(isnan(Clim_max))] = deal(0,0.001);
     plot(.18*y-(microns/2)-.18,.18*x-(microns/2)-.18,'ws','LineWidth',2,'MarkerSize',10,'MarkerEdgeColor','w','MarkerFaceColor','w') 
     imagesc(microns,microns,difT,[min(Clim_min) max(Clim_max)]);
-    plot_axes('Distance (microns)', 'Distance (microns)', 'DIFFERENCE MAP',microns, microns, plot_type, dy, dx, sa, microns);
+    plot_axes('Distance (microns)', 'Distance (microns)', 'DIFFERENCE MAP',microns, microns, plot_type, dy, dx, sb, microns);
 
     %BOTTOM MIDDLE PLOT: error map
     axes(handles.axes6)
     imagesc(microns,microns,error,[(min(error(:))) (max(error(:)))]);    
-    plot_axes('Distance (microns)', 'Distance (microns)', 'ERROR MAP',microns, microns, plot_type, dy, dx, sa, microns);
+    plot_axes('Distance (microns)', 'Distance (microns)', 'ERROR MAP',microns, microns, plot_type, dy, dx, sb, microns);
 
     %BOTTOM RIGHT PLOT: temperature map
     axes(handles.axes7)
     imagesc(microns,microns,T,[(min(min(T(T>0)))) max(T(:))]);
-    plot_axes('Distance (microns)', 'Distance (microns)', 'TEMPERATURE MAP',microns, microns, plot_type, dy, dx, sa, microns);
+    plot_axes('Distance (microns)', 'Distance (microns)', 'TEMPERATURE MAP',microns, microns, plot_type, dy, dx, sb, microns);
     
     window = getappdata(0,'window');
     set(gcf,'position',window);

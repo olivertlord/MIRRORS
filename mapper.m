@@ -1,4 +1,4 @@
-function [Tmax,Emax,T,error,emissivity,umax,slope_max,intercept_max,dx,dy,sa]=mapper(skiac,skibc,skicc,skidc,nw,d,a,c,b,handles)
+function [Tmax,Emax,T,error,emissivity,umax,slope_max,intercept_max,dx,dy,sb]=mapper(skiac,skibc,skicc,skidc,nw,d,a,c,b,handles)
 
 Ja=log(a./skiac*9.8654*752.97^5/3.7403e-12);
 Jb=log(b./skibc*4.191*578.61^5/3.7403e-12);
@@ -12,13 +12,15 @@ Jd=log(d./skidc*7.26917*670.08^5/3.7403e-12);
 %     end
 % end
 
-sa = conv2(a(5:length(a)-5,5:length(a)-5),ones(9,9),'same');
-%produce smoothed a quadrant for cutoff and contouring
+sb = conv2(b(5:length(b)-5,5:length(b)-5),ones(9,9),'same');
+sb = sb*(max(b(:))/max(sb(:)));
+%produce smoothed b quadrant for cutoff and contouring
 
 for m=5:length(a)-5
     for n=5:length(a)-5
-        if  ((max(sa(:))*get(handles.slider1,'value')) < sa(m-4,n-4)) & ([a(m,n) b(m,n) c(m,n) d(m,n)]) < 65000
+        if  ((max(sb(:))*get(handles.slider1,'value')) < sb(m-4,n-4)) & ([a(m,n) b(m,n) c(m,n) d(m,n)]) < 65000
             u=[reshape(Ja(m-4:m+4,n-4:n+4),1,81) reshape(Jb(m-4:m+4,n-4:n+4),1,81) reshape(Jc(m-4:m+4,n-4:n+4),1,81) reshape(Jd(m-4:m+4,n-4:n+4),1,81)]';
+            u(u==-Inf)=NaN;
             [wien,bint,~]=regress(u,nw);
             T(m-4,n-4)=(-1/wien(2));
             emissivity(m-4,n-4)=wien(1);
@@ -35,7 +37,7 @@ end
 %subframe
 
 if get(handles.checkbox3,'Value') == 1
-    errorx = error - 2;
+    errorx = error - min(error(:));
     T = T - ((-0.0216.*(errorx.*errorx))+(17.882.*errorx));
 end
 
@@ -43,7 +45,7 @@ peak_choice = get(handles.radiobutton1,'value');
 %determine radio button state for peak type
 
 if get(handles.radiobutton1,'value') == 1   
-    [~, p] = max(sa(:));
+    [~, p] = max(sb(:));
     %find max intensity point
     
 elseif get(handles.radiobutton2,'value') == 1
@@ -67,3 +69,7 @@ pc(pc<4) = 5;
 
 umax=[reshape(Ja(pr:pr+8,pc:pc+8),1,81) reshape(Jb(pr:pr+8,pc:pc+8),1,81) reshape(Jc(pr:pr+8,pc:pc+8),1,81) reshape(Jd(pr:pr+8,pc:pc+8),1,81)]';
 %finds umax at chosen point
+
+umax(umax==-Inf)=NaN;
+
+assignin('base','umax',umax);
