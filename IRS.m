@@ -421,7 +421,7 @@ for i=good_data(good_data>=fi & good_data<=fl)
     [difT, difT_metric(counter_1)] = difference(T, sb, counter_1, w);
     %determines difference map and difference metric
     
-    if max(sb(:)) < noise*2
+    if max(sb(:)) < noise*4
         difT_metric(counter_1) = NaN;
     end
     
