@@ -1,4 +1,26 @@
 function varargout = IRS(varargin)
+% IRiS (Imaging Radiometry Software)
+% Version 1.5
+% Written and tested on Matlab R2014a (Windows 7) & R2017a (OS X 10.13)
+
+% Copyright 2018 Oliver Lord, Weiwei Wang
+% Contact: oliver.lord@bristol.ac.uk
+ 
+% This file is part of IRiS.
+ 
+% IRiS is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+ 
+% IRiS is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+ 
+% You should have received a copy of the GNU General Public License
+% along with IRiS.  If not, see <http://www.gnu.org/licenses/>.
+
 % IRS MATLAB code for IRS.fig
 
 % Begin initialization code - DO NOT EDIT
@@ -48,6 +70,8 @@ function varargout = IRS_OutputFcn(~, ~, handles)
 % Get default command line output from handles structure
 varargout{1} = handles.output;
 
+movegui(gcf,'center');
+
 % --- Executes during object creation, after setting all properties.
 function edit2_CreateFcn(hObject, ~, ~)
 
@@ -78,6 +102,8 @@ function plot_axes(xlab, ylab, title_string, x, y, plot_type, dy, dx, sb, micron
     x(x==0) = -1;
     if strcmp(title_string,'Image difference metric') == 0    
         y(y==0) = 1;
+    else
+        y(isnan(y)) = 0;
     end
     if length(y) == 1
         y(isnan(y)) = 0.00001;
@@ -85,7 +111,11 @@ function plot_axes(xlab, ylab, title_string, x, y, plot_type, dy, dx, sb, micron
     if strcmp(title_string,'Image difference metric') == 0    
         ylim ([(nanmin(y(:))-0.01*nanmin(y(:))) (nanmax(y(:))+0.01*nanmax(y(:)))])
     else
-        ylim ([min(y) max(y+0.00001)])
+        if isempty(y(y>0)) == 1
+            ylim ([min(y) 0.00001])
+        else
+            ylim ([min(y(y>0)) max(y+0.00001)])
+        end
     end
     
     xlim ([(nanmin(x(:))-0.01*nanmin(x(:))) abs((nanmax(x(:))+0.01*nanmax(x(:))))])
@@ -336,12 +366,9 @@ if auto_flag > 0
     dir_content(1) = dir_content(length(dir_content));
     prefix = strsplit(dir_content(1).name,'-');
     upath = getappdata(0,'upath');
-    
-    fullframe = imread(strcat(upath,'/',dir_content(1).name));
-    a = fullframe(1:255,384:765);
-    [~, idx] = max(a(:));
-    [y, x] = ind2sub(size(a),idx);
-    w = 60;
+     
+    [y, x] = deal(128,191);
+    w = 80;
     counter_1 = auto_flag;
 else
     prefix = strsplit(dir_content(1).name,'-');
@@ -372,8 +399,6 @@ if auto_flag < 2
     setappdata(0,'writerObj',writerObj);
     %sets up video recording
     
-    window = get(gcf,'position');
-    setappdata(0,'window',window);
 end
 
 for i=good_data(good_data>=fi & good_data<=fl)
@@ -415,8 +440,8 @@ for i=good_data(good_data>=fi & good_data<=fl)
     [difT, difT_metric(counter_1)] = difference(T, sb, counter_1, w);
     %determines difference map and difference metric
     
-    if max(sb(:)) < noise*2
-        difT_metric(counter_1) = 0;
+    if max(sb(:)) < noise*4
+        difT_metric(counter_1) = NaN;
     end
     
     assignin('base','difT_metric',difT_metric)
@@ -519,8 +544,7 @@ for i=good_data(good_data>=fi & good_data<=fl)
     imagesc(microns,microns,T,[(min(min(T(T>0)))) max(T(:))]);
     plot_axes('Distance (microns)', 'Distance (microns)', 'TEMPERATURE MAP',microns, microns, plot_type, dy, dx, sb, microns);
     
-    window = getappdata(0,'window');
-    set(gcf,'position',window);
+    movegui(gcf,'center')
     frame=getframe(gcf);
     writeVideo(writerObj,frame);
     %writes frame to .avi
