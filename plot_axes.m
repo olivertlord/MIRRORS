@@ -1,6 +1,6 @@
 function [ output_args ] = plot_axes( input_args )
 %--------------------------------------------------------------------------
-% PLOT_AXES
+% Function PLOT_AXES
 %--------------------------------------------------------------------------
 % Written and tested on Matlab R2014a (Windows 7) & R2017a (OS X 10.13)
 
