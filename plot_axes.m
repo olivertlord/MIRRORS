@@ -1,4 +1,4 @@
-function [ output_args ] = plot_axes( input_args )
+function [] = plot_axes(xlab, ylab, title_string, x, y, plot_type, dy, dx, sb, microns)
 %--------------------------------------------------------------------------
 % Function PLOT_AXES
 %--------------------------------------------------------------------------
@@ -24,6 +24,40 @@ function [ output_args ] = plot_axes( input_args )
 %--------------------------------------------------------------------------
 %   Detailed explanation goes here
 
+x(x==0) = -1;
+if strcmp(title_string,'Image difference metric') == 0
+    y(y==0) = 1;
+else
+    y(isnan(y)) = 0;
+end
+if length(y) == 1
+    y(isnan(y)) = 0.00001;
+end
+if strcmp(title_string,'Image difference metric') == 0
+    ylim ([(nanmin(y(:))-0.01*nanmin(y(:))) (nanmax(y(:))+0.01*nanmax(y(:)))])
+else
+    if isempty(y(y>0)) == 1
+        ylim ([min(y) 0.00001])
+    else
+        ylim ([min(y(y>0)) max(y+0.00001)])
+    end
+end
 
+xlim ([(nanmin(x(:))-0.01*nanmin(x(:))) abs((nanmax(x(:))+0.01*nanmax(x(:))))])
+xlabel(xlab, 'FontSize', 16);
+ylabel(ylab, 'FontSize', 16);
+title(title_string, 'FontSize', 18);
+
+if plot_type == 1
+    originalSize = get(gca, 'Position');
+    colormap jet;
+    colorbar('location','NorthOutside');
+    set(gca, 'Position', originalSize);
+    hold on
+    contour(microns,microns,sb,10,'k');
+    plot(microns(dy),microns(dx),'ws','LineWidth',2,'MarkerSize',10,'MarkerEdgeColor','w','MarkerFaceColor','w')
+    hold off
+end
+drawnow;
 end
 

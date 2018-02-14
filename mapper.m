@@ -36,7 +36,7 @@ end
 %regresses intensity against normalised wavelength for each pixel in
 %subframe
 
-if get(handles.checkbox3,'Value') == 1
+if get(handles.checkbox2,'Value') == 1
     errorx = error - min(error(:));
     T = T - ((-0.0216.*(errorx.*errorx))+(17.882.*errorx));
 end
