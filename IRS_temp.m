@@ -170,6 +170,144 @@ function edit2_Callback(~, ~, handles)
 % --- Executes on button press in pushbutton5.
 function pushbutton3_Callback(~, ~, handles)
 
+auto_flag = getappdata(0,'auto_flag');
+dir_content = getappdata(0,'dir_content');
+
+if auto_flag <= 1
+
+    clear T_hist E_hist acq timestamp elapsedSec timeSec difT_metric
+
+end
+    
+persistent kiac kibc kicc kidc nw savename videofile writerObj T_hist E_hist acq timestamp elapsedSec timeSec difT_metric
+
+if auto_flag == 0
+    
+
+end
+
+if auto_flag > 0
+    
+    [fi,fl,good_data] = deal(1);
+    dir_content(1) = dir_content(length(dir_content));
+    prefix = strsplit(dir_content(1).name,'-');
+    upath = getappdata(0,'upath');
+     
+    [y, x] = deal(128,191);
+    w = 80;
+    counter_1 = auto_flag;
+else
+    prefix = strsplit(dir_content(1).name,'-');
+    counter_1 = 1;
+end
+%removes extension from filename
+
+if auto_flag < 2
+        
+    savename=strcat('IRiS_',date);
+    mkdir(upath,savename);
+    %creates directory for output
+   
+
+
+
+    videofile=strcat(upath,'/',savename,'/',savename,'.avi');
+    
+    writerObj = VideoWriter(videofile);
+    writerObj.FrameRate = 2;
+    open(writerObj);
+    setappdata(0,'writerObj',writerObj);
+    %sets up video recording
+    
+end
+
+
+
+
+    
+    progress = round(counter_1/length(good_data(good_data>=fi & good_data<=fl))*100);
+    %calculates job progress
+    
+    if get(handles.pushbutton5,'Value') == 1
+        progress = 100;
+    end;
+    
+    microns=linspace(-(w*.18),w*.18,(w*2));
+    %pixel to micron conversion
+    
+    plot_type = 0;
+    %sets plot type to 'graph' so plot_axes function performs correctly
+    
+    %TOP LEFT PLOT: normalised intensity vs normalised wavelength of hottest pixel
+    axes(handles.axes2)
+    plot(nw(:,2),umax,'O');
+    plot_axes('Normalised wavelength', 'Normalised intensity', strcat({'Peak temperature: '},(num2str(round(Tmax))),' +/- ',(num2str(round(Emax)))), nw(:,2), umax, plot_type, dy, dx, sb, microns);
+    hold on
+    xline=linspace(min(nw(:,2)),max(nw(:,2)),100);
+    yline=intercept_max+(slope_max*xline);
+    plot(xline,yline,'-r')
+    hold off
+    %overlays the best fit line onto the wien plot
+    
+    %TOP MIDDLE PLOT: Peak Temperature History
+    axes(handles.axes3)
+    plot(elapsedSec,T_hist,'--rs','LineWidth',1,'MarkerEdgeColor','b','MarkerFaceColor','b','MarkerSize',10);
+    plot_axes('Elapsed Time (s)', 'Temperature (K)', strcat(num2str(timevector(1,4)),':',num2str(timevector(1,5)),':',num2str(timevector(1,6)),{'  '},num2str(progress),'%'),elapsedSec,T_hist, plot_type, dy, dx, sb, microns);
+    
+    if get(handles.radiobutton4,'Value') == 1
+        %TOP RIGHT PLOT: Difference Metric History
+        axes(handles.axes4)
+        plot(elapsedSec,difT_metric,'--rs','LineWidth',1,'MarkerEdgeColor','b','MarkerFaceColor','b','MarkerSize',10);
+        plot_axes('Elapsed Time (s)', 'Image difference metric', 'Image difference metric',elapsedSec,difT_metric, plot_type, dy, dx, sb, microns);
+    else
+        %TOP RIGHT PLOT: cross-sections
+        axes(handles.axes4)
+        plot(microns,T(dx,(1:length(T))),'r');
+        hold on
+        plot(microns,T(1:length(T),dy),'g');
+        hold off
+        plot_axes('Distance (microns)', 'Temperature (K)', 'Temperature Cross-sections',microns,T(T>0), plot_type, dy, dx, sb, microns);
+        legend('horizontal','vertical');
+    end
+    
+    plot_type = 1;
+    %sets plot type to 'map' so plot_axes function performs correctly
+    
+    %BOTTOM LEFT PLOT: difference map
+    axes(handles.axes5)
+    [Clim_min(counter_1), Clim_max(counter_1)] = deal(min(difT(:)), max(difT(:)));
+    [Clim_min(isnan(Clim_min)), Clim_max(isnan(Clim_max))] = deal(0,0.001);
+    plot(.18*y-(microns/2)-.18,.18*x-(microns/2)-.18,'ws','LineWidth',2,'MarkerSize',10,'MarkerEdgeColor','w','MarkerFaceColor','w') 
+    imagesc(microns,microns,difT,[min(Clim_min) max(Clim_max)]);
+    plot_axes('Distance (microns)', 'Distance (microns)', 'DIFFERENCE MAP',microns, microns, plot_type, dy, dx, sb, microns);
+
+    %BOTTOM MIDDLE PLOT: error map
+    axes(handles.axes6)
+    imagesc(microns,microns,error,[(min(error(:))) (max(error(:)))]);    
+    plot_axes('Distance (microns)', 'Distance (microns)', 'ERROR MAP',microns, microns, plot_type, dy, dx, sb, microns);
+
+    %BOTTOM RIGHT PLOT: temperature map
+    axes(handles.axes7)
+    imagesc(microns,microns,T,[(min(min(T(T>0)))) max(T(:))]);
+    plot_axes('Distance (microns)', 'Distance (microns)', 'TEMPERATURE MAP',microns, microns, plot_type, dy, dx, sb, microns);
+    
+    movegui(gcf,'center')
+    frame=getframe(gcf);
+    writeVideo(writerObj,frame);
+    %writes frame to .avi
+           
+    counter_1 = counter_1 + 1;
+end
+
+result=strcat(upath,'/',savename,'/',savename,'.txt');
+result=char(result);
+save (result,'autoresult','-ASCII','-double');
+%saves summary data to text file
+
+if get(handles.pushbutton5,'Value') == 0
+    close(writerObj);
+end
+%closes video file unless in automode
 
 
 % --- Executes on button press in pushbutton5.
@@ -249,35 +387,9 @@ if auto_flag < 2
     
 end
 
-for i=good_data(good_data>=fi & good_data<=fl)
+
     
-    filename=dir_content(i).name;
-    filepath=char(strcat(upath,'/',(filename)));
-    %reads unknown file
-   
-    fullframe = imread(filepath);
-    %opens and reads .TIFF
-    
-    noise = mean(mean([fullframe(1:10,1:10) fullframe(1:10,755:765) fullframe(501:510,1:10) fullframe(501:510,755:765)]));
-    %determines background intensity
-    
-    fullframe = fullframe-noise;
-    %subtracts background
-    
-    if (x-w-4 < 1) || (y-w-4 < 1)
-        x = 191;
-        y = 128;
-    end
-    % resets ROI to center if it would have extended outside of the fullframe
-    % and caused the program to crash
-    
-    axes(handles.axes1);
-    imagesc(fullframe);
-    hold on
-    hRectangle = rectangle('position',[x+384-w y-w w*2 w*2],'EdgeColor','w','LineWidth',2);
-    hold off
-    plot_axes('X: pixels', 'Y: pixels', strcat({'DATASET: '},(num2str(i))),[1,757.35],[1,504.9], 0, 0, 0, 0, 0);
-    %plots fullframe   
+
     
     [a, b, c, d]= correlate(fullframe, x, y, w, auto_flag, counter_1);
     %determines offsets based on first unknown file

@@ -153,6 +153,7 @@ delete(hfindROI)
 
 % Create array containing file metadata on all .TIF files in folder
 dir_content = dir(strcat(upath,'/*.tiff'));
+setappdata(0,'dir_content',dir_content);
 
 % Determine number of .TIF files in folder
 total=size(dir_content,1);
@@ -170,8 +171,8 @@ filenames = {dir_content.name};
 % images
 saturate = get(handles.checkbox1,'value');
 
-% Initialise counter_1
-counter_1 = 1;
+% Initialise c1
+c1 = 1;
 
 % Creates list of .TIF files to be fitted
 for i=1:total
@@ -179,9 +180,12 @@ for i=1:total
     % Reads in unknown file  
     raw=imread(char(strcat(upath,'/',(filenames(i)))));
     
+    % Extracts filenumber from filename
+    filenumber(i) = extract_filenumber(cell2mat(filenames(i)));
+    
     % Determines background intensity
-    noise = mean(mean([raw(1:10,1:10) raw(1:10,755:765)...
-        raw(501:510,1:10) raw(501:510,755:765)]));
+    background = mean(mean([raw(1:10,1:10) raw(1:10,end-9:end)...
+        raw(end-9:end,1:10) raw(end-9:end,end-9:end)]));
     
     %//////////////////////////////////////////////////////////////////////
     % HARDWARE SPECIFIC - REQUIRES EDITING
@@ -196,31 +200,29 @@ for i=1:total
     %//////////////////////////////////////////////////////////////////////
 
     % Assigns each file in sequence to GOOD_DATA array if the weakest of
-    % the four hotspots is stronger than double the noise if user has
+    % the four hotspots is stronger than double the background if user has
     % chosen to fit saturated images
     if saturate == 1 
-        if min(max([d(:) a(:) c(:) b(:)])) > 2*noise;
+        if min(max([d(:) a(:) c(:) b(:)])) > 2*background;
             good_data(i) = i;
-            axes(handles.axes1);
-            imagesc(raw)
+            imagesc(raw,'parent',handles.axes1)
             plot_axes('X: pixels', 'Y: pixels', strcat({'DATASET: '},...
-                (num2str(i))),[1,757.35],[1,504.9], 0, 0, 0, 0, 0);
-            counter_1 = counter_1+1;
+                (num2str(filenumber(i)))),[1,757.35],[1,504.9], 0, 0, 0, 0, 0);
+            c1 = c1+1;
         end
         
     % Assigns each file in sequence to GOOD_DATA array if the weakest of
-    % the four hotspots is stronger than double the noise AND none are 
+    % the four hotspots is stronger than double the background AND none are 
     %brighter than the detector bit depth if user has chosen NOT to fit
     %saturated images    
     else
-        if (min(max([d(:) a(:) c(:) b(:)])) > 2*noise) &&...
+        if (min(max([d(:) a(:) c(:) b(:)])) > 2*background) &&...
                 (max(max([d(:) a(:) c(:) b(:)])) < 62000);
             good_data(i) = i;
-            axes(handles.axes1);
-            imagesc(raw)
+            imagesc(raw,'parent',handles.axes1)
             plot_axes('X: pixels', 'Y: pixels', strcat({'DATASET: '},...
-                (num2str(i))),[1,757.35],[1,504.9], 0, 0, 0, 0, 0);
-            counter_1 = counter_1+1;
+                (num2str(filenumber(i)))),[1,757.35],[1,504.9], 0, 0, 0, 0, 0);
+            c1 = c1+1;
         end
     end
 end
@@ -232,6 +234,7 @@ control_colors(flag, handles)
 
 % Make data available between functions within GUI
 setappdata(0,'good_data',good_data)
+setappdata(0,'filenumber',filenumber)
 setappdata(0,'dir_content',dir_content)
 setappdata(0,'upath',upath)
 
@@ -282,14 +285,20 @@ function edit1_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Gets user entered value of first file to fit
-fi = eval(get(handles.edit1,'string'));
+fi = eval(get(handles.edit1,'string'))
 
 % Access previously stored array GOOD_DATA
-good_data = getappdata(0,'good_data');
+filenumber = getappdata(0,'filenumber')
 
-% Converts fi to first GOOD file if user selects earlier file
-if ~ismember(fi,good_data(good_data>0)) == 1
-    fi = find(getappdata(0,'good_data'),1);
+% Converts fi to first GOOD file if user selects earlier file of last GOOD
+% file if user selects a later file
+if ~ismember(fi,filenumber(filenumber>0)) == 1
+    if fi > max(filenumber)
+        a = 10
+        fi = max(filenumber)
+    else 
+        fi = min(filenumber);
+    end
 end
 
 % Set edit box to error checked fl
@@ -321,14 +330,18 @@ function edit2_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Gets user entered value of last file to fit
-fl = eval(get(handles.edit2,'string'))
+fl = eval(get(handles.edit2,'string'));
 
 % Access previously stored array GOOD_DATA
-good_data = getappdata(0,'good_data')
+filenumber = getappdata(0,'filenumber');
 
 % Converts fl to last GOOD file if user selects later file
-if ~ismember(fl,good_data(good_data>0)) == 1
-    fl = find(getappdata(0,'good_data'),1,'last');
+if ~ismember(fl,filenumber(filenumber>0)) == 1
+    if fl > max(filenumber)
+        fl = max(filenumber);
+    else 
+        fl = eval(get(handles.edit1,'string'));
+    end
 end
     
 % Converts fl to fi if user enters a value of fl < fi    
@@ -364,240 +377,68 @@ function pushbutton4_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-auto_flag = getappdata(0,'auto_flag');
-dir_content = getappdata(0,'dir_content');
+% Calls DATA_PREP function which returns parameters for the sequential
+% fitting
+[w,x,y,fi,fl,good_data,filenumber,upath,cal_a,cal_b,cal_c,cal_d,nw,...
+    dir_content,savename] = data_prep(handles);
 
-if auto_flag <= 1
+% Initialise c1
+c1 = 1;
 
-    clear T_hist E_hist acq timestamp elapsedSec timeSec difT_metric
-
-end
-    
-persistent kiac kibc kicc kidc nw savename videofile writerObj T_hist E_hist acq timestamp elapsedSec timeSec difT_metric
-
-if auto_flag == 0
-    
-    subframe = getappdata(0,'subframe');
-    w = round(subframe(3)/2);
-    x = round(subframe(1))+w-384;
-    y = round(subframe(2))+w;
-    %calculate center and half-width of subframe
-    
-    fi = eval(get(handles.edit1,'string'));
-    fl = eval(get(handles.edit2,'string'));
-    %get first and last files to be analysed
-
-    good_data = getappdata(0,'good_data');
-    upath = getappdata(0,'upath');
-    %gets list of unknown files files and file path
-    
-    arrayfun(@cla,findall(0,'type','axes'))
-    fclose('all');
-    %clear axes
-    
-end
-
-if auto_flag > 0
-    
-    [fi,fl,good_data] = deal(1);
-    dir_content(1) = dir_content(length(dir_content));
-    prefix = strsplit(dir_content(1).name,'-');
-    upath = getappdata(0,'upath');
-     
-    [y, x] = deal(128,191);
-    w = 80;
-    counter_1 = auto_flag;
-else
-    prefix = strsplit(dir_content(1).name,'-');
-    counter_1 = 1;
-end
-%removes extension from filename
-
-if auto_flag < 2
-        
-    savename=strcat(prefix{1},'IRiS_',date);
-    mkdir(upath,savename);
-    %creates directory for output
-    
-    fullframe = imread('calibration/tc.tiff');
-    %opens and reads .TIFF
-    
-    [kiac,kibc,kicc,kidc]= correlate(fullframe,x, y, w, 0, 1);
-    %determines offsets based on thermal calibration file 
-    
-    nw = horzcat(ones(324,1),[repmat((14384000/752.97),81,1); repmat((14384000/578.61),81,1); repmat((14384000/851.32),81,1); repmat((14384000/670.08),81,1)]);
-    %determines normalised wavelengths for the four filters
-
-    videofile=strcat(upath,'/',savename,'/',savename,'.avi');
-    
-    writerObj = VideoWriter(videofile);
-    writerObj.FrameRate = 2;
-    open(writerObj);
-    setappdata(0,'writerObj',writerObj);
-    %sets up video recording
-    
-end
-
+% Calculates temperature, error and difference maps and associated output
+% for each file in GOOD_DATA array and plots and stores the results.
 for i=good_data(good_data>=fi & good_data<=fl)
+
+    % Determines path to unknown file
+    filepath = char(strcat(upath,'/',(dir_content(i).name)));
     
-    filename=dir_content(i).name;
-    filepath=char(strcat(upath,'/',(filename)));
-    %reads unknown file
-   
-    fullframe = imread(filepath);
-    %opens and reads .TIFF
+    % Reads in unknown file
+    raw = imread(filepath);
     
-    noise = mean(mean([fullframe(1:10,1:10) fullframe(1:10,755:765) fullframe(501:510,1:10) fullframe(501:510,755:765)]));
-    %determines background intensity
+    % Determines background intensity using image corners
+    background = mean(mean([raw(1:10,1:10) raw(1:10,end-9:end)...
+        raw(end-9:end,1:10) raw(end-9:end,end-9:end)]));
     
-    fullframe = fullframe-noise;
-    %subtracts background
+    % Subtracts background
+    raw = raw-background;
     
-    if (x-w-4 < 1) || (y-w-4 < 1)
-        x = 191;
-        y = 128;
-    end
-    % resets ROI to center if it would have extended outside of the fullframe
-    % and caused the program to crash
-    
-    axes(handles.axes1);
-    imagesc(fullframe);
+    % Plots fullframe in bottom right axes
+    imagesc(raw,'parent',handles.axes1);
     hold on
-    hRectangle = rectangle('position',[x+384-w y-w w*2 w*2],'EdgeColor','w','LineWidth',2);
+    rectangle('position',[x+384-w y-w w*2 w*2],'EdgeColor',...
+        'w','LineWidth',2);
     hold off
-    plot_axes('X: pixels', 'Y: pixels', strcat({'DATASET: '},(num2str(i))),[1,757.35],[1,504.9], 0, 0, 0, 0, 0);
-    %plots fullframe   
+    plot_axes('X: pixels', 'Y: pixels', strcat({'DATASET: '},...
+        (num2str(filenumber(i)))),[1,757.35],[1,504.9], 0, 0, 0, 0, 0);
     
-    [a, b, c, d]= correlate(fullframe, x, y, w, auto_flag, counter_1);
-    %determines offsets based on first unknown file
-    
-    [Tmax,Emax,T,error,emissivity,umax,slope_max,intercept_max,dx,dy,sb]=mapper(kiac,kibc,kicc,kidc,nw,d,a,c,b,handles);
-    %calls mapper function to calculate temperature map
-  
-    [difT, difT_metric(counter_1)] = difference(T, sb, counter_1, w);
-    %determines difference map and difference metric
-    
-    if max(sb(:)) < noise*4
-        difT_metric(counter_1) = NaN;
+    % Returns spatially correlated unknown subframes for first file in the
+    % dataset
+    if c1 == 1
+        [a, b, c, d]= correlate(raw, x, y, w);
     end
     
-    assignin('base','difT_metric',difT_metric)
+    % Calls mapper function to calculate temperature, error and emissivity
+    % maps, and also returns maximum T and associated errors, intensities,
+    % wien slope and intercept and map indices and smoothed b quadrant for
+    % plotting countours later
+    [T,E,epsilon,T_max,E_max,U_max,m_max,C_max,dx,dy,sb] = mapper...
+        (cal_a,cal_b,cal_c,cal_d,nw,d,a,c,b,handles);
     
-    T_hist(counter_1)=Tmax;
-    E_hist(counter_1)=Emax;
+    % Calls difference function to calculate the difference map and
+    % associated metric.
+    [T_dif,T_dif_metric(c1)] = difference(T, sb, c1, w, background); 
     
-    acq(counter_1) = str2double(filename(end-7:end-5));
-    %store max T and associated error
-           
-    timestamp(counter_1) = datenum(dir_content(i).date);
-    %get timestamp
-     
-    timevector = datevec(timestamp(counter_1));
-    %vectorise timestamp
-     
-    timeSec(counter_1) = (timevector(1,6) + (timevector(1,5)*60) + (timevector(1,4)*60*60));
-    %convert timevector to seconds
+    % Create concatenated summary output array and save to workspace and
+    % save current map data to .txt file
+    result = data_output(dir_content,i,c1,T_max,E_max,T_dif_metric,...
+    T,E,epsilon,T_dif,upath,savename,dir_content(i).name);
+    assignin('base', 'result', result);
     
-    elapsedSec(counter_1) = round(timeSec(counter_1)-timeSec(1));
-    %determine seconds elapsed since start of experiment
-    
-    autoresult = [acq',timestamp',elapsedSec',T_hist',E_hist',difT_metric'];
-    assignin('base', 'autoresult', autoresult);
-    %create output array and assign to workspace
-            
-    [x1,y1] = meshgrid(1:length(T),1:length(T));
-    %lists pixel x and y coordinates
-
-    xyz = [x1(:) y1(:) T(:) error(:) emissivity(:) difT(:)];
-    %generates data table containing all three maps for each data point
-
-    map=char(strcat(upath,'/',savename,'/',filename(1:end-5),'_map.txt'));
-    save(map,'xyz','-ASCII');
-    %creates unique file name for map data and saves it
-    
-    progress = round(counter_1/length(good_data(good_data>=fi & good_data<=fl))*100);
-    %calculates job progress
-    
-    if get(handles.pushbutton5,'Value') == 1
-        progress = 100;
-    end;
-    
-    microns=linspace(-(w*.18),w*.18,(w*2));
-    %pixel to micron conversion
-    
-    plot_type = 0;
-    %sets plot type to 'graph' so plot_axes function performs correctly
-    
-    %TOP LEFT PLOT: normalised intensity vs normalised wavelength of hottest pixel
-    axes(handles.axes2)
-    plot(nw(:,2),umax,'O');
-    plot_axes('Normalised wavelength', 'Normalised intensity', strcat({'Peak temperature: '},(num2str(round(Tmax))),' +/- ',(num2str(round(Emax)))), nw(:,2), umax, plot_type, dy, dx, sb, microns);
-    hold on
-    xline=linspace(min(nw(:,2)),max(nw(:,2)),100);
-    yline=intercept_max+(slope_max*xline);
-    plot(xline,yline,'-r')
-    hold off
-    %overlays the best fit line onto the wien plot
-    
-    %TOP MIDDLE PLOT: Peak Temperature History
-    axes(handles.axes3)
-    plot(elapsedSec,T_hist,'--rs','LineWidth',1,'MarkerEdgeColor','b','MarkerFaceColor','b','MarkerSize',10);
-    plot_axes('Elapsed Time (s)', 'Temperature (K)', strcat(num2str(timevector(1,4)),':',num2str(timevector(1,5)),':',num2str(timevector(1,6)),{'  '},num2str(progress),'%'),elapsedSec,T_hist, plot_type, dy, dx, sb, microns);
-    
-    if get(handles.radiobutton4,'Value') == 1
-        %TOP RIGHT PLOT: Difference Metric History
-        axes(handles.axes4)
-        plot(elapsedSec,difT_metric,'--rs','LineWidth',1,'MarkerEdgeColor','b','MarkerFaceColor','b','MarkerSize',10);
-        plot_axes('Elapsed Time (s)', 'Image difference metric', 'Image difference metric',elapsedSec,difT_metric, plot_type, dy, dx, sb, microns);
-    else
-        %TOP RIGHT PLOT: cross-sections
-        axes(handles.axes4)
-        plot(microns,T(dx,(1:length(T))),'r');
-        hold on
-        plot(microns,T(1:length(T),dy),'g');
-        hold off
-        plot_axes('Distance (microns)', 'Temperature (K)', 'Temperature Cross-sections',microns,T(T>0), plot_type, dy, dx, sb, microns);
-        legend('horizontal','vertical');
-    end
-    
-    plot_type = 1;
-    %sets plot type to 'map' so plot_axes function performs correctly
-    
-    %BOTTOM LEFT PLOT: difference map
-    axes(handles.axes5)
-    [Clim_min(counter_1), Clim_max(counter_1)] = deal(min(difT(:)), max(difT(:)));
-    [Clim_min(isnan(Clim_min)), Clim_max(isnan(Clim_max))] = deal(0,0.001);
-    plot(.18*y-(microns/2)-.18,.18*x-(microns/2)-.18,'ws','LineWidth',2,'MarkerSize',10,'MarkerEdgeColor','w','MarkerFaceColor','w') 
-    imagesc(microns,microns,difT,[min(Clim_min) max(Clim_max)]);
-    plot_axes('Distance (microns)', 'Distance (microns)', 'DIFFERENCE MAP',microns, microns, plot_type, dy, dx, sb, microns);
-
-    %BOTTOM MIDDLE PLOT: error map
-    axes(handles.axes6)
-    imagesc(microns,microns,error,[(min(error(:))) (max(error(:)))]);    
-    plot_axes('Distance (microns)', 'Distance (microns)', 'ERROR MAP',microns, microns, plot_type, dy, dx, sb, microns);
-
-    %BOTTOM RIGHT PLOT: temperature map
-    axes(handles.axes7)
-    imagesc(microns,microns,T,[(min(min(T(T>0)))) max(T(:))]);
-    plot_axes('Distance (microns)', 'Distance (microns)', 'TEMPERATURE MAP',microns, microns, plot_type, dy, dx, sb, microns);
-    
-    movegui(gcf,'center')
-    frame=getframe(gcf);
-    writeVideo(writerObj,frame);
-    %writes frame to .avi
-           
-    counter_1 = counter_1 + 1;
+    % Increment counter c1
+    c1 = c1 + 1;
+ 
 end
 
-result=strcat(upath,'/',savename,'/',savename,'.txt');
-result=char(result);
-save (result,'autoresult','-ASCII','-double');
-%saves summary data to text file
-
-if get(handles.pushbutton5,'Value') == 0
-    close(writerObj);
-end
-%closes video file unless in automode
 
 % --- Executes on button press in checkbox1.
 function checkbox1_Callback(hObject, eventdata, handles)

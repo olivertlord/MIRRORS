@@ -1,9 +1,10 @@
-function [Tmax,Emax,T,error,emissivity,umax,slope_max,intercept_max,dx,dy,sb]=mapper(skiac,skibc,skicc,skidc,nw,d,a,c,b,handles)
-
-Ja=log(a./skiac*9.8654*752.97^5/3.7403e-12);
-Jb=log(b./skibc*4.191*578.61^5/3.7403e-12);
-Jc=log(c./skicc*1.2078*10*851.32^5/3.7403e-12);
-Jd=log(d./skidc*7.26917*670.08^5/3.7403e-12);
+function [T,E,epsilon,T_max,E_max,U_max,m_max,C_max,dx,dy,sb] = mapper...
+        (cal_a,cal_b,cal_c,cal_d,nw,d,a,c,b,handles)
+    
+Ja=log(a./cal_a*9.8654*752.97^5/3.7403e-12);
+Jb=log(b./cal_b*4.191*578.61^5/3.7403e-12);
+Jc=log(c./cal_c*1.2078*10*851.32^5/3.7403e-12);
+Jd=log(d./cal_d*7.26917*670.08^5/3.7403e-12);
 %performs system responce calibration of raw data
 
 % for m=5:length(a)-5
@@ -23,13 +24,13 @@ for m=5:length(a)-5
             u(u==-Inf)=NaN;
             [wien,bint,~]=regress(u,nw);
             T(m-4,n-4)=(-1/wien(2));
-            emissivity(m-4,n-4)=wien(1);
+            epsilon(m-4,n-4)=wien(1);
             etemp(m-4,n-4)=-1/(bint(2));
-            error(m-4,n-4)=(abs(T(m-4,n-4)-etemp(m-4,n-4)));
+            E(m-4,n-4)=(abs(T(m-4,n-4)-etemp(m-4,n-4)));
             slope(m-4,n-4)=wien(2);
             intercept(m-4,n-4)=wien(1);
         else
-            [T(m-4,n-4), error(m-4,n-4), emissivity(m-4,n-4)] = deal(NaN);  
+            [T(m-4,n-4), E(m-4,n-4), epsilon(m-4,n-4)] = deal(NaN);  
         end
     end
 end
@@ -37,8 +38,8 @@ end
 %subframe
 
 if get(handles.checkbox2,'Value') == 1
-    errorx = error - min(error(:));
-    T = T - ((-0.0216.*(errorx.*errorx))+(17.882.*errorx));
+    Ex = E - min(E(:));
+    T = T - ((-0.0216.*(Ex.*Ex))+(17.882.*Ex));
 end
 
 peak_choice = get(handles.radiobutton1,'value');
@@ -49,27 +50,28 @@ if get(handles.radiobutton1,'value') == 1
     %find max intensity point
     
 elseif get(handles.radiobutton2,'value') == 1
-    error(error==0)=NaN;
-    [~, p] = min(error(:));
-    %find min error point
+    E(E==0)=NaN;
+    [~, p] = min(E(:));
+    %find min E point
     
 elseif get(handles.radiobutton5,'Value') == 1
     [~, p] = max(T(:));
     %find max T point
 end
 
-[pr, pc] = ind2sub(size(error),p);
-%determine index of min error point
+[pr, pc] = ind2sub(size(E),p);
+%determine index of min E point
 
 pr(pr<4) = 5;
 pc(pc<4) = 5;
 
-[Tmax, dx, dy, Emax,slope_max, intercept_max] = deal(T(pr,pc), pr, pc, error(pr,pc), slope(pr,pc), intercept(pr,pc));
+[T_max, dx, dy, E_max,m_max, C_max] = deal(T(pr,pc), pr, pc, E(pr,pc), slope(pr,pc), intercept(pr,pc));
 %output other parameters based on index of chosen point
 
-umax=[reshape(Ja(pr:pr+8,pc:pc+8),1,81) reshape(Jb(pr:pr+8,pc:pc+8),1,81) reshape(Jc(pr:pr+8,pc:pc+8),1,81) reshape(Jd(pr:pr+8,pc:pc+8),1,81)]';
-%finds umax at chosen point
+U_max=[reshape(Ja(pr:pr+8,pc:pc+8),1,81) reshape(Jb(pr:pr+8,pc:pc+8),1,81) reshape(Jc(pr:pr+8,pc:pc+8),1,81) reshape(Jd(pr:pr+8,pc:pc+8),1,81)]';
+%finds U_max at chosen point
 
-umax(umax==-Inf)=NaN;
+U_max(U_max==-Inf)=NaN;
 
-assignin('base','umax',umax);
+assignin('base','epsilon',epsilon)
+assignin('base','T',T)
