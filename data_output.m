@@ -1,5 +1,5 @@
-function result = data_output(dir_content,i,c1,T_max,E_max,T_dif_metric,...
-    T,E,epsilon,T_dif,upath,savename,filename)
+function [result,timevector] = data_output(dir_content,i,c1,T_max,E_max,...
+    T_dif_metric,T,E,epsilon,T_dif,upath,savename)
 %--------------------------------------------------------------------------
 % Function DATA_OUTPUT
 %--------------------------------------------------------------------------
@@ -46,7 +46,7 @@ else
 end
 
 % Convert to elapsed seconds
-elapsedSec = round(timeSec_0-timeSec);
+elapsedSec = round(timeSec-timeSec_0);
 
 % Concatenate output array
 result = [acq,timestamp,elapsedSec,T_max,E_max,T_dif_metric];
@@ -54,11 +54,11 @@ result = [acq,timestamp,elapsedSec,T_max,E_max,T_dif_metric];
 % Generates data table containing all three maps
 [x1,y1] = meshgrid(1:length(T),1:length(T));
 
-xyz = [x1(:) y1(:) T(:) E(:) epsilon(:) T_dif(:)];
+xyz = real([x1(:) y1(:) T(:) E(:) epsilon(:) T_dif(:)]);
 
 % Creates unique file name for map data and saves it
-map=char(strcat(upath,'/',savename,'/',regexprep(filename,...
-    '\.[^\.]*$', ''),'_map.txt'));
+map=char(strcat(upath,'/',savename,'/',regexprep(dir_content(i)...
+    .name,'\.[^\.]*$', ''),'_map.txt'));
 save(map,'xyz','-ASCII');
 
 end

@@ -15,4 +15,4 @@ for i = n:-1:1
 c1 = c1 + 1;
 end
 
-filenumber=str2double(fliplr(filenumber))
+filenumber=str2double(fliplr(filenumber));

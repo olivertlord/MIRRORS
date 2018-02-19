@@ -2,7 +2,7 @@ function varargout = IRS(varargin)
 %--------------------------------------------------------------------------
 % IRiS (Imaging Radiometry Software)
 %--------------------------------------------------------------------------
-% Version 1.5
+% Version 1.6
 % Written and tested on Matlab R2014a (Windows 7) & R2017a (OS X 10.13)
 
 % Copyright 2018 Oliver Lord, Weiwei Wang
@@ -41,6 +41,16 @@ function varargout = IRS(varargin)
 %
 %      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
 %      instance to run (singleton)".
+
+%      hObject    handle to checkbox1 (see GCBO)
+%      eventdata  reserved - to be defined in a future version of MATLAB
+%      handles    structure with handles and user data (see GUIDATA)
+
+%      handles    structure with handles and user data (see GUIDATA)
+%      varargin   unrecognized PropertyName/PropertyValue pairs from the
+%           command line (see VARARGIN)
+%      varargout  cell array for returning output args (see VARARGOUT);
+
 %
 % See also: GUIDE, GUIDATA, GUIHANDLES
 
@@ -69,16 +79,36 @@ else
 end
 % End initialization code - DO NOT EDIT
 
+% --- Executes during object creation, after setting all properties.
+function edit1_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
+
+if ispc && isequal(get(hObject,'BackgroundColor'),...
+        get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+% --- Executes during object creation, after setting all properties.
+function edit2_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
+
+if ispc && isequal(get(hObject,'BackgroundColor'),...
+        get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+% --- Executes during object creation, after setting all properties.
+function slider1_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
+
+% Hint: slider controls usually have a light gray background.
+if isequal(get(hObject,'BackgroundColor'), get(0,...
+        'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor',[.9 .9 .9]);
+end
+
 
 %--------------------------------------------------------------------------
 % --- Executes just before IRS is made visible.
-function IRS_OpeningFcn(hObject, eventdata, handles, varargin)
+function IRS_OpeningFcn(hObject, ~, handles, varargin)
 % This function has no output args, see OutputFcn.
-% hObject    handle to figure
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-% varargin   unrecognized PropertyName/PropertyValue pairs from the
-%            command line (see VARARGIN)
 
 % Choose default command line output for IRS
 handles.output = hObject;
@@ -92,45 +122,226 @@ plots = [handles.axes2 handles.axes3 handles.axes4 handles.axes5...
 
 % Sets aspect ratio for all axes within the GUI to 1:1
 for i=1:6
-   axes(plots(i));
+   axes(plots(i)); %#ok<LAXES>
    pbaspect([1 1 1])
 end
 
 % Initialises auto mode system flag and intitial filname
-auto_flag = 0;
+setappdata(0,'auto_flag',0);
 auto_filename = ('blank');
 
 % Makes auto mode system flag and intitial filname available to all
 % functions within the GUI
-setappdata(0,'auto_flag',auto_flag);
+setappdata(0,'auto_flag',0);
 setappdata(0,'auto_filename',auto_filename);
 
 % Forces GUI to screen centre at start-up 
 movegui(gcf,'center');
 
 % Initialise button colors and enabled state
-flag = {0 0 0 0 0 0 1 1 0 0 0 0};
-control_colors(flag,handles);
+control_colors({0 0 0 0 0 0 1 1 0 0 0 0},handles);
 
 
 %--------------------------------------------------------------------------
 % --- Outputs from this function are returned to the command line.
-function varargout = IRS_OutputFcn(hObject, eventdata, handles)
-% varargout  cell array for returning output args (see VARARGOUT);
-% hObject    handle to figure
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+function varargout = IRS_OutputFcn(~, ~, handles)
 
 % Get default command line output from handles structure
 varargout{1} = handles.output;
 
 
 %--------------------------------------------------------------------------
+% UNUSED CALLBACK FUNCTIONS
+
+% --- Executes on button press in checkbox1.
+function checkbox1_Callback(~, ~, ~) %#ok<DEFNU>
+
+
+% --- Executes on button press in checkbox2.
+function checkbox2_Callback(~, ~, ~) %#ok<DEFNU>
+
+
+% --- Executes on slider movement.
+function slider1_Callback(~, ~, ~) %#ok<DEFNU>
+
+
+%--------------------------------------------------------------------------
+% --- Executes when user presses LIVE button
+function pushbutton1_Callback(~, ~, handles) %#ok<DEFNU>
+
+if getappdata(0,'auto_flag') == 1
+    
+    % Update button states
+    control_colors({0 0 0 0 0 0 1 1 0 0 0 0}, handles)
+    
+    % Reset auto_flag to 0
+    setappdata(0,'auto_flag','0');
+    
+else
+    
+    % Reset auto_flag to 1
+    setappdata(0,'auto_flag',1);
+    
+    % Clear all axes within GUI
+    arrayfun(@cla,findall(0,'type','axes'))
+    fclose('all');
+    
+    % Reset textboxes to 0
+    set(handles.edit1,'String','0')
+    set(handles.edit2,'String','0')
+    
+    % Update button states
+    control_colors({1 0 0 0 0 0 1 0 0 0 0 0}, handles)
+    
+    % Deletes ROI if one already exists
+    hfindROI = findobj(handles.axes1,'Type','hggroup');
+    delete(hfindROI)
+    
+    % Default intensity cutoff to 25% and disable
+    set(handles.slider1,'Value',0.25);
+    set(handles.text12,'String','25 %');
+    set(handles.slider1,'Enable','off');
+    
+    % Ask user to point to folder containing .TIF files to be processed
+    upath = uigetdir('/Users/oliverlord/Dropbox/Work/EXPERIMENTS/');...
+        %#ok<NASGU>
+ 
+    % Collect list of current .TIFF files
+    dir_content = dir(strcat(upath,'/*.tiff'));
+    initial_list = {dir_content.name};
+    
+    % Initialise counter c1
+    c1 = 1;
+
+    while getappdata(0,'auto_flag') == 1
+        
+        % Collects new list of filenames
+        pause(0.1);
+        dir_content = dir(strcat(upath,'/*.tiff'));
+        new_list = {dir_content.name};
+        
+        % Executes if a new file appears in the target folder
+        if length(new_list) > length(initial_list)
+            
+            % Determines path to unknown file
+            filepath = char(strcat(upath,'/',(dir_content(end).name)));
+            
+            % Reads in unknown file and convert to double precision
+            raw_image = imread(filepath);
+            raw = im2double(raw_image);
+            
+            % Determines background intensity using image corners
+            background = mean(mean([raw(1:10,1:10) raw(1:10,end-9:end)...
+                raw(end-9:end,1:10) raw(end-9:end,end-9:end)]));
+            
+            % Subtracts background
+            raw = raw-background;
+            
+            % Calls DATA_PREP function on the first pass
+            if c1 == 1
+                
+                % Determine center of top right quadrant and set halfwidth
+                x = round(0.75*(length(raw(1,:))));
+                y = round(0.25*(length(raw(:,1))));
+                w = 200;
+                setappdata(0,'subframe',[x-(w/2) y-(w/2) w w])
+                
+                [w,x,y,~,~,~,~,upath,cal_a,cal_b,cal_c,cal_d,nw,...
+                    savename,writerObj,expname] = data_prep(handles);
+            end
+                      
+            % Divides background subtracted image into four quadrants
+            a = raw(1:size(raw,1)/2,1:size(raw,2)/2,:);
+            b = raw(size(raw,1)/2+1:size(raw,1),1:size(raw,2)/2,:);
+            c = raw(1:size(raw,1)/2,size(raw,2)/2+1:size(raw,2),:);
+            d = raw(size(raw,1)/2+1:size(raw,1),size(raw,2)/2+1:size...
+                (raw,2),:);
+            
+            % Wavelengths of each quadrant at Bristol
+            % a = top left (670 nm)
+            % b = top right (750 nm)
+            % c = bottom left (850 nm)
+            % d = bottom right (580 nm)
+            
+            % Returns spatial correlation parameters for first file in the
+            % dataset
+            if c1 == 1
+                [bya,bxa,cya,cxa,dya,dxa] = correlate(a,b,c,d);
+            end
+            
+            % Shifts quadrants based on offsets and pads by 4 pixels
+            a = a(y-w-4:y+w+4,x-w-4:x+w+4);
+            b = b(y-w+bya-4:y+w+bya+4,x-w+bxa-4:x+w+bxa+4);
+            c = c(y-w+cya-4:y+w+cya+4,x-w+cxa-4:x+w+cxa+4);
+            d = d(y-w+dya-4:y+w+dya+4,x-w+dxa-4:x+w+dxa+4);         
+
+            % Calls mapper function to calculate temperature, error and
+            % emissivity maps, and also returns maximum T and associated
+            % errors, intensities, wien slope and intercept and map indices
+            % and smoothed b quadrant for plotting countours later
+            [T,E,epsilon,T_max(c1),E_max(c1),U_max,m_max,C_max,dx,dy,sb]...
+                = mapper(cal_a,cal_b,cal_c,cal_d,nw,d,a,c,b,handles);...
+                %#ok<AGROW>
+            
+            % Calls difference function to calculate the difference map and
+            % associated metric.
+            [T_dif,T_dif_metric(c1)] = difference(T, sb, c1,...
+                background); %#ok<AGROW>
+            
+            % Create concatenated summary output array and save to
+            % workspace and save current map data to .txt file
+            [result(c1,:),timevector] = data_output(dir_content(end),...
+                1,c1,T_max(c1),E_max(c1),T_dif_metric(c1),T,E,epsilon,...
+                T_dif,upath,savename); %#ok<AGROW>
+            assignin('base', 'result', result);
+            
+            % Extracts filenumber from filename
+            filenumber = extract_filenumber(dir_content(end).name);
+            
+            % Calculates job progress
+            progress = 'N/A';
+            
+            % Pixel to micron conversion
+            microns = linspace(-(w*.18),w*.18,(w*2));
+            
+            % Set Colour Limits for difference plot such that it is only
+            % extended if but never reduced
+            [Clim_min(c1), Clim_max(c1)] = deal(min(T_dif(:)),...
+                max(T_dif(:))); %#ok<AGROW>
+            [Clim_min(isnan(Clim_min)), Clim_max(isnan(Clim_max))]...
+                = deal(0,0.001); %#ok<AGROW>
+            
+            % Calls data_plot function
+            data_plot(handles,nw,T_max,E_max,U_max,m_max,C_max,1,...
+                filenumber,raw,timevector,result(:,3),T_dif_metric,T,dx,...
+                dy,microns,progress,T_dif,E,Clim_min,Clim_max,sb);
+            
+            % Writes current GUI frame to movie
+            movegui(gcf,'center')
+            frame=getframe(gcf);
+            writeVideo(writerObj,frame);
+            
+            % Increment counter c1
+            c1 = c1 + 1;
+            
+            initial_list = new_list;
+        end
+    end
+    
+    % Closes video file on loop exit
+    close(writerObj);
+
+    % Saves summary data to text file
+    summary_file = char(strcat(upath,'/',savename,'/',expname(end),...
+        '_SUMMARY.txt'));
+    save (summary_file,'result','-ASCII','-double');
+    
+end
+
+
+%--------------------------------------------------------------------------
 % --- Executes on press of POST PROCESS button
-function pushbutton2_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+function pushbutton2_Callback(~, ~, handles) %#ok<DEFNU>
 
 % Clear all axes within GUI
 arrayfun(@cla,findall(0,'type','axes'))
@@ -147,6 +358,11 @@ control_colors(flag, handles)
 % Deletes ROI if one already exists
 hfindROI = findobj(gca,'Type','hggroup');    
 delete(hfindROI)
+
+% Default intensity cutoff to 25% and enable
+set(handles.slider1,'Value',0.25);
+set(handles.text12,'String','25 %');
+set(handles.slider1,'Enable','on');
 
 % Ask user to point to folder containing .TIF files to be processed
 [upath]=uigetdir('/Users/oliverlord/Dropbox/Work/EXPERIMENTS/');
@@ -181,33 +397,42 @@ for i=1:total
     raw=imread(char(strcat(upath,'/',(filenames(i)))));
     
     % Extracts filenumber from filename
-    filenumber(i) = extract_filenumber(cell2mat(filenames(i)));
+    filenumber(i) = extract_filenumber(cell2mat(filenames(i))); %#ok<AGROW>
     
     % Determines background intensity
     background = mean(mean([raw(1:10,1:10) raw(1:10,end-9:end)...
         raw(end-9:end,1:10) raw(end-9:end,end-9:end)]));
     
-    %//////////////////////////////////////////////////////////////////////
-    % HARDWARE SPECIFIC - REQUIRES EDITING
-    % Divides background subtracted image into four quadrants
+    % Forces top right plot option to 'difference'
+    set(handles.radiobutton4,'Value',1);
     
-    % a = top right (750 nm)
-    % b = bottom right (580 nm)
+    % Divides background subtracted image into four quadrants
+    a = raw(1:round(size(raw,1))/2,1:round(size(raw,2))/2,:);
+    b = raw(size(raw,1)/2+1:size(raw,1),1:size(raw,2)/2,:);
+    c = raw(1:size(raw,1)/2,size(raw,2)/2+1:size(raw,2),:);
+    d = raw(size(raw,1)/2+1:size(raw,1),size(raw,2)/2+1:size(raw,2),:);
+    
+    % Wavelengths of each quadrant at Bristol
+    % a = top left (670 nm)
+    % b = top right (750 nm)
     % c = bottom left (850 nm)
-    % d = top left (670 nm)
-    [a,b,c,d] = deal(raw(1:255,1:382),raw(1:255,384:765),...
-        raw(256:510,1:382),raw(256:510,384:765));
-    %//////////////////////////////////////////////////////////////////////
-
+    % d = bottom right (580 nm)
+    
+    % Automaticlly determines the bit depth of the .TIFF files being used
+    % and sets the saturation limit to 99% of that value
+    image_info = imfinfo(char(strcat(upath,'/',(filenames(i)))));
+    saturation_limit = 2^image_info.BitDepth*.99;
+    setappdata(0,'saturation_limit',saturation_limit);
+    
     % Assigns each file in sequence to GOOD_DATA array if the weakest of
     % the four hotspots is stronger than double the background if user has
     % chosen to fit saturated images
     if saturate == 1 
         if min(max([d(:) a(:) c(:) b(:)])) > 2*background;
-            good_data(i) = i;
-            imagesc(raw,'parent',handles.axes1)
-            plot_axes('X: pixels', 'Y: pixels', strcat({'DATASET: '},...
-                (num2str(filenumber(i)))),[1,757.35],[1,504.9], 0, 0, 0, 0, 0);
+            good_data(i) = i;            
+            data_plot(handles,[0 1],[NaN NaN],[NaN NaN],NaN,NaN,NaN,i,...
+                filenumber,raw,0,[0 1],NaN,[1 2],1,1,[0 1],0,[0 1],[1 2]...
+                ,0,1,[0,1;0,1])
             c1 = c1+1;
         end
         
@@ -217,14 +442,15 @@ for i=1:total
     %saturated images    
     else
         if (min(max([d(:) a(:) c(:) b(:)])) > 2*background) &&...
-                (max(max([d(:) a(:) c(:) b(:)])) < 62000);
+                (max(max([d(:) a(:) c(:) b(:)])) < saturation_limit);
             good_data(i) = i;
-            imagesc(raw,'parent',handles.axes1)
-            plot_axes('X: pixels', 'Y: pixels', strcat({'DATASET: '},...
-                (num2str(filenumber(i)))),[1,757.35],[1,504.9], 0, 0, 0, 0, 0);
+            data_plot(handles,[0 1],[NaN NaN],[NaN NaN],NaN,NaN,NaN,i,...
+                filenumber,raw,0,[0 1],NaN,[1 2],1,1,[0,1],0,[0 1],[1 2]...
+                ,0,1,[0,1;0,1])
             c1 = c1+1;
         end
     end
+    pause(0.1)
 end
 
 % Update button states
@@ -238,12 +464,10 @@ setappdata(0,'filenumber',filenumber)
 setappdata(0,'dir_content',dir_content)
 setappdata(0,'upath',upath)
 
+
 %--------------------------------------------------------------------------
 % --- Executes on press of SELECT ROI button
-function pushbutton3_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton3 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+function pushbutton3_Callback(~, ~, handles) %#ok<DEFNU>
 
 % Update button states
 flag = getappdata(0,'flag');
@@ -277,25 +501,22 @@ flag = getappdata(0,'flag');
 [flag{3},flag{10}] = deal(1);
 control_colors(flag, handles)
 
+
 %--------------------------------------------------------------------------
 % --- Executes when user selects START box
-function edit1_Callback(hObject, eventdata, handles)
-% hObject    handle to edit1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+function edit1_Callback(~, ~, handles) %#ok<DEFNU>
 
 % Gets user entered value of first file to fit
-fi = eval(get(handles.edit1,'string'))
+fi = eval(get(handles.edit1,'string'));
 
 % Access previously stored array GOOD_DATA
-filenumber = getappdata(0,'filenumber')
+filenumber = getappdata(0,'filenumber');
 
 % Converts fi to first GOOD file if user selects earlier file of last GOOD
 % file if user selects a later file
 if ~ismember(fi,filenumber(filenumber>0)) == 1
     if fi > max(filenumber)
-        a = 10
-        fi = max(filenumber)
+        fi = max(filenumber);
     else 
         fi = min(filenumber);
     end
@@ -310,24 +531,9 @@ flag = getappdata(0,'flag');
 control_colors(flag, handles)
 
 
-% --- Executes during object creation, after setting all properties.
-function edit1_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-if ispc && isequal(get(hObject,'BackgroundColor'),...
-        get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
 %--------------------------------------------------------------------------
 % --- Executes when user selects END box
-function edit2_Callback(hObject, eventdata, handles)
-% hObject    handle to edit2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+function edit2_Callback(~, ~, handles) %#ok<DEFNU>
 
 % Gets user entered value of last file to fit
 fl = eval(get(handles.edit2,'string'));
@@ -358,29 +564,17 @@ flag{5} = 1;
 control_colors(flag, handles)
 
 
-% --- Executes during object creation, after setting all properties.
-function edit2_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-if ispc && isequal(get(hObject,'BackgroundColor'),...
-        get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
 %--------------------------------------------------------------------------
 % --- Executes when user presses PROCESS button
-function pushbutton4_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton4 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+function pushbutton4_Callback(~, ~, handles) %#ok<DEFNU>
 
 % Calls DATA_PREP function which returns parameters for the sequential
 % fitting
-[w,x,y,fi,fl,good_data,filenumber,upath,cal_a,cal_b,cal_c,cal_d,nw,...
-    dir_content,savename] = data_prep(handles);
+[w,x,y,fi,fl,good_data,filenumber,upath,cal_a,cal_b,cal_c,cal_d,nw...
+    ,savename,writerObj] = data_prep(handles);
+
+% Get list of .TIFF files from appdata
+dir_content = getappdata(0,'dir_content');
 
 % Initialise c1
 c1 = 1;
@@ -392,8 +586,9 @@ for i=good_data(good_data>=fi & good_data<=fl)
     % Determines path to unknown file
     filepath = char(strcat(upath,'/',(dir_content(i).name)));
     
-    % Reads in unknown file
-    raw = imread(filepath);
+    % Reads in unknown file and convert to double precision
+    raw_image = imread(filepath);
+    raw = im2double(raw_image);
     
     % Determines background intensity using image corners
     background = mean(mean([raw(1:10,1:10) raw(1:10,end-9:end)...
@@ -402,98 +597,80 @@ for i=good_data(good_data>=fi & good_data<=fl)
     % Subtracts background
     raw = raw-background;
     
-    % Plots fullframe in bottom right axes
-    imagesc(raw,'parent',handles.axes1);
-    hold on
-    rectangle('position',[x+384-w y-w w*2 w*2],'EdgeColor',...
-        'w','LineWidth',2);
-    hold off
-    plot_axes('X: pixels', 'Y: pixels', strcat({'DATASET: '},...
-        (num2str(filenumber(i)))),[1,757.35],[1,504.9], 0, 0, 0, 0, 0);
+    % Divides background subtracted image into four quadrants
+    a = raw(1:size(raw,1)/2,1:size(raw,2)/2,:);
+    b = raw(size(raw,1)/2+1:size(raw,1),1:size(raw,2)/2,:);
+    c = raw(1:size(raw,1)/2,size(raw,2)/2+1:size(raw,2),:);
+    d = raw(size(raw,1)/2+1:size(raw,1),size(raw,2)/2+1:size(raw,2),:);
     
-    % Returns spatially correlated unknown subframes for first file in the
-    % dataset
+    % Wavelengths of each quadrant at Bristol
+    % a = top left (670 nm)
+    % b = top right (750 nm)
+    % c = bottom left (850 nm)
+    % d = bottom right (580 nm)
+    
+    % Returns spatial correlation parameters for first file in the dataset
     if c1 == 1
-        [a, b, c, d]= correlate(raw, x, y, w);
+        [bya,bxa,cya,cxa,dya,dxa] = correlate(a,b,c,d);
     end
+    
+    % Shifts quadrants based on offsets and pads by 4 pixels
+    a=a(y-w-4:y+w+4,x-w-4:x+w+4);
+    b=b(y-w+bya-4:y+w+bya+4,x-w+bxa-4:x+w+bxa+4);
+    c=c(y-w+cya-4:y+w+cya+4,x-w+cxa-4:x+w+cxa+4);
+    d=d(y-w+dya-4:y+w+dya+4,x-w+dxa-4:x+w+dxa+4);
     
     % Calls mapper function to calculate temperature, error and emissivity
     % maps, and also returns maximum T and associated errors, intensities,
     % wien slope and intercept and map indices and smoothed b quadrant for
     % plotting countours later
-    [T,E,epsilon,T_max,E_max,U_max,m_max,C_max,dx,dy,sb] = mapper...
-        (cal_a,cal_b,cal_c,cal_d,nw,d,a,c,b,handles);
+    [T,E,epsilon,T_max(c1),E_max(c1),U_max,m_max,C_max,dx,dy,sb]...
+        = mapper (cal_a,cal_b,cal_c,cal_d,nw,d,a,c,b,handles); %#ok<AGROW>
     
     % Calls difference function to calculate the difference map and
     % associated metric.
-    [T_dif,T_dif_metric(c1)] = difference(T, sb, c1, w, background); 
+    [T_dif,T_dif_metric(c1)] = difference(T, sb, c1, background);...
+        %#ok<AGROW>
     
     % Create concatenated summary output array and save to workspace and
     % save current map data to .txt file
-    result = data_output(dir_content,i,c1,T_max,E_max,T_dif_metric,...
-    T,E,epsilon,T_dif,upath,savename,dir_content(i).name);
+    [result(c1,:),timevector] = data_output(dir_content,i,c1,T_max(c1),...
+        E_max(c1),T_dif_metric(c1),T,E,epsilon,T_dif,upath,savename);...
+        %#ok<AGROW>
     assignin('base', 'result', result);
+    
+    % Calculates job progress
+    progress = round(c1/length(filenumber)*100);
+
+    % Pixel to micron conversion
+    microns = linspace(-(w*.18),w*.18,(w*2));
+    
+    % Set Colour Limits for difference plot such that it is only extended
+    % if but never reduced
+    [Clim_min(c1), Clim_max(c1)] = deal(min(T_dif(:)), max(T_dif(:)));...
+        %#ok<AGROW>
+    [Clim_min(isnan(Clim_min)), Clim_max(isnan(Clim_max))]...
+        = deal(0,0.001); %#ok<AGROW>
+
+    % Calls data_plot function
+    data_plot(handles,nw,T_max,E_max,U_max,m_max,C_max,i,...
+        filenumber,raw,timevector,result(:,3),T_dif_metric,T,dx,dy,...
+        microns,progress,T_dif,E,Clim_min,Clim_max,sb);
+    
+    % Writes current GUI frame to movie
+    movegui(gcf,'center')
+    frame=getframe(gcf);
+    writeVideo(writerObj,frame);
     
     % Increment counter c1
     c1 = c1 + 1;
  
 end
 
+% Closes video file on loop exit
+close(writerObj);
 
-% --- Executes on button press in checkbox1.
-function checkbox1_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox1
-
-
-% --- Executes on button press in checkbox2.
-function checkbox2_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox2
-
-
-% --- Executes on button press in pushbutton5.
-function pushbutton5_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton5 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of pushbutton5
-
-
-% --- Executes on button press in pushbutton10.
-function pushbutton10_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton10 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-
-
-
-% --- Executes on slider movement.
-function slider1_Callback(hObject, eventdata, handles)
-% hObject    handle to slider1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'Value') returns position of slider
-%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
-
-
-% --- Executes during object creation, after setting all properties.
-function slider1_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to slider1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: slider controls usually have a light gray background.
-if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor',[.9 .9 .9]);
-end
+% Saves summary data to text file
+summary_file=char(strcat(upath,'/',savename,'/',regexprep(dir_content(i)...
+    .name,'\.[^\.]*$', ''),'_SUMMARY.txt'));
+save (summary_file,'result','-ASCII','-double');
