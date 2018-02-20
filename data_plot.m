@@ -1,7 +1,6 @@
 function [] = data_plot(handles,nw,T_max,E_max,U_max,m_max,C_max,i,...
     filenumber,raw,timevector,elapsedSec,T_dif_metric,T,dx,dy,microns,...
-    progress,T_dif,E,Clim_min,Clim_max,sb,writerObj)
-
+    progress,T_dif,E,Clim_min,Clim_max,sb)
 %--------------------------------------------------------------------------
 % Function DATA_PLOT
 %--------------------------------------------------------------------------
@@ -29,6 +28,12 @@ function [] = data_plot(handles,nw,T_max,E_max,U_max,m_max,C_max,i,...
 
 
 %--------------------------------------------------------------------------
+% Clear all axes within GUI
+arrayfun(@cla,findall(0,'type','axes'))
+fclose('all');
+
+
+%--------------------------------------------------------------------------
 % SUMMARY PLOT: raw image data
 axes(handles.axes1)
 imagesc(raw)
@@ -46,9 +51,12 @@ delete(hfindROI)
 hfindrect = findobj(handles.axes1,'Type','rectangle');
 delete(hfindrect)
 
-% Plot rectangle on summary plot
-rectangle('Position',getappdata(0,'subframe'),'EdgeColor','w',...
-    'LineWidth',2);
+% Plot rectangle on summary plot except when this function is called from
+% pushbutton2_Callback
+if length(sb) > 2
+    rectangle('Position',getappdata(0,'subframe'),'EdgeColor','w',...
+        'LineWidth',2);
+end
 
 
 %--------------------------------------------------------------------------
@@ -187,5 +195,4 @@ ylabel('Distance (microns)', 'FontSize', 16);
 title('DIFFERENCE MAP','FontSize',18);
 
 drawnow;
-
 end

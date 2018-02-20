@@ -141,6 +141,9 @@ movegui(gcf,'center');
 % Initialise button colors and enabled state
 control_colors({0 0 0 0 0 0 1 1 0 0 0 0},handles);
 
+% Suppress non integer index warnings
+warning('off','MATLAB:colon:nonIntegerIndex');
+
 
 %--------------------------------------------------------------------------
 % --- Outputs from this function are returned to the command line.
@@ -204,7 +207,6 @@ else
     
     % Ask user to point to folder containing .TIF files to be processed
     upath = uigetdir('/Users/oliverlord/Dropbox/Work/EXPERIMENTS/');...
-        %#ok<NASGU>
  
     % Collect list of current .TIFF files
     dir_content = dir(strcat(upath,'/*.tiff'));
@@ -450,7 +452,6 @@ for i=1:total
             c1 = c1+1;
         end
     end
-    pause(0.1)
 end
 
 % Update button states
@@ -571,18 +572,22 @@ function pushbutton4_Callback(~, ~, handles) %#ok<DEFNU>
 % Calls DATA_PREP function which returns parameters for the sequential
 % fitting
 [w,x,y,fi,fl,good_data,filenumber,upath,cal_a,cal_b,cal_c,cal_d,nw...
-    ,savename,writerObj] = data_prep(handles);
+    ,savename,writerObj,expname] = data_prep(handles);
 
 % Get list of .TIFF files from appdata
 dir_content = getappdata(0,'dir_content');
+
+% Determine start and end positions within file list;
+[~,start_file] = find(filenumber==fi);
+[~,end_file] = find(filenumber==fl);
 
 % Initialise c1
 c1 = 1;
 
 % Calculates temperature, error and difference maps and associated output
 % for each file in GOOD_DATA array and plots and stores the results.
-for i=good_data(good_data>=fi & good_data<=fl)
-
+for i=start_file:end_file
+    
     % Determines path to unknown file
     filepath = char(strcat(upath,'/',(dir_content(i).name)));
     
@@ -640,13 +645,13 @@ for i=good_data(good_data>=fi & good_data<=fl)
     assignin('base', 'result', result);
     
     % Calculates job progress
-    progress = round(c1/length(filenumber)*100);
+    progress = ceil(c1/(fl-fi+1)*100);
 
     % Pixel to micron conversion
     microns = linspace(-(w*.18),w*.18,(w*2));
     
     % Set Colour Limits for difference plot such that it is only extended
-    % if but never reduced
+    % but never reduced
     [Clim_min(c1), Clim_max(c1)] = deal(min(T_dif(:)), max(T_dif(:)));...
         %#ok<AGROW>
     [Clim_min(isnan(Clim_min)), Clim_max(isnan(Clim_max))]...
@@ -664,13 +669,12 @@ for i=good_data(good_data>=fi & good_data<=fl)
     
     % Increment counter c1
     c1 = c1 + 1;
- 
 end
 
 % Closes video file on loop exit
 close(writerObj);
 
 % Saves summary data to text file
-summary_file=char(strcat(upath,'/',savename,'/',regexprep(dir_content(i)...
-    .name,'\.[^\.]*$', ''),'_SUMMARY.txt'));
+summary_file = char(strcat(upath,'/',savename,'/',expname(end),...
+    '_SUMMARY.txt'));
 save (summary_file,'result','-ASCII','-double');

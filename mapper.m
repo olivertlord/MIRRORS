@@ -34,6 +34,11 @@ function [T,E,epsilon,T_max,E_max,U_max,m_max,C_max,dx,dy,sb] = mapper...
 %   The binning chosen here is designed to replicate that reolution and
 %   prevent computationally intensive oversampling.
 
+%   Based on the concepts detailed in: Campbell, A. J. (2008). Measurement
+%   of temperature distributions across laser heated samples by
+%   multispectral imaging radiometry. Review of Scientific Instruments,
+%   79(1), 015108. http://doi.org/10.1063/1.2827513
+
 %   INPUTS: a,b,c,d = subframes of unknown data, spatially correlated in
 %           the CORRELATE function
             
@@ -74,6 +79,14 @@ Jd=log(d./cal_d*4.191*578.61^5/3.7403e-12);
 sb = conv2(b(5:length(b)-5,5:length(b)-5),ones(9,9),'same');
 sb = sb*(max(b(:))/max(sb(:)));
 
+% Get saturation limit and intensity limit
+sl = getappdata(0,'saturation_limit');
+il = max(sb(:))*get(handles.slider1,'value');
+
+
+% Pre-allocate arrays with NaN
+[T,E,epsilon,etemp,slope,intercept] = deal(NaN(length(sb)));
+
 % Bin in x
 for m=5:length(a)-5
     
@@ -83,9 +96,8 @@ for m=5:length(a)-5
         % Only fit data if the peak intensity of quadrant b is larger than
         % the value set by the user AND none of the quadrants contain a
         % pixel with a value of > 99% of the bitdepth of the TIFF file
-        if  ((max(sb(:))*get(handles.slider1,'value')) < sb(m-4,n-4)) &&...
-                ([a(m,n) b(m,n) c(m,n) d(m,n)]) <...
-                getappdata(0,'saturation_limit')
+        if  il < sb(m-4,n-4) & a(m,n) < sl & b(m,n) < sl & c(m,n) < sl...
+                & d(m,n)< sl
             
             % Concatenate calibrated pixels from each subframe
             u=[reshape(Ja(m-4:m+4,n-4:n+4),1,81) reshape(Jb(m-4:m+4,...
@@ -110,14 +122,12 @@ for m=5:length(a)-5
             
             % Extract fitting parameters
             slope(m-4,n-4)=wien(2);
-            intercept(m-4,n-4)=wien(1);
-        else
-            [T(m-4,n-4), E(m-4,n-4), epsilon(m-4,n-4)] = deal(NaN);  
+            intercept(m-4,n-4)=wien(1);  
         end
     end
 end
 
-% Perform T correction is user has selected it
+% Perform T correction if user has selected it
 % After: Walter, M. J., & Koga, K. T. (2004). The effects of chromatic
 % dispersion on temperature measurement in the laser-heated diamond anvil
 % cell. Physics of the Earth and Planetary Interiors, 143-144, 541?558.
@@ -139,7 +149,7 @@ elseif get(handles.radiobutton2,'value') == 1
     E(E==0)=NaN;
     [~, p] = min(E(:));
     
-elseif get(handles.radiobutton5,'Value') == 1
+elseif get(handles.radiobutton3,'Value') == 1
     
     % Find max T point
     [~, p] = max(T(:));
