@@ -3,6 +3,7 @@ function [result,timevector] = data_output(dir_content,i,c1,T_max,E_max,...
 %--------------------------------------------------------------------------
 % Function DATA_OUTPUT
 %--------------------------------------------------------------------------
+% Version 1.6
 % Written and tested on Matlab R2014a (Windows 7) & R2017a (OS X 10.13)
 
 % Copyright 2018 Oliver Lord, Weiwei Wang
@@ -23,8 +24,36 @@ function [result,timevector] = data_output(dir_content,i,c1,T_max,E_max,...
 % You should have received a copy of the GNU General Public License
 % along with IRiS.  If not, see <http://www.gnu.org/licenses/>.
 %--------------------------------------------------------------------------
-%   Detailed description goes here
+%   Computes timestamps and creates summary datat array 'result'. Saves map
+%   data into a text file for every unknown file
 
+%   INPUTS: dir_content = structured array contaning metadata on every
+%           .TIFF file in the current directory
+
+%           i = the current position within filenumber
+
+%           c1 = flag used to save initial timestamp into appdata iff == 1
+
+%           T_max,E_max = peak temperature and associated error
+
+%           T_dif_metric = average of the difference map
+
+%           T,E,epsilon = computed maps of temperature, error and
+%           emissivity
+
+%           T_dif = difference map
+
+%           upath = path to working directory
+
+%           savename = unique folder name for output
+
+%   OUTPUTS: result = array containing acquisition number, timestamp,
+%            elapsedSec, T_max, E_max and T_dif_metric
+
+%            timevector = timestamp in vectorised format
+
+
+%--------------------------------------------------------------------------
 % Determine and store filenumber of each acquisiton in dataset
 acq = extract_filenumber(dir_content(i).name);
 
@@ -48,13 +77,18 @@ end
 % Convert to elapsed seconds
 elapsedSec = round(timeSec-timeSec_0);
 
+
+%--------------------------------------------------------------------------
 % Concatenate output array
 result = [acq,timestamp,elapsedSec,T_max,E_max,T_dif_metric];
 
+
+%--------------------------------------------------------------------------
 % Generates data table containing all three maps
 [x1,y1] = meshgrid(1:length(T),1:length(T));
 
-xyz = real([x1(:) y1(:) T(:) E(:) epsilon(:) T_dif(:)]);
+% Concatenate output array
+xyz = real([x1(:) y1(:) T(:) E(:) epsilon(:) T_dif(:)]); %#ok<NASGU>
 
 % Creates unique file name for map data and saves it
 map=char(strcat(upath,'/',savename,'/',regexprep(dir_content(i)...

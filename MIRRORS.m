@@ -1,6 +1,6 @@
-function varargout = IRS(varargin)
+function varargout = MIRRORS(varargin)
 %--------------------------------------------------------------------------
-% IRiS (Imaging Radiometry Software)
+% MIRRORS (MultIspectRal imaging RadiOmetRy Software)
 %--------------------------------------------------------------------------
 % Version 1.6
 % Written and tested on Matlab R2014a (Windows 7) & R2017a (OS X 10.13)
@@ -8,35 +8,35 @@ function varargout = IRS(varargin)
 % Copyright 2018 Oliver Lord, Weiwei Wang
 % email: oliver.lord@bristol.ac.uk
  
-% This file is part of IRiS.
+% This file is part of MIRRORS.
  
-% IRiS is free software: you can redistribute it and/or modify
+% MIRRORS is free software: you can redistribute it and/or modify
 % it under the terms of the GNU General Public License as published by
 % the Free Software Foundation, either version 3 of the License, or
 % (at your option) any later version.
  
-% IRiS is distributed in the hope that it will be useful,
+% MIRRORS is distributed in the hope that it will be useful,
 % but WITHOUT ANY WARRANTY; without even the implied warranty of
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 % GNU General Public License for more details.
  
 % You should have received a copy of the GNU General Public License
-% along with IRiS.  If not, see <http://www.gnu.org/licenses/>.
+% along with MIRRORS.  If not, see <http://www.gnu.org/licenses/>.
 %--------------------------------------------------------------------------
-%IRS M-file for IRS.fig
-%      IRS, by itself, creates a new IRS or raises the existing
+%MIRRORS M-file for MIRRORS.fig
+%      MIRRORS, by itself, creates a new MIRRORS or raises the existing
 %      singleton*.
 %
-%      H = IRS returns the handle to a new IRS or the handle to
+%      H = MIRRORS returns the handle to a new MIRRORS or the handle to
 %      the existing singleton*.
 %
-%      IRS('Property','Value',...) creates a new IRS using the
+%      MIRRORS('Property','Value',...) creates a new MIRRORS using the
 %      given property value pairs. Unrecognized properties are passed via
-%      varargin to IRS_OpeningFcn.  This calling syntax produces a
+%      varargin to MIRRORS_OpeningFcn.  This calling syntax produces a
 %      warning when there is an existing singleton*.
 %
-%      IRS('CALLBACK') and IRS('CALLBACK',hObject,...) call the
-%      local function named CALLBACK in IRS.M with the given input
+%      MIRRORS('CALLBACK') and MIRRORS('CALLBACK',hObject,...) call the
+%      local function named CALLBACK in MIRRORS.M with the given input
 %      arguments.
 %
 %      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
@@ -54,9 +54,9 @@ function varargout = IRS(varargin)
 %
 % See also: GUIDE, GUIDATA, GUIHANDLES
 
-% Edit the above text to modify the response to help IRS
+% Edit the above text to modify the response to help MIRRORS
 
-% Last Modified by GUIDE v2.5 13-Feb-2018 12:53:47
+% Last Modified by GUIDE v2.5 21-Feb-2018 13:54:49
 
 
 %--------------------------------------------------------------------------
@@ -64,8 +64,8 @@ function varargout = IRS(varargin)
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
                    'gui_Singleton',  gui_Singleton, ...
-                   'gui_OpeningFcn', @IRS_OpeningFcn, ...
-                   'gui_OutputFcn',  @IRS_OutputFcn, ...
+                   'gui_OpeningFcn', @MIRRORS_OpeningFcn, ...
+                   'gui_OutputFcn',  @MIRRORS_OutputFcn, ...
                    'gui_LayoutFcn',  [], ...
                    'gui_Callback',   []);
 if nargin && ischar(varargin{1})
@@ -106,11 +106,11 @@ end
 
 
 %--------------------------------------------------------------------------
-% --- Executes just before IRS is made visible.
-function IRS_OpeningFcn(hObject, ~, handles, varargin)
+% --- Executes just before MIRRORS is made visible.
+function MIRRORS_OpeningFcn(hObject, ~, handles, varargin)
 % This function has no output args, see OutputFcn.
 
-% Choose default command line output for IRS
+% Choose default command line output for MIRRORS
 handles.output = hObject;
 
 % Update handles structure
@@ -141,13 +141,14 @@ movegui(gcf,'center');
 % Initialise button colors and enabled state
 control_colors({0 0 0 0 0 0 1 1 0 0 0 0},handles);
 
-% Suppress non integer index warnings
+% Suppress non integer index and complex number warnings
 warning('off','MATLAB:colon:nonIntegerIndex');
+warning('off','MATLAB:plot:IgnoreImaginaryXYPart');
 
 
 %--------------------------------------------------------------------------
 % --- Outputs from this function are returned to the command line.
-function varargout = IRS_OutputFcn(~, ~, handles)
+function varargout = MIRRORS_OutputFcn(~, ~, handles)
 
 % Get default command line output from handles structure
 varargout{1} = handles.output;
@@ -248,8 +249,8 @@ else
                 w = 200;
                 setappdata(0,'subframe',[x-(w/2) y-(w/2) w w])
                 
-                [w,x,y,~,~,~,~,upath,cal_a,cal_b,cal_c,cal_d,nw,...
-                    savename,writerObj,expname] = data_prep(handles);
+                [w,x,y,~,~,~,upath,cal_a,cal_b,cal_c,cal_d,savename,...
+                    writerObj,expname] = data_prep(handles);
             end
                       
             % Divides background subtracted image into four quadrants
@@ -281,8 +282,8 @@ else
             % emissivity maps, and also returns maximum T and associated
             % errors, intensities, wien slope and intercept and map indices
             % and smoothed b quadrant for plotting countours later
-            [T,E,epsilon,T_max(c1),E_max(c1),U_max,m_max,C_max,dx,dy,sb]...
-                = mapper(cal_a,cal_b,cal_c,cal_d,nw,d,a,c,b,handles);...
+            [T,E,epsilon,T_max(c1),E_max(c1),U_max,m_max,C_max,dx,dy,sb,...
+                nw] = mapper(cal_a,cal_b,cal_c,cal_d,d,a,c,b,handles);...
                 %#ok<AGROW>
             
             % Calls difference function to calculate the difference map and
@@ -316,7 +317,7 @@ else
             % Calls data_plot function
             data_plot(handles,nw,T_max,E_max,U_max,m_max,C_max,1,...
                 filenumber,raw,timevector,result(:,3),T_dif_metric,T,dx,...
-                dy,microns,progress,T_dif,E,Clim_min,Clim_max,sb);
+                dy,microns,progress,T_dif,E,Clim_min,Clim_max,sb,epsilon,1);
             
             % Writes current GUI frame to movie
             movegui(gcf,'center')
@@ -379,9 +380,6 @@ total=size(dir_content,1);
 % Set string of text5 to current folder path
 set(handles.text5,'string',upath);
 
-% Pre-allocate array based on number of files in the folder 
-good_data = zeros(1,total);
-
 % List filenames of .TIF files in folder
 filenames = {dir_content.name};
 
@@ -397,9 +395,6 @@ for i=1:total
     
     % Reads in unknown file  
     raw=imread(char(strcat(upath,'/',(filenames(i)))));
-    
-    % Extracts filenumber from filename
-    filenumber(i) = extract_filenumber(cell2mat(filenames(i))); %#ok<AGROW>
     
     % Determines background intensity
     background = mean(mean([raw(1:10,1:10) raw(1:10,end-9:end)...
@@ -426,29 +421,31 @@ for i=1:total
     saturation_limit = 2^image_info.BitDepth*.99;
     setappdata(0,'saturation_limit',saturation_limit);
     
-    % Assigns each file in sequence to GOOD_DATA array if the weakest of
+    % Assigns each file in sequence to filenumber array if the weakest of
     % the four hotspots is stronger than double the background if user has
     % chosen to fit saturated images
     if saturate == 1 
         if min(max([d(:) a(:) c(:) b(:)])) > 2*background;
-            good_data(i) = i;            
+            filenumber(c1) = extract_filenumber(cell2mat(filenames(c1)))...
+                ; %#ok<AGROW>            
             data_plot(handles,[0 1],[NaN NaN],[NaN NaN],NaN,NaN,NaN,i,...
                 filenumber,raw,0,[0 1],NaN,[1 2],1,1,[0 1],0,[0 1],[1 2]...
-                ,0,1,[0,1;0,1])
+                ,0,1,[0,1;0,1],NaN,c1)
             c1 = c1+1;
         end
         
-    % Assigns each file in sequence to GOOD_DATA array if the weakest of
+    % Assigns each file in sequence to filenumber array if the weakest of
     % the four hotspots is stronger than double the background AND none are 
     %brighter than the detector bit depth if user has chosen NOT to fit
     %saturated images    
     else
         if (min(max([d(:) a(:) c(:) b(:)])) > 2*background) &&...
                 (max(max([d(:) a(:) c(:) b(:)])) < saturation_limit);
-            good_data(i) = i;
+            filenumber(c1) = extract_filenumber(cell2mat(filenames(c1)))...
+                ; %#ok<AGROW>  
             data_plot(handles,[0 1],[NaN NaN],[NaN NaN],NaN,NaN,NaN,i,...
                 filenumber,raw,0,[0 1],NaN,[1 2],1,1,[0,1],0,[0 1],[1 2]...
-                ,0,1,[0,1;0,1])
+                ,0,1,[0,1;0,1],NaN,c1)
             c1 = c1+1;
         end
     end
@@ -460,7 +457,6 @@ flag = getappdata(0,'flag');
 control_colors(flag, handles)
 
 % Make data available between functions within GUI
-setappdata(0,'good_data',good_data)
 setappdata(0,'filenumber',filenumber)
 setappdata(0,'dir_content',dir_content)
 setappdata(0,'upath',upath)
@@ -510,7 +506,7 @@ function edit1_Callback(~, ~, handles) %#ok<DEFNU>
 % Gets user entered value of first file to fit
 fi = eval(get(handles.edit1,'string'));
 
-% Access previously stored array GOOD_DATA
+% Access previously stored array filenumber
 filenumber = getappdata(0,'filenumber');
 
 % Converts fi to first GOOD file if user selects earlier file of last GOOD
@@ -539,7 +535,7 @@ function edit2_Callback(~, ~, handles) %#ok<DEFNU>
 % Gets user entered value of last file to fit
 fl = eval(get(handles.edit2,'string'));
 
-% Access previously stored array GOOD_DATA
+% Access previously stored array filenumbers
 filenumber = getappdata(0,'filenumber');
 
 % Converts fl to last GOOD file if user selects later file
@@ -571,8 +567,8 @@ function pushbutton4_Callback(~, ~, handles) %#ok<DEFNU>
 
 % Calls DATA_PREP function which returns parameters for the sequential
 % fitting
-[w,x,y,fi,fl,good_data,filenumber,upath,cal_a,cal_b,cal_c,cal_d,nw...
-    ,savename,writerObj,expname] = data_prep(handles);
+[w,x,y,fi,fl,filenumber,upath,cal_a,cal_b,cal_c,cal_d,savename,...
+    writerObj,expname] = data_prep(handles);
 
 % Get list of .TIFF files from appdata
 dir_content = getappdata(0,'dir_content');
@@ -585,7 +581,7 @@ dir_content = getappdata(0,'dir_content');
 c1 = 1;
 
 % Calculates temperature, error and difference maps and associated output
-% for each file in GOOD_DATA array and plots and stores the results.
+% for each file and plots and stores the results.
 for i=start_file:end_file
     
     % Determines path to unknown file
@@ -629,8 +625,8 @@ for i=start_file:end_file
     % maps, and also returns maximum T and associated errors, intensities,
     % wien slope and intercept and map indices and smoothed b quadrant for
     % plotting countours later
-    [T,E,epsilon,T_max(c1),E_max(c1),U_max,m_max,C_max,dx,dy,sb]...
-        = mapper (cal_a,cal_b,cal_c,cal_d,nw,d,a,c,b,handles); %#ok<AGROW>
+    [T,E,epsilon,T_max(c1),E_max(c1),U_max,m_max,C_max,dx,dy,sb,nw]...
+        = mapper(cal_a,cal_b,cal_c,cal_d,d,a,c,b,handles); %#ok<AGROW>
     
     % Calls difference function to calculate the difference map and
     % associated metric.
@@ -660,7 +656,7 @@ for i=start_file:end_file
     % Calls data_plot function
     data_plot(handles,nw,T_max,E_max,U_max,m_max,C_max,i,...
         filenumber,raw,timevector,result(:,3),T_dif_metric,T,dx,dy,...
-        microns,progress,T_dif,E,Clim_min,Clim_max,sb);
+        microns,progress,T_dif,E,Clim_min,Clim_max,sb,epsilon,1);
     
     % Writes current GUI frame to movie
     movegui(gcf,'center')

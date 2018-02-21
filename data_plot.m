@@ -1,9 +1,10 @@
 function [] = data_plot(handles,nw,T_max,E_max,U_max,m_max,C_max,i,...
     filenumber,raw,timevector,elapsedSec,T_dif_metric,T,dx,dy,microns,...
-    progress,T_dif,E,Clim_min,Clim_max,sb)
+    progress,T_dif,E,Clim_min,Clim_max,sb,epsilon,c1)
 %--------------------------------------------------------------------------
 % Function DATA_PLOT
 %--------------------------------------------------------------------------
+% Version 1.6
 % Written and tested on Matlab R2014a (Windows 7) & R2017a (OS X 10.13)
 
 % Copyright 2018 Oliver Lord, Weiwei Wang
@@ -24,7 +25,61 @@ function [] = data_plot(handles,nw,T_max,E_max,U_max,m_max,C_max,i,...
 % You should have received a copy of the GNU General Public License
 % along with IRiS.  If not, see <http://www.gnu.org/licenses/>.
 %--------------------------------------------------------------------------
-%   Detailed description goes here
+%   Performs all plotting tasks and is called after every new unknown file
+%   is processed.
+
+%   INPUTS: handles = data structure containing information on graphics
+%           elements within the GUI.
+
+%           nw = array of normalised wavelengths computed for the four
+%           filter wavelngths used in Bristol.
+
+%           T_max,E_max = peak temperature and associated error
+
+%           U_max = array of normalised intensities used to compute the
+%           peak temperature pixel
+
+%           m_max,c_max = gradient and y-intercept of the Wien fit at the
+%           peak temperature pixel
+
+%           i = the current position within filenumber
+
+%           filenumber = list of filenumbers extrcated from filenames in
+%           working directory
+
+%           raw = background corrected fullframe
+
+%           timevector = timestamp in vectorised format
+
+%           elapsedSec = time in seconds since first datatpoint
+
+%           T_dif_metric = average of the difference map
+
+%           T = computed temperature map
+
+%           dx,dy = co-ordinates of peak pixel
+
+%           micorns = array containing distances in microns from the
+%           subframe center for each pixel
+
+%           progress = percentage progress through current processing job
+
+%           T_dif = difference map
+
+%           E = computed error map
+
+%           Clim_min,Clim_max = minimum and maximum colour limits for
+%           differnece map
+
+%           sb = smoothed form of subframe b for contouring
+
+%           epsilon = computed emissivity map
+
+%           c1 = flag; only plot output data if == 1. Speeds up plotting
+%           during initial data checking when user presses the post
+%           processing button
+
+%   OUTPUTS: NONE
 
 
 %--------------------------------------------------------------------------
@@ -58,6 +113,10 @@ if length(sb) > 2
         'LineWidth',2);
 end
 
+%--------------------------------------------------------------------------
+% Only update remaining plots on first pass pushbutton2_Callback processing
+% loop and every time when called form elsewhere
+if c1 == 1
 
 %--------------------------------------------------------------------------
 % TOP LEFT PLOT: normalised intensity vs normalised wavelength of hottest
@@ -110,8 +169,8 @@ if get(handles.radiobutton4,'Value') == 1
     title('Image difference metric','FontSize',18);
     xlim([min(elapsedSec) max(elapsedSec)+1])
     
-% Cross Sections
-else
+% Temperature cross Sections
+elseif get(handles.radiobutton5,'Value') == 1
     plot(microns,T(dx,(1:length(T))),'r',microns,T(1:length(T),dy),'g');
     
     % Set axes labels and plot title
@@ -119,6 +178,16 @@ else
     ylabel('Temperature (K)', 'FontSize', 16);
     title('Temperature Cross Sections','FontSize',18);
     legend('horizontal','vertical');
+    
+% Emissivity vs Temperature
+elseif get(handles.radiobutton6,'Value') == 1
+    plot(T(:),epsilon(:),'bO','LineWidth',1,'MarkerEdgeColor','b',...
+        'MarkerFaceColor','b','MarkerSize',2);
+    
+    % Set axes labels and plot title
+    xlabel('Temperature (K)', 'FontSize', 16);
+    ylabel('Emissivity', 'FontSize', 16);
+    title('Emissivity vs Temperature','FontSize',18);
 end
 
 
@@ -194,5 +263,8 @@ xlabel('Distance (microns)', 'FontSize', 16);
 ylabel('Distance (microns)', 'FontSize', 16);
 title('DIFFERENCE MAP','FontSize',18);
 
+end;
+
 drawnow;
+
 end

@@ -2,6 +2,7 @@ function [bya,bxa,cya,cxa,dya,dxa] = correlate(a,b,c,d)
 %--------------------------------------------------------------------------
 % Function CORRELATE
 %--------------------------------------------------------------------------
+% Version 1.6
 % Written and tested on Matlab R2014a (Windows 7) & R2017a (OS X 10.13)
 
 % Copyright 2018 Oliver Lord, Weiwei Wang
