@@ -2,7 +2,7 @@
 
 MIRRORS is a Graphical User Interface (GUI) created using the Matlab(c) GUIDE(c) program and was written in Matlab(c). The software is designed to process .TIFF images from a four colour multispectral imaging radiometry system like the one developed by Campbell et al. (2008) for temperature measurement of samples laser heated in a diamond anvil cell and which has been copied at the School of Earth Sciences at the University of Bristol, UK. 
 
-The GUI can work in either a live mode (during an experiment) or in a post-processing mode, and performs both spatial and thermal calibrations on the data beofre producing maps of temprature, temperature error and image difference (i.e. the change in shape of the temperature field, based on the work presented in the Supplementary Information of Briggs et al. 2017). The software also provides the user with an example Wien fit, peak temperature as a function of elapsed time, an image difference metric (also as a function of elapsed time), orthoganol temperature cross-sections centered on the peak pixel and finally emissivity as a function of temperature 9as described in Fischer & Campbell (2010). A correction routine designed to account for the effects of chromatic dispersion is also provided, based on the work of Walter & Koga (2004).
+The GUI can work in either a live mode (during an experiment) or in a post-processing mode, and performs both spatial and thermal calibrations on the data before producing maps of temprature, temperature error and image difference (i.e. the change in shape of the temperature field, based on the work presented in the Supplementary Information of Briggs et al. 2017). The software also provides the user with an example Wien fit, peak temperature as a function of elapsed time, an image difference metric (also as a function of elapsed time), orthoganol temperature cross-sections centered on the peak pixel and finally emissivity as a function of temperature 9as described in Fischer & Campbell (2010). A correction routine designed to account for the effects of chromatic dispersion is also provided, based on the work of Walter & Koga (2004).
 
 ## Getting Started
 
@@ -103,7 +103,7 @@ difference =
 
 10. Repeat steps 6-9 for each of the 8 tests. If the resulting output looks like that in step 9 for every test, then the software is working correctly.
 
-## Hardware specific code edits
+### Hardware specific code edits
 
 Before using MIRRORS, you will need to edit the code to match your hardware. Find the following lines in ```mapper.m```:
 
@@ -126,7 +126,7 @@ sr_wd = 4.19100;
 
 You will need to change the values `wa`,`wb`,`wc`,`wd`, to match the wavelngths of the filters used in your system, being careful to correctly match the wavelgnth of the image to its quadrant in the image. You will also need to change the values of `sr_wa`,`sr_wb`,`sr_wc`,`sr_wd` to the spectral radiance of your calibration source at the relevant wavelength.
 
-## Troubleshooting
+### Troubleshooting
 
 Should the testing procedure fail, or if you detect any bugs during use, then please contact me (Oliver Lord) at <oliver.lord@bristol.ac.uk>. Suggestions for new features are also welcome.
 
