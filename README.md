@@ -10,7 +10,7 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-MIRRORS requires Matlab to run and was written and tested on versions R2014a (Windows 7) & R2015/17a (OS X 10.13). It will likely work on all versions after R2014a on both Windows and OS X, but has not been tested. 
+MIRRORS requires Matlab and its image, signal and statistics toolboxes to run and was written and tested on versions R2014a (Windows 7) & R2015/17a (OS X 10.13). It will likely work on all versions after R2014a on both Windows and OS X, but has not been tested. 
 
 You will also need:
 
@@ -54,27 +54,6 @@ addpath(genpath('~/MIRRORS'));
 
 Where ```~/MIRRORS``` is the full path to your MIRRORS directory. Now, next time you start Matlab, MIRRORS will be on the Matlab PATH and you can type MIRRORS at the command prompt from any directory and the GUI should run.
 
-Before using MIRRORS, you will need to edit the code to match your hardware. Find the following lines in ```mapper.m```:
-
-```
-%//////////////////////////////////////////////////////////////////////////
-% HARDWARE SPECIFIC - REQUIRES EDITING
-% Wavelengths in nm
-wa = 670.08; %top left
-wb = 752.97; %top right
-wc = 851.32; %bottom left
-wd = 578.61; %bottom right
-
-% Values of Spectral Radiance of calibration source at each wavelength in 
-sr_wa = 7.26917; 
-sr_wb = 9.86540; 
-sr_wc = 12.0780; 
-sr_wd = 4.19100;
-%//////////////////////////////////////////////////////////////////////////
-```
-
-You will need to change the values ```wa```,```wb```,```wc```,```wd```, to match the wavelngths of the filters used in your system, being careful to correctly match the wavelgnth of the image to its quadrant in the image. You will also need to change the values of ```sr_wa```,```sr_wb```,```sr_wc```,```sr_wd``` to the spectral radiance of your calibration source at the relevant wavelength.
-
 ### Testing
 
 To check that MIRRORS is working correctly, a set of example data files are provided, along with screnshots of the MIRRORS GUI after processing and output files containing the epected results. Below are instructions on how to process these files and check that the output matches expectations.
@@ -97,39 +76,59 @@ To test your insatallation:
 
 8. A new folder should appear in ```/MIRRORS/example/data``` of the form ```MIRRORS_output_xx_xxx_xxx_xx_xx_xx``` where the x's denote the date and time. Inside that folder should be 13 files, 11 of the form ```example_xxx_map.txt``` where xxx is 001 to 011, 1 called ```data_SUMMARY.txt``` and 1 called ```data_VIDEO.avi```.
 
-9. 
-
-Explain what these tests test and why
+9. To check the output of your installation against the benchmark data provided in the software, type the following commands in the Matlab command line (this assumes you are in the folder ```MIRRORS```:
 
 ```
-Give an example
+new = textread('example/data/MIRRORS_output_22_Feb_2018_15_20_40/data_SUMMARY.txt');
+benchmark = textread('example/data/test_1/data_SUMMARY.txt');
+difference = new-benchmark
+```
+The resulting output should look like this:
+
+```
+difference =
+
+     0     0     0     0     0   NaN
+     0     0     0     0     0     0
+     0     0     0     0     0     0
+     0     0     0     0     0     0
+     0     0     0     0     0     0
+     0     0     0     0     0     0
+     0     0     0     0     0     0
+     0     0     0     0     0     0
+     0     0     0     0     0     0
+     0     0     0     0     0     0
+     0     0     0     0     0     0
 ```
 
-### And coding style tests
+10. Repeat steps 6-9 for each of the 8 tests. If the resulting output looks like that in step 9 for every test, then the software is working correctly.
 
-Explain what these tests test and why
+## Hardware specific code edits
+
+Before using MIRRORS, you will need to edit the code to match your hardware. Find the following lines in ```mapper.m```:
 
 ```
-Give an example
+%//////////////////////////////////////////////////////////////////////////
+% HARDWARE SPECIFIC - REQUIRES EDITING
+% Wavelengths in nm
+wa = 670.08; %top left
+wb = 752.97; %top right
+wc = 851.32; %bottom left
+wd = 578.61; %bottom right
+
+% Values of Spectral Radiance of calibration source at each wavelength in 
+sr_wa = 7.26917; 
+sr_wb = 9.86540; 
+sr_wc = 12.0780; 
+sr_wd = 4.19100;
+%//////////////////////////////////////////////////////////////////////////
 ```
 
-## Deployment
+You will need to change the values ```wa```,```wb```,```wc```,```wd```, to match the wavelngths of the filters used in your system, being careful to correctly match the wavelgnth of the image to its quadrant in the image. You will also need to change the values of ```sr_wa```,```sr_wb```,```sr_wc```,```sr_wd``` to the spectral radiance of your calibration source at the relevant wavelength.
 
-Add additional notes about how to deploy this on a live system
-
-## Built With
-
-* [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) - The web framework used
-* [Maven](https://maven.apache.org/) - Dependency Management
-* [ROME](https://rometools.github.io/rome/) - Used to generate RSS Feeds
-
-## Contributing
+## Troubleshooting
 
 Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
-
-## Versioning
-
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags). 
 
 ## Authors
 
