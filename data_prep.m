@@ -9,20 +9,20 @@ function [w,x,y,fi,fl,filenumber,upath,cal_a,cal_b,cal_c,...
 % Copyright 2018 Oliver Lord, Weiwei Wang
 % email: oliver.lord@bristol.ac.uk
  
-% This file is part of IRiS.
+% This file is part of MIRRORS.
  
-% IRiS is free software: you can redistribute it and/or modify
+% MIRRORS is free software: you can redistribute it and/or modify
 % it under the terms of the GNU General Public License as published by
 % the Free Software Foundation, either version 3 of the License, or
 % (at your option) any later version.
  
-% IRiS is distributed in the hope that it will be useful,
+% MIRRORS is distributed in the hope that it will be useful,
 % but WITHOUT ANY WARRANTY; without even the implied warranty of
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 % GNU General Public License for more details.
  
 % You should have received a copy of the GNU General Public License
-% along with IRiS.  If not, see <http://www.gnu.org/licenses/>.
+% along with MIRRORS.  If not, see <http://www.gnu.org/licenses/>.
 %--------------------------------------------------------------------------
 %  Performs a variety of data preparation tasks before fitting is executed,
 %  in both live and post-processing mode.
@@ -108,7 +108,8 @@ cal_d=cal_d(y-w+dya-4:y+w+dya+4,x-w+dxa-4:x+w+dxa+4);
 
 %--------------------------------------------------------------------------
 % Create output directory
-savename = strcat('IRiS_output_',regexprep(datestr(datetime),' |-|:','_'));
+savename = strcat('MIRRORS_output_',regexprep(datestr(datetime),...
+    ' |-|:','_'));
 mkdir(upath,savename);
 
 % Extract parent folder name

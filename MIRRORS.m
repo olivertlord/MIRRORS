@@ -317,7 +317,8 @@ else
             % Calls data_plot function
             data_plot(handles,nw,T_max,E_max,U_max,m_max,C_max,1,...
                 filenumber,raw,timevector,result(:,3),T_dif_metric,T,dx,...
-                dy,microns,progress,T_dif,E,Clim_min,Clim_max,sb,epsilon,1);
+                dy,microns,progress,T_dif,E,Clim_min,Clim_max,sb,epsilon...
+                ,1);
             
             % Writes current GUI frame to movie
             movegui(gcf,'center')

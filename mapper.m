@@ -1,5 +1,5 @@
-function [T,E,epsilon,T_max,E_max,U_max,m_max,C_max,pr,pc,sb,nw] = mapper...
-        (cal_a,cal_b,cal_c,cal_d,d,a,c,b,handles)
+function [T,E,epsilon,T_max,E_max,U_max,m_max,C_max,pr,pc,sb,nw]...
+    = mapper(cal_a,cal_b,cal_c,cal_d,d,a,c,b,handles)
 %--------------------------------------------------------------------------
 % Function MAPPER
 %--------------------------------------------------------------------------
@@ -9,20 +9,20 @@ function [T,E,epsilon,T_max,E_max,U_max,m_max,C_max,pr,pc,sb,nw] = mapper...
 % Copyright 2018 Oliver Lord, Weiwei Wang
 % email: oliver.lord@bristol.ac.uk
  
-% This file is part of IRiS.
+% This file is part of MIRRORS.
  
-% IRiS is free software: you can redistribute it and/or modify
+% MIRRORS is free software: you can redistribute it and/or modify
 % it under the terms of the GNU General Public License as published by
 % the Free Software Foundation, either version 3 of the License, or
 % (at your option) any later version.
  
-% IRiS is distributed in the hope that it will be useful,
+% MIRRORS is distributed in the hope that it will be useful,
 % but WITHOUT ANY WARRANTY; without even the implied warranty of
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 % GNU General Public License for more details.
  
 % You should have received a copy of the GNU General Public License
-% along with IRiS.  If not, see <http://www.gnu.org/licenses/>.
+% along with MIRRORS.  If not, see <http://www.gnu.org/licenses/>.
 %--------------------------------------------------------------------------
 %   Performes system responce calibration on raw data for each subframe and
 %   then computes temperatures, errors and emissivities for each pixel by
@@ -35,10 +35,17 @@ function [T,E,epsilon,T_max,E_max,U_max,m_max,C_max,pr,pc,sb,nw] = mapper...
 %   The binning chosen here is designed to replicate that reolution and
 %   prevent computationally intensive oversampling.
 
-%   Based on the concepts detailed in: Campbell, A. J. (2008). Measurement
-%   of temperature distributions across laser heated samples by
-%   multispectral imaging radiometry. Review of Scientific Instruments,
-%   79(1), 015108. http://doi.org/10.1063/1.2827513
+%   Based on the concepts detailed in: 
+
+%   1/Campbell, A. J. (2008). Measurement of temperature distributions
+%   across laser heated samples by multispectral imaging radiometry. Review
+%   of Scientific Instruments, 79(1), 015108.
+%   http://doi.org/10.1063/1.2827513
+
+%   2/Walter, M. J., & Koga, K. T. (2004). The effects of chromatic
+%   dispersion on temperature measurement in the laser-heated diamond anvil
+%   cell. Physics of the Earth and Planetary Interiors, 143-144, 541?558.
+%   http://doi.org/10.1016/j.pepi.2003.09.019
 
 %   INPUTS: a,b,c,d = subframes of unknown data, spatially correlated in
 %           the CORRELATE function
@@ -70,26 +77,45 @@ function [T,E,epsilon,T_max,E_max,U_max,m_max,C_max,pr,pc,sb,nw] = mapper...
 
 %--------------------------------------------------------------------------   
 
+% Constant c1 = 2hc^2*?*1e4 in W cm2 where h is Planck's constant in J s, c
+% is the speed of light in m s-1, ? = 3.1415926
+c1 = 3.74177e-12;
+
+% Constant c2 = hc/k*1e9 nm K where h is Planck's constant in J s, c is the
+% speed of light in m s-1 and k is Boltzmann's constant in J K-1.
+c2 = 14387773.54;
+
 %//////////////////////////////////////////////////////////////////////////
 % HARDWARE SPECIFIC - REQUIRES EDITING
-% Determines normalised wavelengths for the four filters
+% Wavelengths in nm
+wa = 670.08; %top left
+wb = 752.97; %top right
+wc = 851.32; %bottom left
+wd = 578.61; %bottom right
 
-nwa = 14384000/670.08;
-nwb = 14384000/752.97;
-nwc = 14384000/851.32;
-nwd = 14384000/578.61;
-
+% Values of Spectral Radiance of calibration source at each wavelength in 
+sr_wa = 7.26917; 
+sr_wb = 9.86540; 
+sr_wc = 12.0780; 
+sr_wd = 4.19100;
 %//////////////////////////////////////////////////////////////////////////
+
+% Determines normalised wavelengths for the four filters
+nwa = c2/wa; %top left
+nwb = c2/wb; %top right
+nwc = c2/wc; %bottom left
+nwd = c2/wd; %bottom right
 
 % Concatenate normalised wavelengths for fitting
 nw = horzcat(ones(324,1),[repmat(nwa,81,1);repmat(nwb,81,1);...
     repmat(nwc,81,1);repmat(nwd,81,1);]);
 
-% Performs system responce calibration of the raw data
-Ja=log(a./cal_a*7.26917*670.08^5/3.7403e-12);
-Jb=log(b./cal_b*9.8654*752.97^5/3.7403e-12);
-Jc=log(c./cal_c*1.2078*10*851.32^5/3.7403e-12);
-Jd=log(d./cal_d*4.191*578.61^5/3.7403e-12);
+% Performs system responce calibration of the raw data and calculates
+% normalised intensities
+Ja=log(a./cal_a*sr_wa*wa^5/c1);
+Jb=log(b./cal_b*sr_wb*wb^5/c1);
+Jc=log(c./cal_c*sr_wc*wc^5/c1);
+Jd=log(d./cal_d*sr_wd*wd^5/c1);
 
 % Produces smoothed b quadrant for cutoff and contouring
 sb = conv2(b(5:length(b)-5,5:length(b)-5),ones(9,9),'same');
@@ -112,8 +138,8 @@ for m=5:length(a)-5
         % Only fit data if the peak intensity of quadrant b is larger than
         % the value set by the user AND none of the quadrants contain a
         % pixel with a value of > 99% of the bitdepth of the TIFF file
-        if  il < sb(m-4,n-4) && a(m,n) < sl && b(m,n) < sl && c(m,n) < sl...
-                && d(m,n)< sl
+        if  il < sb(m-4,n-4) && a(m,n) < sl && b(m,n) < sl && c(m,n)...
+                < sl && d(m,n)< sl
             
             % Concatenate calibrated pixels from each subframe
             u=[reshape(Ja(m-4:m+4,n-4:n+4),1,81) reshape(Jb(m-4:m+4,...

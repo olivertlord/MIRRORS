@@ -8,20 +8,20 @@ function [T_dif,T_dif_metric] = difference(T, sb, c1, background)
 % Copyright 2018 Oliver Lord, Weiwei Wang
 % email: oliver.lord@bristol.ac.uk
  
-% This file is part of IRiS.
+% This file is part of MIRRORS.
  
-% IRiS is free software: you can redistribute it and/or modify
+% MIRRORS is free software: you can redistribute it and/or modify
 % it under the terms of the GNU General Public License as published by
 % the Free Software Foundation, either version 3 of the License, or
 % (at your option) any later version.
  
-% IRiS is distributed in the hope that it will be useful,
+% MIRRORS is distributed in the hope that it will be useful,
 % but WITHOUT ANY WARRANTY; without even the implied warranty of
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 % GNU General Public License for more details.
  
 % You should have received a copy of the GNU General Public License
-% along with IRiS.  If not, see <http://www.gnu.org/licenses/>.
+% along with MIRRORS.  If not, see <http://www.gnu.org/licenses/>.
 %--------------------------------------------------------------------------
 %   Determines the difference map between the current and previous
 %   normaised temperature maps, modulated by the light intensity such that

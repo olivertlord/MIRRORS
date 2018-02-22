@@ -10,20 +10,20 @@ function [] = data_plot(handles,nw,T_max,E_max,U_max,m_max,C_max,i,...
 % Copyright 2018 Oliver Lord, Weiwei Wang
 % email: oliver.lord@bristol.ac.uk
  
-% This file is part of IRiS.
+% This file is part of MIRRORS.
  
-% IRiS is free software: you can redistribute it and/or modify
+% MIRRORS is free software: you can redistribute it and/or modify
 % it under the terms of the GNU General Public License as published by
 % the Free Software Foundation, either version 3 of the License, or
 % (at your option) any later version.
  
-% IRiS is distributed in the hope that it will be useful,
+% MIRRORS is distributed in the hope that it will be useful,
 % but WITHOUT ANY WARRANTY; without even the implied warranty of
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 % GNU General Public License for more details.
  
 % You should have received a copy of the GNU General Public License
-% along with IRiS.  If not, see <http://www.gnu.org/licenses/>.
+% along with MIRRORS.  If not, see <http://www.gnu.org/licenses/>.
 %--------------------------------------------------------------------------
 %   Performs all plotting tasks and is called after every new unknown file
 %   is processed.
@@ -128,8 +128,8 @@ plot(nw(:,2),U_max,'bO','LineWidth',1,'MarkerEdgeColor','b',...
 % Set axes labels and plot title
 xlabel('Normalised wavelength', 'FontSize', 16);
 ylabel('Normalised intensity', 'FontSize', 16);
-title((strcat({'Peak temperature: '},(num2str(round(T_max(end)))),' +/- ',...
-    (num2str(round(E_max(end)))))),'FontSize',18);
+title((strcat({'Peak temperature: '},(num2str(round(T_max(end)))),...
+    ' +/- ',(num2str(round(E_max(end)))))),'FontSize',18);
 xlim([min(nw(:,2))-0.02*max(nw(:,2)) max(nw(:,2))+0.02*max(nw(:,2))])
 
 % Overlay linear fit to data
@@ -143,8 +143,8 @@ hold off
 %--------------------------------------------------------------------------
 %TOP MIDDLE PLOT: Peak Temperature History
 axes(handles.axes3)
-errorbar(elapsedSec,T_max,E_max,'--bO','LineWidth',1,'MarkerEdgeColor','b',...
-    'MarkerFaceColor','b','MarkerSize',10);
+errorbar(elapsedSec,T_max,E_max,'--bO','LineWidth',1,'MarkerEdgeColor'...
+    ,'b','MarkerFaceColor','b','MarkerSize',10);
 
 % Set axes labels and plot title
 xlabel('Elapsed Time (s)', 'FontSize', 16);
