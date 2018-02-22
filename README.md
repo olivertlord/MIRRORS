@@ -54,12 +54,50 @@ addpath(genpath('~/MIRRORS'));
 
 Where ```~/MIRRORS``` is the full path to your MIRRORS directory. Now, next time you start Matlab, MIRRORS will be on the Matlab PATH and you can type MIRRORS at the command prompt from any directory and the GUI should run.
 
+Before using MIRRORS, you will need to edit the code to match your hardware. Find the following lines in ```mapper.m```:
 
-## Running the tests
+```
+%//////////////////////////////////////////////////////////////////////////
+% HARDWARE SPECIFIC - REQUIRES EDITING
+% Wavelengths in nm
+wa = 670.08; %top left
+wb = 752.97; %top right
+wc = 851.32; %bottom left
+wd = 578.61; %bottom right
 
-Explain how to run the automated tests for this system
+% Values of Spectral Radiance of calibration source at each wavelength in 
+sr_wa = 7.26917; 
+sr_wb = 9.86540; 
+sr_wc = 12.0780; 
+sr_wd = 4.19100;
+%//////////////////////////////////////////////////////////////////////////
+```
 
-### Break down into end to end tests
+You will need to change the values ```wa```,```wb```,```wc```,```wd```, to match the wavelngths of the filters used in your system, being careful to correctly match the wavelgnth of the image to its quadrant in the image. You will also need to change the values of ```sr_wa```,```sr_wb```,```sr_wc```,```sr_wd``` to the spectral radiance of your calibration source at the relevant wavelength.
+
+### Testing
+
+To check that MIRRORS is working correctly, a set of example data files are provided, along with screnshots of the MIRRORS GUI after processing and output files containing the epected results. Below are instructions on how to process these files and check that the output matches expectations.
+
+To test your insatallation:
+
+1. Run MIRRORS by typing ```MIRRORS``` at the Matlab command prompt.
+
+2. Once the GUI has opened, click the 'Post process' button. 
+
+3. Navigate to the folder ```/MIRRORS/example/data``` and click 'Open'. 
+
+4. Click 'Select ROI' and then double click inside the white rectangle that appears in the summary plot window at the bottom right of the GUI. The 'Select ROI' button should go green.
+
+5. Type '1' in the 'Start' box and '11' in the 'End' box. Both should go green.
+
+6. Check that the tickboxes and radiobuttons match those in ```/MIRRORS/example/data/test_1/test_1.png```.
+
+7. Click 'Process'. Once processing is complete, the GUI window should look like ```/MIRRORS/example/data/test_1/test_1.png```.
+
+8. A new folder should appear in ```/MIRRORS/example/data``` of the form ```MIRRORS_output_xx_xxx_xxx_xx_xx_xx``` where the x's denote the date and time. Inside that folder should be 13 files, 11 of the form ```example_xxx_map.txt``` where xxx is 001 to 011, 1 called ```data_SUMMARY.txt``` and 1 called ```data_VIDEO.avi```.
+
+9. 
 
 Explain what these tests test and why
 
