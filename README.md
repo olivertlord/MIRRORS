@@ -1,5 +1,4 @@
 # MIRRORS (MultIspectRal imaging RadiOmetRy Software)
-### v1.6
 
 [![DOI](https://zenodo.org/badge/100439021.svg)](https://zenodo.org/badge/latestdoi/100439021)
 
