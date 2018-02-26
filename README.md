@@ -25,13 +25,7 @@ Details of these systems as well as calibration methods can be found in Campbell
 
 ### Installing
 
-Installation is simple. Simply navigate to https://github.com/olivertlord/MIRRORS and download the .ZIP file and extract it into your chosen directory. Alternatively, if you have git installed, then at the command line type:
-
-```
-cd targetdirectory
-git clone https://github.com/olivertlord/MIRRORS.git
-```
-This will craete a clone of the GitHub repository called ```MIRRORS``` inside ```targetdirectory```
+Simply navigate to https://github.com/olivertlord/MIRRORS/releases/latest and download the latest source xode (as either a .ZIP or .tar.gz file) and extract to your desired location. 
 
 To run MIRRORS, simply open Matlab, navigate to the MIRRORS directory and then type
 
