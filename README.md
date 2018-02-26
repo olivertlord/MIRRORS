@@ -25,7 +25,7 @@ Details of these systems as well as calibration methods can be found in Campbell
 
 ### Installing
 
-Simply navigate to https://github.com/olivertlord/MIRRORS/releases/latest and download the latest source xode (as either a .ZIP or .tar.gz file) and extract to your desired location. 
+Simply navigate to https://github.com/olivertlord/MIRRORS/releases/latest and download the latest source code (as either a .ZIP or .tar.gz file) and extract to your desired location. 
 
 To run MIRRORS, simply open Matlab, navigate to the MIRRORS directory and then type
 
