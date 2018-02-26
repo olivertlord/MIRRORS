@@ -2,9 +2,9 @@
 
 [![DOI](https://zenodo.org/badge/100439021.svg)](https://zenodo.org/badge/latestdoi/100439021)
 
-MIRRORS is a Graphical User Interface (GUI) created using the Matlab(c) GUIDE(c) program and was written in Matlab(c). The software is designed to process .TIFF images from a four colour multispectral imaging radiometry system like the one developed by Campbell et al. (2008) for temperature measurement of samples laser heated in a diamond anvil cell and which has been copied at the School of Earth Sciences at the University of Bristol, UK. 
+MIRRORS is a Graphical User Interface (GUI) created using the Matlab© GUIDE© program and was written in Matlab©. The software is designed to process .TIFF images from a four colour multispectral imaging radiometry system like the one developed by Campbell (2008) for temperature measurement of samples laser heated in a diamond anvil cell and which has been copied at the School of Earth Sciences at the University of Bristol, UK. 
 
-The GUI can work in either a live mode (during an experiment) or in a post-processing mode, and performs both spatial and thermal calibrations on the data before producing maps of temprature, temperature error and image difference (i.e. the change in shape of the temperature field, based on the work presented in the Supplementary Information of Briggs et al. 2017). The software also provides the user with an example Wien fit, peak temperature as a function of elapsed time, an image difference metric (also as a function of elapsed time), orthoganol temperature cross-sections centered on the peak pixel and finally emissivity as a function of temperature 9as described in Fischer & Campbell (2010). A correction routine designed to account for the effects of chromatic dispersion is also provided, based on the work of Walter & Koga (2004).
+The GUI can work in either a live mode (during an experiment) or in a post-processing mode, and performs both spatial and thermal calibrations on the data before producing maps of temprature, temperature error and image difference (i.e. the change in shape of the temperature field, based on the work presented in the Supplementary Information of Briggs et al. 2017). The software also provides the user with an example Wien fit, peak temperature as a function of elapsed time, an image difference metric (also as a function of elapsed time), orthoganol temperature cross-sections centered on the peak pixel and finally emissivity as a function of temperature (as described in Fischer & Campbell (2010). A correction routine designed to account for the effects of chromatic dispersion is also provided, based on the work of Walter & Koga (2004).
 
 ## Getting Started
 
@@ -18,9 +18,9 @@ You will also need:
 
 1. A multispectral imaging radiometry system that produces .TIFF files of any resolution, aspect ratio and bit depth. Each .TIFF must include four monochromatic images of the laser heated spot to be analysed, each centered on the middle pixel of one quadrant of the full image. The software performs a spatial calibration before stacking the four quadrants and so the centering does not need to be perfect. Each image must be at a different, precisely known wavelength.  
 
-2. A thermal calibration .TIFF image produced using a calibrated source of known spectral radiance and and as before, consisting of four equal quadrants each illuminated by a monochromatic image of the calibration source.
+2. A thermal calibration .TIFF image produced using a calibrated source of known spectral radiance and as before, consisting of four equal quadrants each illuminated by a monochromatic image of the calibration source.
 
-Details of these systems as well as calibration methods can be found in Campbell et al. 2017 and Lord & Wang (in prep).
+Details of these systems as well as calibration methods can be found in Campbell et al. 2008 and Lord & Wang (in prep).
 
 ### Installing
 
@@ -120,7 +120,7 @@ sr_wd = 4.19100;
 %//////////////////////////////////////////////////////////////////////////
 ```
 
-You will need to change the values `wa`,`wb`,`wc`,`wd`, to match the wavelngths of the filters used in your system, being careful to correctly match the wavelgnth of the image to its quadrant in the image. You will also need to change the values of `sr_wa`,`sr_wb`,`sr_wc`,`sr_wd` to the spectral radiance of your calibration source at the relevant wavelength.
+You will need to change the values `wa`,`wb`,`wc`,`wd`, to match the wavelengths of the filters used in your system, being careful to correctly match the wavelength of the image to its quadrant in the image. You will also need to change the values of `sr_wa`,`sr_wb`,`sr_wc`,`sr_wd` to the spectral radiance of your calibration source at the relevant wavelength.
 
 ### Troubleshooting
 
@@ -138,7 +138,7 @@ This project is licensed under the GNU General Public Licence Version 3 - see th
 
 ## Acknowledgments
 
-* Mike Walter, Director, Gephysical Laboratory, Carnegie Institution of Washington for help and advice on all things radiometic
+* Mike Walter, Director, Gephysical Laboratory, Carnegie Institution of Washington for help and advice on all things radiometic.
 * The students and post-doctoral researchers at the DAC lab, School of Earth Sciences, University of Bristol, who tested the software, detected numerous bugs and suggested improvements.
 * I (Oliver Lord) would like to acknowledge support from the Royal Society in the form of a University Research Fellowship (UF150057) and the Natural Environment Research Council (NERC) in the form of an Post-doctoral Research Fellowship (NE/J018945/1).
 
@@ -151,4 +151,3 @@ This project is licensed under the GNU General Public Licence Version 3 - see th
 * Fischer, R. A., & Campbell, A. J. (2010). High-pressure melting of wustite. American Mineralogist, 95(10), 1473–1477. http://doi.org/10.2138/am.2010.3463
 
 * Walter, M. J., & Koga, K. T. (2004). The effects of chromatic dispersion on temperature measurement in the laser-heated diamond anvil cell. Physics of the Earth and Planetary Interiors, 143-144, 541–558. http://doi.org/10.1016/j.pepi.2003.09.019
-
