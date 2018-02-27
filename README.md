@@ -56,23 +56,25 @@ To check that MIRRORS is working correctly, a set of example data files are prov
 
 To test your insatallation:
 
-1. Run MIRRORS by typing ```MIRRORS``` at the Matlab command prompt.
+1. Copy ```MIRRORS/example/tc_example.tiff``` to ```NIRRORS/calibration``` and rename it to ```tc.tiff```.
 
-2. Once the GUI has opened, click the 'Post process' button. 
+2. Run MIRRORS by typing ```MIRRORS``` at the Matlab command prompt.
 
-3. Navigate to the folder ```/MIRRORS/example/data``` and click 'Open'. 
+3. Once the GUI has opened, click the 'Post process' button. 
 
-4. Click 'Select ROI' and then double click inside the white rectangle that appears in the summary plot window at the bottom right of the GUI. The 'Select ROI' button should go green.
+4. Navigate to the folder ```/MIRRORS/example/data``` and click 'Open'. 
 
-5. Type '1' in the 'Start' box and '11' in the 'End' box. Both should go green.
+5. Click 'Select ROI' and then double click inside the white rectangle that appears in the summary plot window at the bottom right of the GUI. The 'Select ROI' button should go green.
 
-6. Check that the tickboxes and radiobuttons match those in ```/MIRRORS/example/data/test_1/test_1.png```.
+6. Type '1' in the 'Start' box and '11' in the 'End' box. Both should go green.
 
-7. Click 'Process'. Once processing is complete, the GUI window should look like ```/MIRRORS/example/data/test_1/test_1.png```.
+7. Check that the tickboxes and radiobuttons match those in ```/MIRRORS/example/data/test_1/test_1.png```.
 
-8. A new folder should appear in ```/MIRRORS/example/data``` of the form ```MIRRORS_output_xx_xxx_xxx_xx_xx_xx``` where the x's denote the date and time. Inside that folder should be 13 files, 11 of the form ```example_xxx_map.txt``` where xxx is 001 to 011, 1 called ```data_SUMMARY.txt``` and 1 called ```data_VIDEO.avi```.
+8. Click 'Process'. Once processing is complete, the GUI window should look like ```/MIRRORS/example/data/test_1/test_1.png```.
 
-9. To check the output of your installation against the benchmark data provided in the software, type the following commands in the Matlab command line (this assumes you are in the folder ```MIRRORS```:
+9. A new folder should appear in ```/MIRRORS/example/data``` of the form ```MIRRORS_output_xx_xxx_xxx_xx_xx_xx``` where the x's denote the date and time. Inside that folder should be 13 files, 11 of the form ```example_xxx_map.txt``` where xxx is 001 to 011, 1 called ```data_SUMMARY.txt``` and 1 called ```data_VIDEO.avi```.
+
+10. To check the output of your installation against the benchmark data provided in the software, type the following commands in the Matlab command line (this assumes you are in the folder ```MIRRORS```:
 
 ```
 new = textread('example/data/MIRRORS_output_22_Feb_2018_15_20_40/data_SUMMARY.txt');
