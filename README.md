@@ -77,7 +77,7 @@ To test your insatallation:
 10. To check the output of your installation against the benchmark data provided in the software, type the following commands in the Matlab command line (this assumes you are in the folder ```MIRRORS```:
 
 ```
-new = textread('example/data/MIRRORS_output_22_Feb_2018_15_20_40/data_SUMMARY.txt');
+new = textread('example/data/MIRRORS_output_xx_xxx_xxx_xx_xx_xx/data_SUMMARY.txt');
 benchmark = textread('example/data/test_1/data_SUMMARY.txt');
 difference = new-benchmark
 ```
@@ -86,20 +86,24 @@ The resulting output should look like this:
 ```
 difference =
 
-     0     0     0     0     0   NaN
-     0     0     0     0     0     0
-     0     0     0     0     0     0
-     0     0     0     0     0     0
-     0     0     0     0     0     0
-     0     0     0     0     0     0
-     0     0     0     0     0     0
-     0     0     0     0     0     0
-     0     0     0     0     0     0
-     0     0     0     0     0     0
-     0     0     0     0     0     0
+   1.0e+03 *
+
+         0    1.0511         0   -0.0000   -0.0000       NaN
+         0    1.0511   -0.0020   -0.0000   -0.0000   -0.0000
+         0    1.0511   -0.0040   -0.0000   -0.0000   -0.0000
+         0    1.0511   -0.0060   -0.0000   -0.0000   -0.0000
+         0    1.0511   -0.0100   -0.0000   -0.0000    0.0000
+         0    1.0511   -0.0120   -0.0000   -0.0000   -0.0000
+         0    1.0511   -0.0140   -0.0000   -0.0000   -0.0000
+         0    1.0511   -0.0160   -0.0000   -0.0000    0.0000
+         0    1.0511   -0.0200   -0.0000   -0.0000   -0.0000
+         0    1.0511   -0.0220   -0.0000         0   -0.0000
+         0    1.0511   -0.0230   -0.0000         0   -0.0000
 ```
 
-10. Repeat steps 6-9 for each of the 8 tests. If the resulting output looks like that in step 9 for every test, then the software is working correctly.
+The differences in column 2 and 3 simply reflect the fact that when downloading files from the internet, their modification date is set as the download time, rather than the time they were acquired. However, this is not a problem with MIRRORS and can be ignored. 
+
+10. Repeat steps 6-9 for each of the 8 tests. If the resulting output looks like that in step 9 for every test, then the software is working correctly. Note that the image difference metric and temperature history (top middle) plots will not look correct because of the issue with modification dates noted in 9. Again this can be ignored.
 
 ### Hardware specific code edits
 
