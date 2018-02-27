@@ -138,8 +138,8 @@ for m=5:length(a)-5
         % Only fit data if the peak intensity of quadrant b is larger than
         % the value set by the user AND none of the quadrants contain a
         % pixel with a value of > 99% of the bitdepth of the TIFF file
-        if  il < sb(m-4,n-4) && a(m,n) < sl && b(m,n) < sl && c(m,n)...
-                < sl && d(m,n)< sl
+        if  il < sb(m-4,n-4) & a(m,n) < sl & b(m,n) < sl & c(m,n)...
+                < sl & d(m,n)< sl
             
             % Concatenate calibrated pixels from each subframe
             u=[reshape(Ja(m-4:m+4,n-4:n+4),1,81) reshape(Jb(m-4:m+4,...

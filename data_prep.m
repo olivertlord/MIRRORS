@@ -108,7 +108,7 @@ cal_d=cal_d(y-w+dya-4:y+w+dya+4,x-w+dxa-4:x+w+dxa+4);
 
 %--------------------------------------------------------------------------
 % Create output directory
-savename = strcat('MIRRORS_output_',regexprep(datestr(datetime),...
+savename = strcat('MIRRORS_output_',regexprep(datestr(clock),...
     ' |-|:','_'));
 mkdir(upath,savename);
 

@@ -122,6 +122,8 @@ if c1 == 1
 % TOP LEFT PLOT: normalised intensity vs normalised wavelength of hottest
 % pixel
 axes(handles.axes2)
+pbaspect([1 1 1])
+
 plot(nw(:,2),U_max,'bO','LineWidth',1,'MarkerEdgeColor','b',...
     'MarkerSize',10);
 
@@ -138,11 +140,14 @@ xline = linspace(min(nw(:,2)),max(nw(:,2)),100);
 yline = polyval([m_max,C_max],xline);
 plot(xline,yline,'-r')
 hold off
+pbaspect([1 1 1])
 
 
 %--------------------------------------------------------------------------
 %TOP MIDDLE PLOT: Peak Temperature History
 axes(handles.axes3)
+pbaspect([1 1 1])
+
 errorbar(elapsedSec,T_max,E_max,'--bO','LineWidth',1,'MarkerEdgeColor'...
     ,'b','MarkerFaceColor','b','MarkerSize',10);
 
@@ -152,6 +157,7 @@ ylabel('Temperature (K)', 'FontSize', 16);
 title(strcat(datestr(timevector),{'  '},num2str(progress),'%'),...
     'FontSize',18);
 xlim([min(elapsedSec) max(elapsedSec)+1])
+pbaspect([1 1 1])
 
 
 %--------------------------------------------------------------------------
@@ -189,6 +195,7 @@ elseif get(handles.radiobutton6,'Value') == 1
     ylabel('Emissivity', 'FontSize', 16);
     title('Emissivity vs Temperature','FontSize',18);
 end
+pbaspect([1 1 1])
 
 
 %--------------------------------------------------------------------------
@@ -214,6 +221,8 @@ end
 xlabel('Distance (microns)', 'FontSize', 16);
 ylabel('Distance (microns)', 'FontSize', 16);
 title('TEMPERATURE MAP','FontSize',18); 
+pbaspect([1 1 1])
+
 
 %--------------------------------------------------------------------------
 %BOTTOM MIDDLE PLOT: error map
@@ -238,6 +247,8 @@ end
 xlabel('Distance (microns)', 'FontSize', 16);
 ylabel('Distance (microns)', 'FontSize', 16);
 title('ERROR MAP','FontSize',18);
+pbaspect([1 1 1])
+
 
 %--------------------------------------------------------------------------
 %BOTTOM RIGHT PLOT: difference map
@@ -262,6 +273,7 @@ end
 xlabel('Distance (microns)', 'FontSize', 16);
 ylabel('Distance (microns)', 'FontSize', 16);
 title('DIFFERENCE MAP','FontSize',18);
+pbaspect([1 1 1])
 
 end;
 

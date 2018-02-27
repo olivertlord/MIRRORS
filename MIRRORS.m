@@ -56,7 +56,7 @@ function varargout = MIRRORS(varargin)
 
 % Edit the above text to modify the response to help MIRRORS
 
-% Last Modified by GUIDE v2.5 21-Feb-2018 13:54:49
+% Last Modified by GUIDE v2.5 27-Feb-2018 15:13:36
 
 
 %--------------------------------------------------------------------------
@@ -165,10 +165,6 @@ function checkbox1_Callback(~, ~, ~) %#ok<DEFNU>
 function checkbox2_Callback(~, ~, ~) %#ok<DEFNU>
 
 
-% --- Executes on slider movement.
-function slider1_Callback(~, ~, ~) %#ok<DEFNU>
-
-
 %--------------------------------------------------------------------------
 % --- Executes when user presses LIVE button
 function pushbutton1_Callback(~, ~, handles) %#ok<DEFNU>
@@ -207,7 +203,8 @@ else
     set(handles.slider1,'Enable','off');
     
     % Ask user to point to folder containing .TIF files to be processed
-    upath = uigetdir('/Users/oliverlord/Dropbox/Work/EXPERIMENTS/');...
+    upath = uigetdir('/Users/oliverlord/Dropbox/Work/EXPERIMENTS/');
+    setappdata(0,'upath',upath);
  
     % Collect list of current .TIFF files
     dir_content = dir(strcat(upath,'/*.tiff'));
@@ -513,11 +510,8 @@ filenumber = getappdata(0,'filenumber');
 % Converts fi to first GOOD file if user selects earlier file of last GOOD
 % file if user selects a later file
 if ~ismember(fi,filenumber(filenumber>0)) == 1
-    if fi > max(filenumber)
-        fi = max(filenumber);
-    else 
-        fi = min(filenumber);
-    end
+    [~,idx] = min(abs(filenumber-fi));
+    fi= filenumber(idx);
 end
 
 % Set edit box to error checked fl
@@ -541,11 +535,8 @@ filenumber = getappdata(0,'filenumber');
 
 % Converts fl to last GOOD file if user selects later file
 if ~ismember(fl,filenumber(filenumber>0)) == 1
-    if fl > max(filenumber)
-        fl = max(filenumber);
-    else 
-        fl = eval(get(handles.edit1,'string'));
-    end
+    [~,idx] = min(abs(filenumber-fl));
+    fl = filenumber(idx);
 end
     
 % Converts fl to fi if user enters a value of fl < fi    
@@ -675,3 +666,14 @@ close(writerObj);
 summary_file = char(strcat(upath,'/',savename,'/',expname(end),...
     '_SUMMARY.txt'));
 save (summary_file,'result','-ASCII','-double');
+
+
+%--------------------------------------------------------------------------
+% --- Executes on slider movement.
+function slider1_Callback(~, ~, handles) %#ok<DEFNU>
+
+% Get current slider value
+slider_val = get(handles.slider1,'Value')*100;
+
+%Set textbox to current slider value
+set(handles.text12,'String',strcat(num2str(round(slider_val)),{' '},'%'));
