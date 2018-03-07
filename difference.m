@@ -69,10 +69,13 @@ else
     I1_field = (sb - min(sb(:)))/(max(sb(:)) - min(sb(:)));
     
     % Compute intensity weighted difference map
-    T_dif = abs(T1_field-T0_field).*I1_field;
+    T_dif = abs(T1_field-T0_field);
+    
+    % Determine ratio of non-NaN to NaN pixels
+    NaN_ratio = length(T(isnan(T(:))))/length(T(~isnan(T(:))));
     
     % Compute average difference metric
-    T_dif_metric = nansum(T_dif(:));
+    T_dif_metric = nansum(T_dif(:))*NaN_ratio;
     
     T0_field = T1_field;
     setappdata(0,'T0_field',T0_field);
