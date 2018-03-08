@@ -575,7 +575,7 @@ c1 = 1;
 % Calculates temperature, error and difference maps and associated output
 % for each file and plots and stores the results.
 for i=start_file:end_file
-    
+    tic
     % Determines path to unknown file
     filepath = char(strcat(upath,'/',(dir_content(i).name)));
     
@@ -657,6 +657,7 @@ for i=start_file:end_file
     
     % Increment counter c1
     c1 = c1 + 1;
+    toc
 end
 
 % Closes video file on loop exit

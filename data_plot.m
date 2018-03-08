@@ -83,14 +83,14 @@ function [] = data_plot(handles,nw,T_max,E_max,U_max,m_max,C_max,i,...
 
 
 %--------------------------------------------------------------------------
-% Clear all axes within GUI
-arrayfun(@cla,findall(0,'type','axes'))
+% Close all open files
 fclose('all');
 
 
 %--------------------------------------------------------------------------
 % SUMMARY PLOT: raw image data
 axes(handles.axes1)
+cla
 imagesc(raw)
 
 % Set axes labels and plot title
@@ -122,6 +122,7 @@ if c1 == 1
 % TOP LEFT PLOT: normalised intensity vs normalised wavelength of hottest
 % pixel
 axes(handles.axes2)
+cla
 pbaspect([1 1 1])
 
 plot(nw(:,2),U_max,'bO','LineWidth',1,'MarkerEdgeColor','b',...
@@ -146,6 +147,7 @@ pbaspect([1 1 1])
 %--------------------------------------------------------------------------
 %TOP MIDDLE PLOT: Peak Temperature History
 axes(handles.axes3)
+cla
 pbaspect([1 1 1])
 
 errorbar(elapsedSec,T_max,E_max,'--bO','LineWidth',1,'MarkerEdgeColor'...
@@ -163,6 +165,7 @@ pbaspect([1 1 1])
 %--------------------------------------------------------------------------
 %TOP RIGHT PLOT: various user options
 axes(handles.axes4)
+cla
 
 % Difference Metric
 if get(handles.radiobutton4,'Value') == 1    
@@ -200,12 +203,13 @@ pbaspect([1 1 1])
 
 %--------------------------------------------------------------------------
 %BOTTOM LEFT PLOT: temperature map
-axes(handles.axes5)   
+axes(handles.axes5)  
+cla
 
 if ~isnan(U_max)
     imagesc(microns,microns,T,[(min(min(T(T>0)))) max(T(:))]);
 
-    % Add colorbar and intensity contour
+    % add colorbar and intensity contour
     originalSize = get(gca, 'Position');
     colormap jet;
     colorbar('location','NorthOutside');
@@ -227,11 +231,12 @@ pbaspect([1 1 1])
 %--------------------------------------------------------------------------
 %BOTTOM MIDDLE PLOT: error map
 axes(handles.axes6)
+cla
 
 if ~isnan(U_max)
     imagesc(microns,microns,E,[(min(E(:))) (max(E(:)))]);
 
-    % Add colorbar and intensity contour
+    % add colorbar and intensity contour
     originalSize = get(gca, 'Position');
     colormap jet;
     colorbar('location','NorthOutside');
@@ -253,11 +258,12 @@ pbaspect([1 1 1])
 %--------------------------------------------------------------------------
 %BOTTOM RIGHT PLOT: difference map
 axes(handles.axes7)
+cla
 
 if ~isnan(U_max)
     imagesc(microns,microns,T_dif,[min(Clim_min) max(Clim_max)]);
 
-    % Add colorbar and intensity contour
+    % add colorbar and intensity contour
     originalSize = get(gca, 'Position');
     colormap jet;
     colorbar('location','NorthOutside');
