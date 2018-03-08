@@ -169,6 +169,8 @@ function checkbox2_Callback(~, ~, ~) %#ok<DEFNU>
 % --- Executes when user presses LIVE button
 function pushbutton1_Callback(~, ~, handles) %#ok<DEFNU>
 
+a = getappdata(0,'auto_flag')
+
 if getappdata(0,'auto_flag') == 1
     
     % Update button states
@@ -191,7 +193,7 @@ else
     set(handles.edit2,'String','0')
     
     % Update button states
-    control_colors({1 0 0 0 0 0 1 0 0 0 0 0}, handles)
+    control_colors({1 0 0 0 0 0 1 1 0 0 0 0}, handles)
     
     % Deletes ROI if one already exists
     hfindROI = findobj(handles.axes1,'Type','hggroup');
@@ -557,6 +559,9 @@ control_colors(flag, handles)
 % --- Executes when user presses PROCESS button
 function pushbutton4_Callback(~, ~, handles) %#ok<DEFNU>
 
+% Reset auto_flag to 0
+setappdata(0,'auto_flag','0');
+    
 % Calls DATA_PREP function which returns parameters for the sequential
 % fitting
 [w,x,y,fi,fl,filenumber,upath,cal_a,cal_b,cal_c,cal_d,savename,...

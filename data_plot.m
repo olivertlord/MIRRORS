@@ -112,6 +112,7 @@ if length(sb) > 2
     rectangle('Position',getappdata(0,'subframe'),'EdgeColor','w',...
         'LineWidth',2);
 end
+axis equal
 
 %--------------------------------------------------------------------------
 % Only update remaining plots on first pass pushbutton2_Callback processing
