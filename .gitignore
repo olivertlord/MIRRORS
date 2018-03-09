@@ -1,5 +1,4 @@
 example/data/*output*
-Archive/
 *.mat
 *.asv
 *.m~
