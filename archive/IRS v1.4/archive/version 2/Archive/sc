@@ -1,0 +1,13 @@
+function sc (raw); 
+
+a=raw(1:205,1:378);                     %top left 900nm
+b=raw(1:205,379:756);                   %top right 800nm
+c=raw(206:510,1:378);                   %bottom left 750nm
+d=raw(206:510,379:756);                 %bottom right 670nm
+
+[num,idx]=max(a(:));
+[ax,ay]=ind2sub(size(a),idx);
+
+
+
+
