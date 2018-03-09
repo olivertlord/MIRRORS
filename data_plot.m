@@ -208,7 +208,7 @@ axes(handles.axes5)
 cla
 
 if ~isnan(U_max)
-    imagesc(microns,microns,T,'CData',[(min(min(T(T>0)))) max(T(:))]);
+    imagesc(microns,microns,T,[(min(min(T(T>0)))) max(T(:))]);
 
     % add colorbar and intensity contour
     originalSize = get(gca, 'Position');
@@ -235,7 +235,7 @@ axes(handles.axes6)
 cla
 
 if ~isnan(U_max)
-    imagesc(microns,microns,E,'CData',[(min(E(:))) (max(E(:)))]);
+    imagesc(microns,microns,E,[(min(E(:))) (max(E(:)))]);
 
     % add colorbar and intensity contour
     originalSize = get(gca, 'Position');
@@ -262,7 +262,7 @@ axes(handles.axes7)
 cla
 
 if ~isnan(U_max)
-    imagesc(microns,microns,T_dif,'CData',[min(Clim_min) max(Clim_max)]);
+    imagesc(microns,microns,T_dif,[min(Clim_min) max(Clim_max)]);
 
     % add colorbar and intensity contour
     originalSize = get(gca, 'Position');

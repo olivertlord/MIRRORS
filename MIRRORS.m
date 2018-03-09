@@ -282,7 +282,7 @@ else
             % errors, intensities, wien slope and intercept and map indices
             % and smoothed b quadrant for plotting countours later
             [T,E,epsilon,T_max(c1),E_max(c1),U_max,m_max,C_max,dx,dy,sb,...
-                nw] = mapper(cal_a,cal_b,cal_c,cal_d,d,a,c,b,handles);...
+                nw] = mapper(cal_a,cal_b,cal_c,cal_d,d,a,c,b,handles,filepath);...
                 %#ok<AGROW>
             
             % Calls difference function to calculate the difference map and
@@ -419,7 +419,6 @@ for i=1:total
     % and sets the saturation limit to 99% of that value
     image_info = imfinfo(char(strcat(upath,'/',(filenames(i)))));
     saturation_limit = 2^image_info.BitDepth*.99;
-    setappdata(0,'saturation_limit',saturation_limit);
     
     % Assigns each file in sequence to filenumber array if the weakest of
     % the four hotspots is stronger than double the background if user has
@@ -623,7 +622,7 @@ for i=start_file:end_file
     % wien slope and intercept and map indices and smoothed b quadrant for
     % plotting countours later
     [T,E,epsilon,T_max(c1),E_max(c1),U_max,m_max,C_max,dx,dy,sb,nw]...
-        = mapper(cal_a,cal_b,cal_c,cal_d,d,a,c,b,handles); %#ok<AGROW>
+        = mapper(cal_a,cal_b,cal_c,cal_d,d,a,c,b,handles,filepath); %#ok<AGROW>
     
     % Calls difference function to calculate the difference map and
     % associated metric.

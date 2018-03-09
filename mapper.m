@@ -1,5 +1,5 @@
 function [T,E,epsilon,T_max,E_max,U_max,m_max,C_max,pr,pc,sb,nw]...
-    = mapper(cal_a,cal_b,cal_c,cal_d,d,a,c,b,handles)
+    = mapper(cal_a,cal_b,cal_c,cal_d,d,a,c,b,handles, filepath)
 %--------------------------------------------------------------------------
 % Function MAPPER
 %--------------------------------------------------------------------------
@@ -121,10 +121,13 @@ Jd=log(d./cal_d*sr_wd*wd^5/c1);
 sb = conv2(b(5:length(b)-5,5:length(b)-5),ones(9,9),'same');
 sb = sb*(max(b(:))/max(sb(:)));
 
-% Get saturation limit and intensity limit
-sl = getappdata(0,'saturation_limit');
+% Set intensity limit
 il = max(sb(:))*get(handles.slider1,'value');
-assignin('base','sb',sb)
+
+% Automaticlly determines the bit depth of the .TIFF files being used
+% and sets the saturation limit to 99% of that value
+image_info = imfinfo(char(filepath));
+sl = 2^image_info.BitDepth*.99;
 
 % Pre-allocate arrays with NaN
 [T,E,epsilon,etemp,slope,intercept] = deal(NaN(length(sb)));
