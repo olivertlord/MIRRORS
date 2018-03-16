@@ -157,9 +157,6 @@ varargout{1} = handles.output;
 %--------------------------------------------------------------------------
 % UNUSED CALLBACK FUNCTIONS
 
-% --- Executes on button press in checkbox1.
-function checkbox1_Callback(~, ~, ~) %#ok<DEFNU>
-
 
 % --- Executes on button press in checkbox2.
 function checkbox2_Callback(~, ~, ~) %#ok<DEFNU>
@@ -344,7 +341,7 @@ end
 
 %--------------------------------------------------------------------------
 % --- Executes on press of POST PROCESS button
-function pushbutton2_Callback(~, ~, handles) %#ok<DEFNU>
+function pushbutton2_Callback(~, ~, handles)
 
 % Clear all axes within GUI
 arrayfun(@cla,findall(0,'type','axes'))
@@ -408,7 +405,7 @@ for i=1:total
     b = raw(size(raw,1)/2+1:size(raw,1),1:size(raw,2)/2,:);
     c = raw(1:size(raw,1)/2,size(raw,2)/2+1:size(raw,2),:);
     d = raw(size(raw,1)/2+1:size(raw,1),size(raw,2)/2+1:size(raw,2),:);
-    
+
     % Wavelengths of each quadrant at Bristol
     % a = top left (670 nm)
     % b = top right (750 nm)
@@ -418,21 +415,22 @@ for i=1:total
     % Automaticlly determines the bit depth of the .TIFF files being used
     % and sets the saturation limit to 99% of that value
     image_info = imfinfo(char(strcat(upath,'/',(filenames(i)))));
-    saturation_limit = 2^image_info.BitDepth*.99;
+    saturation_limit = 2^image_info.BitDepth*.95;
     
     % Assigns each file in sequence to filenumber array if the weakest of
     % the four hotspots is stronger than double the background if user has
     % chosen to fit saturated images
+
     if saturate == 1 
         if min(max([d(:) a(:) c(:) b(:)])) > 2*background;
-            filenumber(c1) = extract_filenumber(cell2mat(filenames(c1)))...
-                ; %#ok<AGROW>            
-            data_plot(handles,[0 1],[NaN NaN],[NaN NaN],NaN,NaN,NaN,i,...
+            filenumber(c1) = extract_filenumber(cell2mat(filenames(i)))...
+               ; %#ok<AGROW>
+            listpos(c1)=i;
+            data_plot(handles,[0 1],[NaN NaN],[NaN NaN],NaN,NaN,NaN,c1,...
                 filenumber,raw,0,[0 1],NaN,[1 2],1,1,[0 1],0,[0 1],[1 2]...
                 ,0,1,[0,1;0,1],NaN,c1)
             c1 = c1+1;
         end
-        
     % Assigns each file in sequence to filenumber array if the weakest of
     % the four hotspots is stronger than double the background AND none are 
     %brighter than the detector bit depth if user has chosen NOT to fit
@@ -440,9 +438,10 @@ for i=1:total
     else
         if (min(max([d(:) a(:) c(:) b(:)])) > 2*background) &&...
                 (max(max([d(:) a(:) c(:) b(:)])) < saturation_limit);
-            filenumber(c1) = extract_filenumber(cell2mat(filenames(c1)))...
+            filenumber(c1) = extract_filenumber(cell2mat(filenames(i)))...
                 ; %#ok<AGROW>  
-            data_plot(handles,[0 1],[NaN NaN],[NaN NaN],NaN,NaN,NaN,i,...
+            listpos(c1)=i;
+            data_plot(handles,[0 1],[NaN NaN],[NaN NaN],NaN,NaN,NaN,c1,...
                 filenumber,raw,0,[0 1],NaN,[1 2],1,1,[0,1],0,[0 1],[1 2]...
                 ,0,1,[0,1;0,1],NaN,c1)
             c1 = c1+1;
@@ -457,6 +456,7 @@ control_colors(flag, handles)
 
 % Make data available between functions within GUI
 setappdata(0,'filenumber',filenumber)
+setappdata(0,'listpos',listpos)
 setappdata(0,'dir_content',dir_content)
 setappdata(0,'upath',upath)
 
@@ -569,9 +569,12 @@ setappdata(0,'auto_flag','0');
 % Get list of .TIFF files from appdata
 dir_content = getappdata(0,'dir_content');
 
+%Get list of positions in folder of files to be fitted
+listpos = getappdata(0,'listpos');
+
 % Determine start and end positions within file list;
-[~,start_file] = find(filenumber==fi);
-[~,end_file] = find(filenumber==fl);
+[start_file,~] = find(filenumber'==fi);
+[end_file,~] = find(filenumber'==fl);
 
 % Initialise c1
 c1 = 1;
@@ -579,9 +582,9 @@ c1 = 1;
 % Calculates temperature, error and difference maps and associated output
 % for each file and plots and stores the results.
 for i=start_file:end_file
-    tic
+
     % Determines path to unknown file
-    filepath = char(strcat(upath,'/',(dir_content(i).name)));
+    filepath = char(strcat(upath,'/',(dir_content(listpos(i)).name)));
     
     % Reads in unknown file and convert to double precision
     raw_image = imread(filepath);
@@ -661,7 +664,7 @@ for i=start_file:end_file
     
     % Increment counter c1
     c1 = c1 + 1;
-    toc
+  
 end
 
 % Closes video file on loop exit
@@ -682,3 +685,7 @@ slider_val = get(handles.slider1,'Value')*100;
 
 %Set textbox to current slider value
 set(handles.text12,'String',strcat(num2str(round(slider_val)),{' '},'%'));
+
+% --- Executes on button press in Fit saturated images chackbox.
+function checkbox1_Callback(~, ~, handles) %#ok<DEFNU>
+pushbutton2_Callback([], [], handles)

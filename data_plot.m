@@ -92,7 +92,6 @@ fclose('all');
 axes(handles.axes1)
 cla
 imagesc(raw)
-
 % Set axes labels and plot title
 xlabel('X: pixels', 'FontSize', 16);
 ylabel('Y: pixels', 'FontSize', 16);
