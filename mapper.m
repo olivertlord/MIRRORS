@@ -89,21 +89,21 @@ c2 = 14387773.54;
 % HARDWARE SPECIFIC - REQUIRES EDITING
 % Wavelengths in nm
 wa = 670.08; %top left
-wb = 752.97; %top right
-wc = 851.32; %bottom left
+wb = 851.32; %bottom left
+wc = 752.97; %top right
 wd = 578.61; %bottom right
 
 % Values of Spectral Radiance of calibration source at each wavelength in 
 sr_wa = 7.26917; 
-sr_wb = 9.86540; 
-sr_wc = 12.0780; 
+sr_wb = 12.0780; 
+sr_wc = 9.86540;
 sr_wd = 4.19100;
 %//////////////////////////////////////////////////////////////////////////
 
 % Determines normalised wavelengths for the four filters
 nwa = c2/wa; %top left
-nwb = c2/wb; %top right
-nwc = c2/wc; %bottom left
+nwb = c2/wb; %bottom left
+nwc = c2/wc; %top right
 nwd = c2/wd; %bottom right
 
 % Concatenate normalised wavelengths for fitting

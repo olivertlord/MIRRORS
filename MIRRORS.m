@@ -408,8 +408,8 @@ for i=1:total
 
     % Wavelengths of each quadrant at Bristol
     % a = top left (670 nm)
-    % b = top right (750 nm)
-    % c = bottom left (850 nm)
+    % b = bottom left (850 nm)
+    % c = top right (750 nm)
     % d = bottom right (580 nm)
     
     % Automaticlly determines the bit depth of the .TIFF files being used
