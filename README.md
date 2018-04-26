@@ -128,6 +128,22 @@ sr_wd = 4.19100;
 
 You will need to change the values `wa`,`wb`,`wc`,`wd`, to match the wavelengths of the filters used in your system, being careful to correctly match the wavelength of the image to its quadrant in the image. You will also need to change the values of `sr_wa`,`sr_wb`,`sr_wc`,`sr_wd` to the spectral radiance of your calibration source at the relevant wavelength.
 
+Next, find the following lines in ```MIRRORS.m```:
+
+```
+%//////////////////////////////////////////////////////////////
+% HARDWARE SPECIFIC - REQUIRES EDITING
+% CCD pixel width at sample location in microns
+mpp = 0.18;
+%//////////////////////////////////////////////////////////////
+```
+
+You will need to change the value of the scaling factor `mpp` which is the width in microns at the sample location of a single pixel of your CCD. This can be calculated using the following equation
+
+mpp = Wp / M
+
+where Wp is the real width of each CCD pixel and M is the magnification of the system. 
+
 ### Troubleshooting
 
 Should the testing procedure fail, or if you detect any bugs during use, then please contact me (Oliver Lord) at <oliver.lord@bristol.ac.uk>. Suggestions for new features are also welcome.
