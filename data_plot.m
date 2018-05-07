@@ -125,6 +125,8 @@ axes(handles.axes2)
 cla
 pbaspect([1 1 1])
 
+size(nw)
+size(U_max)
 plot(nw(:,2),U_max,'bO','LineWidth',1,'MarkerEdgeColor','b',...
     'MarkerSize',10);
 
@@ -215,6 +217,8 @@ if ~isnan(U_max)
     colorbar('location','NorthOutside');
     set(gca, 'Position', originalSize);
     hold on
+    size(sb)
+    size(microns)
     contour(microns,microns,sb,10,'k');
     plot(microns(dy),microns(dx),'ws','LineWidth',2,'MarkerSize',10,...
         'MarkerEdgeColor','w','MarkerFaceColor','w')

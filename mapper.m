@@ -98,6 +98,15 @@ sr_wa = 7.26917;
 sr_wb = 12.0780; 
 sr_wc = 9.86540;
 sr_wd = 4.19100;
+
+% Width of CCD pixels in microns
+pixel_width = 9;
+
+% Magnification of temperature measurement system
+system_mag = 50;
+
+% Numerical aperture of system
+NA = .4;
 %//////////////////////////////////////////////////////////////////////////
 
 % Determines normalised wavelengths for the four filters
@@ -106,10 +115,6 @@ nwb = c2/wb; %bottom left
 nwc = c2/wc; %top right
 nwd = c2/wd; %bottom right
 
-% Concatenate normalised wavelengths for fitting
-nw = horzcat(ones(324,1),[repmat(nwa,81,1);repmat(nwb,81,1);...
-    repmat(nwc,81,1);repmat(nwd,81,1);]);
-
 % Performs system responce calibration of the raw data and calculates
 % normalised intensities
 Ja=log(a./cal_a*sr_wa*wa^5/c1);
@@ -117,8 +122,28 @@ Jb=log(b./cal_b*sr_wb*wb^5/c1);
 Jc=log(c./cal_c*sr_wc*wc^5/c1);
 Jd=log(d./cal_d*sr_wd*wd^5/c1);
 
+% Calculate CCD resolution at the image plane
+resolution = pixel_width/system_mag;
+
+% Calculate the Abbe diffraction limit of the system
+diff_limit = (max([wa wb wc wd])/1000)/(2*NA);
+
+% Calculate bin size required to match diffraction limited system
+% resolution
+bsz = 2*floor((diff_limit/resolution)/2)+1;
+
+% Calculate integer half-width of bin
+bhw = (bsz-1)/2;
+
+% Calculate ROI border width
+bw = bhw+1;
+
+% Concatenate normalised wavelengths for fitting
+nw = horzcat(ones(bsz^2*4,1),[repmat(nwa,bsz^2,1);repmat(nwb,bsz^2,1);...
+    repmat(nwc,bsz^2,1);repmat(nwd,bsz^2,1);]);
+
 % Produces smoothed b quadrant for cutoff and contouring
-sb = conv2(b(5:length(b)-5,5:length(b)-5),ones(9,9),'same');
+sb = conv2(b(bw:length(b)-bw,bw:length(b)-bw),ones(bsz,bsz),'same');
 sb = sb*(max(b(:))/max(sb(:)));
 
 % Set intensity limit
@@ -132,22 +157,24 @@ sl = 2^image_info.BitDepth*.99;
 % Pre-allocate arrays with NaN
 [T,E,epsilon,etemp,slope,intercept] = deal(NaN(length(sb)));
 
+% Loop over ROI to determine temperature and emissivity at each pixel
 % Bin in x
-for m=5:length(a)-5
+for m=bw:length(a)-bw
     
     % Bin in y
-    for n=5:length(a)-5
-        
+    for n=bw:length(a)-bw
+
         % Only fit data if the peak intensity of quadrant b is larger than
         % the value set by the user AND none of the quadrants contain a
         % pixel with a value of > 99% of the bitdepth of the TIFF file
-        if  il < sb(m-4,n-4) & a(m,n) < sl & b(m,n) < sl & c(m,n)...
-                < sl & d(m,n)< sl
+        if  il < sb(m-bhw,n-bhw) & a(m,n) < sl & b(m,n) < sl...
+                & c(m,n) < sl & d(m,n)< sl
             
             % Concatenate calibrated pixels from each subframe
-            u=[reshape(Ja(m-4:m+4,n-4:n+4),1,81) reshape(Jb(m-4:m+4,...
-                n-4:n+4),1,81) reshape(Jc(m-4:m+4,n-4:n+4),1,81)...
-                reshape(Jd(m-4:m+4,n-4:n+4),1,81)]';
+            u=[reshape(Ja(m-bhw:m+bhw,n-bhw:n+bhw),1,bsz^2)...
+                reshape(Jb(m-bhw:m+bhw,n-bhw:n+bhw),1,bsz^2)...
+                reshape(Jc(m-bhw:m+bhw,n-bhw:n+bhw),1,bsz^2)...
+                reshape(Jd(m-bhw:m+bhw,n-bhw:n+bhw),1,bsz^2)]';
             
             % Remove an -Inf values
             u(u==-Inf)=NaN;
@@ -156,18 +183,19 @@ for m=5:length(a)-5
             [wien,bint,~]=regress(u,nw);
             
             % Determine T from fit
-            T(m-4,n-4)=real((-1/wien(2)));
+            T(m-bhw,n-bhw)=real((-1/wien(2)));
             
             % Determine emissivity from fit
-            epsilon(m-4,n-4)=wien(1);
+            epsilon(m-bhw,n-bhw)=wien(1);
             
             % Determine E from fit
-            etemp(m-4,n-4)=-1/(bint(2));
-            E(m-4,n-4)=(abs(T(m-4,n-4)-etemp(m-4,n-4)));
+            etemp(m-bhw,n-bhw)=-1/(bint(2));
+            E(m-bhw,n-bhw)=(abs(T(m-bhw,n-bhw)...
+                -etemp(m-bhw,n-bhw)));
             
             % Extract fitting parameters
-            slope(m-4,n-4)=wien(2);
-            intercept(m-4,n-4)=wien(1);  
+            slope(m-bhw,n-bhw)=wien(2);
+            intercept(m-bhw,n-bhw)=wien(1);  
         end
     end
 end
@@ -252,13 +280,14 @@ if get(handles.radiobutton7,'Value') ~= 1
     
     % Fix to the edge if within 4 pixels of the edge, to prevent problems
     % with determining U_max
-    pr(pr<4) = 5;
-    pc(pc<4) = 5;
+    pr(pr<bhw) = bw;
+    pc(pc<bhw) = bw;
     
     % Concatenate array of U_max at chosen point
-    U_max=[reshape(Ja(pr:pr+8,pc:pc+8),1,81) reshape(Jb(pr:pr+8,pc:pc+8)...
-        ,1,81) reshape(Jc(pr:pr+8,pc:pc+8),1,81)...
-        reshape(Jd(pr:pr+8,pc:pc+8),1,81)]';    
+    U_max=[reshape(Ja(pr:pr+bhw*2,pc:pc+bhw*2),1,bsz^2)... 
+        reshape(Jb(pr:pr+bhw*2,pc:pc+bhw*2),1,bsz^2)...
+        reshape(Jc(pr:pr+bhw*2,pc:pc+bhw*2),1,bsz^2)...
+        reshape(Jd(pr:pr+bhw*2,pc:pc+bhw*2),1,bsz^2)]';    
 end
 
 % Eliminate -Inf values of U_max

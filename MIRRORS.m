@@ -300,15 +300,6 @@ else
             % Calculates job progress
             progress = 'N/A';
             
-            %//////////////////////////////////////////////////////////////
-            % HARDWARE SPECIFIC - REQUIRES EDITING
-            % CCD pixel width at sample location in microns
-            mpp = 0.18;
-            %//////////////////////////////////////////////////////////////
-            
-            % Pixel to micron conversion
-            microns = linspace(-(mpp*.18),mpp*.18,(mpp*2));
-            
             % Set Colour Limits for difference plot such that it is only
             % extended if but never reduced
             [Clim_min(c1), Clim_max(c1)] = deal(min(T_dif(:)),...
@@ -649,7 +640,8 @@ for i=start_file:end_file
     progress = ceil(c1/(fl-fi+1)*100);
 
     % Pixel to micron conversion
-    microns = linspace(-(w*.18),w*.18,(w*2));
+    microns = linspace(-((length(sb)/2)*.18),((length(sb)/2)*.18),...
+        (((length(sb)/2)*2)));
     
     % Set Colour Limits for difference plot such that it is only extended
     % but never reduced
