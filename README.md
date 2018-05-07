@@ -114,35 +114,34 @@ Before using MIRRORS, you will need to edit the code to match your hardware. Fin
 % HARDWARE SPECIFIC - REQUIRES EDITING
 % Wavelengths in nm
 wa = 670.08; %top left
-wb = 752.97; %top right
-wc = 851.32; %bottom left
+wb = 851.32; %bottom left
+wc = 752.97; %top right
 wd = 578.61; %bottom right
 
 % Values of Spectral Radiance of calibration source at each wavelength in 
 sr_wa = 7.26917; 
-sr_wb = 9.86540; 
-sr_wc = 12.0780; 
+sr_wb = 12.0780; 
+sr_wc = 9.86540;
 sr_wd = 4.19100;
+
+% Width of CCD pixels in microns
+pixel_width = 9;
+
+% Magnification of temperature measurement system
+system_mag = 50;
+
+% Numerical aperture of system
+NA = .4;
 %//////////////////////////////////////////////////////////////////////////
 ```
 
 You will need to change the values `wa`,`wb`,`wc`,`wd`, to match the wavelengths of the filters used in your system, being careful to correctly match the wavelength of the image to its quadrant in the image. You will also need to change the values of `sr_wa`,`sr_wb`,`sr_wc`,`sr_wd` to the spectral radiance of your calibration source at the relevant wavelength.
 
-Next, find the following lines in ```MIRRORS.m```:
+You will also need to change the following constants to values appropriate for your system:
 
-```
-%//////////////////////////////////////////////////////////////
-% HARDWARE SPECIFIC - REQUIRES EDITING
-% CCD pixel width at sample location in microns
-mpp = 0.18;
-%//////////////////////////////////////////////////////////////
-```
-
-You will need to change the value of the scaling factor `mpp` which is the width in microns at the sample location of a single pixel of your CCD. This can be calculated using the following equation
-
-mpp = Wp / M
-
-where Wp is the real width of each CCD pixel and M is the magnification of the system. 
+* `pixel_width` - the size of the pixels of the CCD camera 
+* `system_mag` - the magnification of the system
+* `NA` - numerical aperture
 
 ### Troubleshooting
 
