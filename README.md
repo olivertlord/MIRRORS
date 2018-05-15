@@ -58,23 +58,40 @@ To test your insatallation:
 
 1. Copy ```MIRRORS/example/tc_example.tiff``` to ```NIRRORS/calibration``` and rename it to ```tc.tiff```.
 
-2. Run MIRRORS by typing ```MIRRORS``` at the Matlab command prompt.
+2. When downloading files from the internet, their modification date is set as the download time, rather than the time they were acquired and so all the example_xxx.tiff files will have the same timestamp, making plots as a function of time indecipherable. To deal with this, run the following code at the command line:
 
-3. Once the GUI has opened, click the 'Post process' button. 
+   ```dir_content = dir('./example/data');
+      listpos = [length(dir_content)-10:1:length(dir_content)];
+      
+      for i = 1:11
+         current = dir_content(listpos(i)).name
+         fid = fopen(strcat('./example/data/',current),'r+');
+         byte = fread(fid, 1);
+         fseek(fid, 0, 'bof');
+         fwrite(fid, byte);
+         fclose(fid);
+         pause(1);
+      end```
+      
+This will update the timestamps on the example data files such that they are separated by one second. 
 
-4. Navigate to the folder ```/MIRRORS/example/data``` and click 'Open'. 
+3. Run MIRRORS by typing ```MIRRORS``` at the Matlab command prompt.
 
-5. Click 'Select ROI' and then double click inside the white rectangle that appears in the summary plot window at the bottom right of the GUI. The 'Select ROI' button should go green.
+4. Once the GUI has opened, click the 'Post process' button. 
 
-6. Type '1' in the 'Start' box and '11' in the 'End' box. Both should go green.
+5. Navigate to the folder ```/MIRRORS/example/data``` and click 'Open'. 
 
-7. Check that the tickboxes and radiobuttons match those in ```/MIRRORS/example/data/test_1/test_1.png```.
+6. Click 'Select ROI' and then double click inside the white rectangle that appears in the summary plot window at the bottom right of the GUI. The 'Select ROI' button should go green.
 
-8. Click 'Process'. Once processing is complete, the GUI window should look like ```/MIRRORS/example/data/test_1/test_1.png```.
+7. Type '1' in the 'Start' box and '11' in the 'End' box. Both should go green.
 
-9. A new folder should appear in ```/MIRRORS/example/data``` of the form ```MIRRORS_output_xx_xxx_xxx_xx_xx_xx``` where the x's denote the date and time. Inside that folder should be 13 files, 11 of the form ```example_xxx_map.txt``` where xxx is 001 to 011, 1 called ```data_SUMMARY.txt``` and 1 called ```data_VIDEO.avi```.
+8. Check that the tickboxes and radiobuttons match those in ```/MIRRORS/example/data/test_1/test_1.png```.
 
-10. To check the output of your installation against the benchmark data provided in the software, type the following commands in the Matlab command line (this assumes you are in the folder ```MIRRORS```:
+9. Click 'Process'. Once processing is complete, the GUI window should look like ```/MIRRORS/example/data/test_1/test_1.png```.
+
+10. A new folder should appear in ```/MIRRORS/example/data``` of the form ```MIRRORS_output_xx_xxx_xxx_xx_xx_xx``` where the x's denote the date and time. Inside that folder should be 13 files, 11 of the form ```example_xxx_map.txt``` where xxx is 001 to 011, 1 called ```data_SUMMARY.txt``` and 1 called ```data_VIDEO.avi```.
+
+11. To check the output of your installation against the benchmark data provided in the software, type the following commands in the Matlab command line (this assumes you are in the folder ```MIRRORS```:
 
 ```
 new = textread('example/data/MIRRORS_output_xx_xxx_xxx_xx_xx_xx/data_SUMMARY.txt');
@@ -86,24 +103,22 @@ The resulting output should look like this:
 ```
 difference =
 
-   1.0e+03 *
-
-         0    1.0511         0   -0.0000   -0.0000       NaN
-         0    1.0511   -0.0020   -0.0000   -0.0000   -0.0000
-         0    1.0511   -0.0040   -0.0000   -0.0000   -0.0000
-         0    1.0511   -0.0060   -0.0000   -0.0000   -0.0000
-         0    1.0511   -0.0100   -0.0000   -0.0000    0.0000
-         0    1.0511   -0.0120   -0.0000   -0.0000   -0.0000
-         0    1.0511   -0.0140   -0.0000   -0.0000   -0.0000
-         0    1.0511   -0.0160   -0.0000   -0.0000    0.0000
-         0    1.0511   -0.0200   -0.0000   -0.0000   -0.0000
-         0    1.0511   -0.0220   -0.0000         0   -0.0000
-         0    1.0511   -0.0230   -0.0000         0   -0.0000
+         0    0.0016         0         0         0         0         0       NaN
+         0    0.0016         0         0         0         0         0         0
+         0    0.0016         0         0         0         0         0         0
+         0    0.0016         0         0         0         0         0         0
+         0    0.0040  206.0000         0         0         0         0         0
+         0    0.0040  206.0000         0         0         0         0         0
+         0    0.0040  206.0000         0         0         0         0         0
+         0    0.0040  206.0000         0         0         0         0         0
+         0    0.0040  206.0000         0         0         0         0         0
+         0    0.0040  206.0000         0         0         0         0         0
+         0    0.0040  206.0000         0         0         0         0         0
 ```
 
 The differences in column 2 and 3 simply reflect the fact that when downloading files from the internet, their modification date is set as the download time, rather than the time they were acquired. However, this is not a problem with MIRRORS and can be ignored. 
 
-10. Repeat steps 6-9 for each of the 8 tests. If the resulting output looks like that in step 9 for every test, then the software is working correctly. Note that the image difference metric and temperature history (top middle) plots will not look correct because of the issue with modification dates noted in 9. Again this can be ignored.
+10. Repeat steps 6-9 for each of the 4 tests. If the resulting output looks like that in step 9 for every test, then the software is working correctly. Note that the image difference metric and temperature history (top middle) plots will not look correct because of the issue with modification dates noted in 9. Again this can be ignored.
 
 ### Hardware specific code edits
 
