@@ -1,5 +1,5 @@
-function [T,E,epsilon,T_max,E_max,U_max,m_max,C_max,pr,pc,sb,nw]...
-    = mapper(cal_a,cal_b,cal_c,cal_d,d,a,c,b,handles, filepath)
+function [T,E_T,E_E,epsilon,T_max,E_T_max,E_E_max,U_max,m_max,C_max,pr,...
+    pc,sb,nw] = mapper(cal_a,cal_b,cal_c,cal_d,d,a,c,b,handles,filepath)
 %--------------------------------------------------------------------------
 % Function MAPPER
 %--------------------------------------------------------------------------
@@ -59,10 +59,11 @@ function [T,E,epsilon,T_max,E_max,U_max,m_max,C_max,pr,pc,sb,nw]...
 %           handles = data structure containing information on graphics
 %           elements within the GUI.
 
-%   OUTPUTS: T,E,epsilon = computed maps of temperature, error and
-%            emissivity
+%   OUTPUTS: T,E_T,E_E,epsilon = computed maps of temperature, temperature 
+%            error, emissivity error and emissivity
 
-%            T_max,E_max = peak temperature and associated error
+%            T_max,E_T_max,E_E_max = peak temperature and associated error
+%            in temperature and emissivity
 
 %            U_max = array of normalised intensities used to compute the
 %            peak temperature pixel
@@ -155,7 +156,7 @@ image_info = imfinfo(char(filepath));
 sl = 2^image_info.BitDepth*.99;
 
 % Pre-allocate arrays with NaN
-[T,E,epsilon,etemp,slope,intercept] = deal(NaN(length(sb)));
+[T,E_T,E_E,epsilon,t_error,slope,intercept] = deal(NaN(length(sb)));
 
 % Loop over ROI to determine temperature and emissivity at each pixel
 % Bin in x
@@ -188,10 +189,12 @@ for m=bw:length(a)-bw
             % Determine emissivity from fit
             epsilon(m-bhw,n-bhw)=wien(1);
             
-            % Determine E from fit
-            etemp(m-bhw,n-bhw)=-1/(bint(2));
-            E(m-bhw,n-bhw)=(abs(T(m-bhw,n-bhw)...
-                -etemp(m-bhw,n-bhw)));
+            % Determine error in temperature from fit
+            t_error(m-bhw,n-bhw)=-1/(bint(2));
+            E_T(m-bhw,n-bhw)=(abs(T(m-bhw,n-bhw)-t_error(m-bhw,n-bhw)));
+            
+            % Determine error in emissivity from fit
+            E_E(m-bhw,n-bhw)=(abs(epsilon(m-bhw,n-bhw)-bint(1)));
             
             % Extract fitting parameters
             slope(m-bhw,n-bhw)=wien(2);
@@ -210,8 +213,8 @@ end
 % http://doi.org/10.1016/j.pepi.2003.09.019
 if get(handles.checkbox2,'Value') == 1
     [~, p] = max(sb(:));
-    [pr, pc] = ind2sub(size(E),p);
-    Ex = E - E(pr,pc);
+    [pr, pc] = ind2sub(size(E_T),p);
+    Ex = E_T - E_T(pr,pc);
     T = T - ((-0.0216.*(Ex.*Ex))+(17.882.*Ex));
 end
 
@@ -224,8 +227,8 @@ if get(handles.radiobutton1,'value') == 1
 elseif get(handles.radiobutton2,'value') == 1
     
     % Find min E point
-    E(E==0)=NaN;
-    [~, p] = min(E(:));
+    E_T(E_T==0)=NaN;
+    [~, p] = min(E_T(:));
     
 elseif get(handles.radiobutton3,'Value') == 1
     
@@ -253,11 +256,12 @@ elseif get(handles.radiobutton7,'Value') == 1
     
     % Extract fitting parameters
     m_max = wien(2);
-    C_max = wien(1);
+    C_max = real(wien(1));
     
     % Find average T within top 10 percentile intensity contour, and
-    % associated stamdard error
-    [T_max,E_max] = deal(nanmean(T(sb>cut)),std(T(sb>cut))/sqrt(points));
+    % associated standard error
+    [T_max,E_T_max,E_E_max] = deal(nanmean(T(sb>cut)),...
+        std(T(sb>cut))/sqrt(points),std(intercept(sb>cut))/sqrt(points));
     
     % Determine indices of max intensity peak and pass to variables pr
     % and pc so that peak position / cross sections can be plotted
@@ -272,11 +276,12 @@ if get(handles.radiobutton7,'Value') ~= 1
     
     % Determine indices of selected peak and pass to variables pr and pc so
     % that peak position / cross sections can be plotted
-    [pr, pc] = ind2sub(size(E),p);
+    [pr, pc] = ind2sub(size(E_T),p);
     
     % Output parameters of chosen point
-    [T_max,E_max,m_max,C_max] = deal(nanmean(T(p)),nanmean(E(p)),...
-        nanmean(slope(p)), nanmean(intercept(p)));    
+    [T_max,E_T_max,E_E_max,m_max,C_max] = deal(nanmean(T(p)),...
+        nanmean(E_T(p)),nanmean(E_E(p)),nanmean(slope(p)),...
+        nanmean(intercept(p)));    
     
     % Fix to the edge if within 4 pixels of the edge, to prevent problems
     % with determining U_max

@@ -69,8 +69,8 @@ fl = eval(get(handles.edit2,'string'));
 %--------------------------------------------------------------------------
 % Gets list of positions of good data in the folder, filenumbers of those
 % data and the path to the folder
-filenumber = getappdata(0,'filenumber');
-upath = getappdata(0,'upath');
+filenumber = getappdata(0,'filenumber')
+upath = getappdata(0,'upath')
 
 
 %--------------------------------------------------------------------------
@@ -111,6 +111,7 @@ cal_d=cal_d(y-w+dya-4:y+w+dya+4,x-w+dxa-4:x+w+dxa+4);
 savename = strcat('MIRRORS_output_',regexprep(datestr(clock),...
     ' |-|:','_'));
 mkdir(upath,savename);
+setappdata(0,'savename',savename);
 
 % Extract parent folder name
 expname = strsplit(upath,{'/','\'});

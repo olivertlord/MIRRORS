@@ -1,6 +1,6 @@
-function [] = data_plot(handles,nw,T_max,E_max,U_max,m_max,C_max,i,...
-    filenumber,raw,timevector,elapsedSec,T_dif_metric,T,dx,dy,microns,...
-    progress,T_dif,E,Clim_min,Clim_max,sb,epsilon,c1)
+function [] = data_plot(handles,nw,T_max,E_T_max,E_E_max,U_max,m_max,...
+    C_max,i,filenumber,raw,timevector,elapsedSec,T_dif_metric,T,dx,dy,...
+    progress,T_dif,E_T,Clim_min,Clim_max,sb,epsilon,c1)
 %--------------------------------------------------------------------------
 % Function DATA_PLOT
 %--------------------------------------------------------------------------
@@ -34,13 +34,15 @@ function [] = data_plot(handles,nw,T_max,E_max,U_max,m_max,C_max,i,...
 %           nw = array of normalised wavelengths computed for the four
 %           filter wavelngths used in Bristol.
 
-%           T_max,E_max = peak temperature and associated error
+%           T_max,E_T_max = peak temperature and associated error
+
+%           E_E_max = error in the emissivity
 
 %           U_max = array of normalised intensities used to compute the
 %           peak temperature pixel
 
-%           m_max,c_max = gradient and y-intercept of the Wien fit at the
-%           peak temperature pixel
+%           m_max,c_max = gradient and y-intercept (emissivity) of the Wien
+%           fit at the peak temperature pixel
 
 %           i = the current position within filenumber
 
@@ -66,14 +68,12 @@ function [] = data_plot(handles,nw,T_max,E_max,U_max,m_max,C_max,i,...
 
 %           T_dif = difference map
 
-%           E = computed error map
+%           E_T = computed temperature error map
 
 %           Clim_min,Clim_max = minimum and maximum colour limits for
 %           differnece map
 
 %           sb = smoothed form of subframe b for contouring
-
-%           epsilon = computed emissivity map
 
 %           c1 = flag; only plot output data if == 1. Speeds up plotting
 %           during initial data checking when user presses the post
@@ -86,6 +86,10 @@ function [] = data_plot(handles,nw,T_max,E_max,U_max,m_max,C_max,i,...
 % Close all open files
 fclose('all');
 
+%--------------------------------------------------------------------------
+% Pixel to micron conversion
+microns = linspace(-((length(sb)/2)*.18),((length(sb)/2)*.18),...
+    (((length(sb)/2)*2)));
 
 %--------------------------------------------------------------------------
 % SUMMARY PLOT: raw image data
@@ -125,8 +129,6 @@ axes(handles.axes2)
 cla
 pbaspect([1 1 1])
 
-size(nw)
-size(U_max)
 plot(nw(:,2),U_max,'bO','LineWidth',1,'MarkerEdgeColor','b',...
     'MarkerSize',10);
 
@@ -134,13 +136,13 @@ plot(nw(:,2),U_max,'bO','LineWidth',1,'MarkerEdgeColor','b',...
 xlabel('Normalised wavelength', 'FontSize', 16);
 ylabel('Normalised intensity', 'FontSize', 16);
 title((strcat({'Peak temperature: '},(num2str(round(T_max(end)))),...
-    ' +/- ',(num2str(round(E_max(end)))))),'FontSize',18);
+    ' +/- ',(num2str(round(E_T_max(end)))))),'FontSize',18);
 xlim([min(nw(:,2))-0.02*max(nw(:,2)) max(nw(:,2))+0.02*max(nw(:,2))])
 
 % Overlay linear fit to data
 hold on
 xline = linspace(min(nw(:,2)),max(nw(:,2)),100);
-yline = polyval([m_max,C_max],xline);
+yline = polyval([m_max,C_max(end)],xline);
 plot(xline,yline,'-r')
 hold off
 pbaspect([1 1 1])
@@ -152,7 +154,7 @@ axes(handles.axes3)
 cla
 pbaspect([1 1 1])
 
-errorbar(elapsedSec,T_max,E_max,'--bO','LineWidth',1,'MarkerEdgeColor'...
+errorbar(elapsedSec,T_max,E_T_max,'--bO','LineWidth',1,'MarkerEdgeColor'...
     ,'b','MarkerFaceColor','b','MarkerSize',10);
 
 % Set axes labels and plot title
@@ -182,23 +184,48 @@ if get(handles.radiobutton4,'Value') == 1
     
 % Temperature cross Sections
 elseif get(handles.radiobutton5,'Value') == 1
-    plot(microns,T(dx,(1:length(T))),'r',microns,T(1:length(T),dy),'g');
+    cla
     
+    % centre lines on middle of hotspot
+    plot(microns,T(dx,(1:length(T))),'r',microns,T(1:length(T),dy),'g');
+
     % Set axes labels and plot title
     xlabel('Distance (microns)', 'FontSize', 16);
     ylabel('Temperature (K)', 'FontSize', 16);
     title('Temperature Cross Sections','FontSize',18);
-    legend('horizontal','vertical');
+    legend('horizontal','vertical','location','northwest');
     
 % Emissivity vs Temperature
 elseif get(handles.radiobutton6,'Value') == 1
-    plot(T(:),epsilon(:),'bO','LineWidth',1,'MarkerEdgeColor','b',...
-        'MarkerFaceColor','b','MarkerSize',2);
+    
+    % centre lines on middle of hotspot
+    plot(epsilon(1:length(T),dy),T(1:length(T),dy),...
+        'go-','MarkerFaceColor','g');
+    hold on
+    plot(epsilon(dx,(1:length(T))),T(dx,(1:length(T))),...
+        'ro-','MarkerFaceColor','r')
+    hold off
     
     % Set axes labels and plot title
-    xlabel('Temperature (K)', 'FontSize', 16);
-    ylabel('Emissivity', 'FontSize', 16);
+    ylabel('Temperature (K)', 'FontSize', 16);
+    xlabel('Emissivity', 'FontSize', 16);
     title('Emissivity vs Temperature','FontSize',18);
+    legend('horizontal','vertical','location','northwest');
+    xlim('auto');
+
+% Emissivity History
+elseif get(handles.radiobutton8,'Value') == 1
+    cla
+
+    errorbar(elapsedSec,C_max,E_E_max,'--bO','LineWidth',1,...
+        'MarkerEdgeColor','b','MarkerFaceColor','b','MarkerSize',10);
+
+    % Set axes labels and plot title
+    xlabel('Elapsed Time (s)', 'FontSize', 16);
+    ylabel('Emissivity (nm^5/Jm)', 'FontSize', 16);
+    title('Peak Emissivity History','Fontsize',18);
+    xlim([min(elapsedSec) max(elapsedSec)+1])
+
 end
 pbaspect([1 1 1])
 
@@ -217,8 +244,6 @@ if ~isnan(U_max)
     colorbar('location','NorthOutside');
     set(gca, 'Position', originalSize);
     hold on
-    size(sb)
-    size(microns)
     contour(microns,microns,sb,10,'k');
     plot(microns(dy),microns(dx),'ws','LineWidth',2,'MarkerSize',10,...
         'MarkerEdgeColor','w','MarkerFaceColor','w')
@@ -238,7 +263,7 @@ axes(handles.axes6)
 cla
 
 if ~isnan(U_max)
-    imagesc(microns,microns,E,[(min(E(:))) (max(E(:)))]);
+    imagesc(microns,microns,E_T,[(min(E_T(:))) (max(E_T(:)))]);
 
     % add colorbar and intensity contour
     originalSize = get(gca, 'Position');

@@ -1,5 +1,5 @@
-function [result,timevector] = data_output(dir_content,i,c1,T_max,E_max,...
-    T_dif_metric,T,E,epsilon,T_dif,upath,savename)
+function [result,timevector] = data_output(dir_content,i,c1,T_max,...
+    E_T_max,C_max,E_E_max,T_dif_metric,T,E_T,epsilon,T_dif,upath,savename)
 %--------------------------------------------------------------------------
 % Function DATA_OUTPUT
 %--------------------------------------------------------------------------
@@ -80,7 +80,8 @@ elapsedSec = round(timeSec-timeSec_0);
 
 %--------------------------------------------------------------------------
 % Concatenate output array
-result = [acq,timestamp,elapsedSec,T_max,E_max,T_dif_metric];
+result = [acq,timestamp,elapsedSec,T_max,E_T_max,C_max,E_E_max,...
+    T_dif_metric];
 
 
 %--------------------------------------------------------------------------
@@ -88,7 +89,7 @@ result = [acq,timestamp,elapsedSec,T_max,E_max,T_dif_metric];
 [x1,y1] = meshgrid(1:length(T),1:length(T));
 
 % Concatenate output array
-xyz = real([x1(:) y1(:) T(:) E(:) epsilon(:) T_dif(:)]); %#ok<NASGU>
+xyz = real([x1(:) y1(:) T(:) E_T(:) epsilon(:) T_dif(:)]); %#ok<NASGU>
 
 % Creates unique file name for map data and saves it
 map=char(strcat(upath,'/',savename,'/',regexprep(dir_content(i)...

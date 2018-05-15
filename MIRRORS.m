@@ -56,7 +56,7 @@ function varargout = MIRRORS(varargin)
 
 % Edit the above text to modify the response to help MIRRORS
 
-% Last Modified by GUIDE v2.5 27-Feb-2018 15:13:36
+% Last Modified by GUIDE v2.5 15-May-2018 15:01:02
 
 
 %--------------------------------------------------------------------------
@@ -120,6 +120,9 @@ guidata(hObject, handles);
 plots = [handles.axes2 handles.axes3 handles.axes4 handles.axes5...
     handles.axes6 handles.axes7];
 
+% Hide EXAMPLE DATA button
+%set(handles.pushbutton5,'visible','off');
+
 % Sets aspect ratio for all axes within the GUI to 1:1
 for i=1:6
    axes(plots(i)); %#ok<LAXES>
@@ -165,8 +168,6 @@ function checkbox2_Callback(~, ~, ~) %#ok<DEFNU>
 %--------------------------------------------------------------------------
 % --- Executes when user presses LIVE button
 function pushbutton1_Callback(~, ~, handles) %#ok<DEFNU>
-
-a = getappdata(0,'auto_flag')
 
 if getappdata(0,'auto_flag') == 1
     
@@ -273,14 +274,14 @@ else
             b = b(y-w+bya-4:y+w+bya+4,x-w+bxa-4:x+w+bxa+4);
             c = c(y-w+cya-4:y+w+cya+4,x-w+cxa-4:x+w+cxa+4);
             d = d(y-w+dya-4:y+w+dya+4,x-w+dxa-4:x+w+dxa+4);         
-
+            
             % Calls mapper function to calculate temperature, error and
             % emissivity maps, and also returns maximum T and associated
             % errors, intensities, wien slope and intercept and map indices
             % and smoothed b quadrant for plotting countours later
-            [T,E,epsilon,T_max(c1),E_max(c1),U_max,m_max,C_max,dx,dy,sb,...
-                nw] = mapper(cal_a,cal_b,cal_c,cal_d,d,a,c,b,handles,filepath);...
-                %#ok<AGROW>
+            [T,E_T,~,epsilon,T_max(c1),E_T_max(c1),E_E_max(c1),U_max,...
+                m_max,C_max(c1),dx,dy,sb,nw] = mapper(cal_a,cal_b,cal_c,...
+                cal_d,d,a,c,b,handles,filepath); %#ok<AGROW>
             
             % Calls difference function to calculate the difference map and
             % associated metric.
@@ -289,13 +290,13 @@ else
             
             % Create concatenated summary output array and save to
             % workspace and save current map data to .txt file
-            [result(c1,:),timevector] = data_output(dir_content(end),...
-                1,c1,T_max(c1),E_max(c1),T_dif_metric(c1),T,E,epsilon,...
-                T_dif,upath,savename); %#ok<AGROW>
+            [result(c1,:),timevector] = data_output(dir_content(c1),...
+                1,c1,T_max(c1),E_T_max(c1),C_max(c1),E_E_max(c1),...
+                T_dif_metric(c1),T,E_T,epsilon,T_dif,upath,savename); %#ok<AGROW>
             assignin('base', 'result', result);
             
             % Extracts filenumber from filename
-            filenumber = extract_filenumber(dir_content(end).name);
+            filenumber(c1) = extract_filenumber(dir_content(end).name);
             
             % Calculates job progress
             progress = 'N/A';
@@ -308,10 +309,9 @@ else
                 = deal(0,0.001); %#ok<AGROW>
             
             % Calls data_plot function
-            data_plot(handles,nw,T_max,E_max,U_max,m_max,C_max,1,...
-                filenumber,raw,timevector,result(:,3),T_dif_metric,T,dx,...
-                dy,microns,progress,T_dif,E,Clim_min,Clim_max,sb,epsilon...
-                ,1);
+            data_plot(handles,nw,T_max,E_T_max,E_E_max,U_max,m_max,C_max,c1,...
+                filenumber,raw,timevector,result(:,3),T_dif_metric,T,...
+                dx,dy,progress,T_dif,E_T,Clim_min,Clim_max,sb,epsilon,1);
             
             % Writes current GUI frame to movie
             movegui(gcf,'center')
@@ -423,9 +423,10 @@ for i=1:total
             filenumber(c1) = extract_filenumber(cell2mat(filenames(i)))...
                ; %#ok<AGROW>
             listpos(c1)=i;
-            data_plot(handles,[0 1],[NaN NaN],[NaN NaN],NaN,NaN,NaN,c1,...
-                filenumber,raw,0,[0 1],NaN,[1 2],1,1,[0 1],0,[0 1],[1 2]...
-                ,0,1,[0,1;0,1],NaN,c1)
+            data_plot(handles,[0 1],[NaN NaN],[NaN NaN],[NaN NaN],NaN,...
+                NaN,NaN,c1,filenumber,raw,0,[0 1],NaN,[1 2],1,1,[0 1],0,...
+                [0 1],[1 2],0,1,[0,1;0,1],[NaN,NaN])
+            
             c1 = c1+1;
         end
     % Assigns each file in sequence to filenumber array if the weakest of
@@ -438,9 +439,9 @@ for i=1:total
             filenumber(c1) = extract_filenumber(cell2mat(filenames(i)))...
                 ; %#ok<AGROW>  
             listpos(c1)=i;
-            data_plot(handles,[0 1],[NaN NaN],[NaN NaN],NaN,NaN,NaN,c1,...
-                filenumber,raw,0,[0 1],NaN,[1 2],1,1,[0,1],0,[0 1],[1 2]...
-                ,0,1,[0,1;0,1],NaN,c1)
+            data_plot(handles,[0 1],[NaN NaN],[NaN NaN],[NaN NaN],NaN,...
+                NaN,NaN,c1,filenumber,raw,0,[0 1],NaN,[1 2],1,1,[0 1],0,...
+                [0 1],[1 2],0,1,[0,1;0,1],[NaN,NaN],c1)
             c1 = c1+1;
         end
     end
@@ -621,8 +622,9 @@ for i=start_file:end_file
     % maps, and also returns maximum T and associated errors, intensities,
     % wien slope and intercept and map indices and smoothed b quadrant for
     % plotting countours later
-    [T,E,epsilon,T_max(c1),E_max(c1),U_max,m_max,C_max,dx,dy,sb,nw]...
-        = mapper(cal_a,cal_b,cal_c,cal_d,d,a,c,b,handles,filepath); %#ok<AGROW>
+    [T,E_T,~,epsilon,T_max(c1),E_T_max(c1),E_E_max(c1),U_max,m_max,...
+        C_max(c1),dx,dy,sb,nw] = mapper(cal_a,cal_b,cal_c,cal_d,d,a,c,b,...
+        handles,filepath); %#ok<AGROW>
     
     % Calls difference function to calculate the difference map and
     % associated metric.
@@ -631,17 +633,13 @@ for i=start_file:end_file
     
     % Create concatenated summary output array and save to workspace and
     % save current map data to .txt file
-    [result(c1,:),timevector] = data_output(dir_content,i,c1,T_max(c1),...
-        E_max(c1),T_dif_metric(c1),T,E,epsilon,T_dif,upath,savename);...
-        %#ok<AGROW>
+    [result(c1,:),timevector] = data_output(dir_content(listpos(i)),...
+        1,c1,T_max(c1),E_T_max(c1),C_max(c1),E_E_max(c1),...
+        T_dif_metric(c1),T,E_T,epsilon,T_dif,upath,savename); %#ok<AGROW>
     assignin('base', 'result', result);
     
     % Calculates job progress
     progress = ceil(c1/(fl-fi+1)*100);
-
-    % Pixel to micron conversion
-    microns = linspace(-((length(sb)/2)*.18),((length(sb)/2)*.18),...
-        (((length(sb)/2)*2)));
     
     % Set Colour Limits for difference plot such that it is only extended
     % but never reduced
@@ -651,13 +649,14 @@ for i=start_file:end_file
         = deal(0,0.001); %#ok<AGROW>
 
     % Calls data_plot function
-    data_plot(handles,nw,T_max,E_max,U_max,m_max,C_max,i,...
+    data_plot(handles,nw,T_max,E_T_max,E_E_max,U_max,m_max,C_max,i,...
         filenumber,raw,timevector,result(:,3),T_dif_metric,T,dx,dy,...
-        microns,progress,T_dif,E,Clim_min,Clim_max,sb,epsilon,1);
+        progress,T_dif,E_T,Clim_min,Clim_max,sb,epsilon,1);
     
     % Writes current GUI frame to movie
     movegui(gcf,'center')
     frame=getframe(gcf);
+    setappdata(0,'frame',frame);
     writeVideo(writerObj,frame);
     
     % Increment counter c1
@@ -684,6 +683,123 @@ slider_val = get(handles.slider1,'Value')*100;
 %Set textbox to current slider value
 set(handles.text12,'String',strcat(num2str(round(slider_val)),{' '},'%'));
 
+%--------------------------------------------------------------------------
 % --- Executes on button press in Fit saturated images chackbox.
 function checkbox1_Callback(~, ~, handles) %#ok<DEFNU>
 pushbutton2_Callback([], [], handles)
+
+%--------------------------------------------------------------------------
+% --- Executes when EXAMPLE DATA button is pushed
+function pushbutton5_Callback(~, ~, handles)
+
+% --- PREFLIGHT ALTERATIONS -----------------------------------------------
+
+% Change tc.tiff to tc_example.tiff
+movefile('./calibration/tc.tiff','./calibration/tc_temp.tiff')
+movefile('./example/tc_example.tiff','./calibration/tc.tiff')
+
+% Fix subframe position
+setappdata(0,'subframe',[474 28 200 200])
+
+% Fix file range
+set(handles.edit1,'string','1')
+set(handles.edit2,'string','11')
+
+% Fix filenumber list and upath
+setappdata(0,'filenumber',[1 2 3 4 5 6 7 8 9 10 11]);
+setappdata(0,'upath','./example/data');
+
+% Set dir_content and listpos variables
+dir_content = dir('./example/data');
+assignin('base','dir_content',dir_content)
+setappdata(0,'dir_content',dir_content)
+listpos = [length(dir_content)-10:1:length(dir_content)];
+setappdata(0,'listpos',listpos)
+
+% Update timestamps by reading a re-writing a single byte
+for i = 1:11
+    current = dir_content(listpos(i)).name
+    fid = fopen(strcat('./example/data/',current),'r+');
+    byte = fread(fid, 1);
+    fseek(fid, 0, 'bof');
+    fwrite(fid, byte);
+    fclose(fid);
+    pause(1);
+end
+
+% Remove existing folders - DANGEROUS
+% isub = [dir_content(:).isdir];
+% old_folders = {dir_content(isub).name}';
+% old_folders(ismember(old_folders,{'.','..'})) = [];
+% rmdir(strcat('./example/data/',old_folders{:}),'s')
+
+% --- TEST 1 --------------------------------------------------------------
+
+% Set user options
+set(handles.slider1,'Value',0.25)
+set(handles.checkbox1,'Value',1)
+set(handles.checkbox2,'Value',1)
+set(handles.radiobutton1,'Value',1)
+set(handles.radiobutton4,'Value',1)
+
+% Run PROCESS button
+pushbutton4_Callback([], [], handles)
+
+% Get folder name of output directory
+savename = getappdata(0,'savename');
+
+% Change output folder name to test_1
+movefile(strcat('./example/data/',savename),strcat('./example/data/','test_1'))
+
+% Get last frame of GUI window
+frame = getappdata(0,'frame');
+imwrite(frame.cdata,'./example/data/test_1/test_1.png')
+
+% --- TEST 2 --------------------------------------------------------------
+
+set(handles.radiobutton2,'Value',1)
+set(handles.radiobutton5,'Value',1)
+
+pushbutton4_Callback([], [], handles)
+
+savename = getappdata(0,'savename');
+
+movefile(strcat('./example/data/',savename),strcat('./example/data/','test_2'))
+
+frame = getappdata(0,'frame');
+imwrite(frame.cdata,'./example/data/test_2/test_2.png')
+
+% --- TEST 3 --------------------------------------------------------------
+
+set(handles.radiobutton3,'Value',1)
+set(handles.radiobutton6,'Value',1)
+
+pushbutton4_Callback([], [], handles)
+
+savename = getappdata(0,'savename');
+
+movefile(strcat('./example/data/',savename),strcat('./example/data/','test_3'))
+
+frame = getappdata(0,'frame');
+imwrite(frame.cdata,'./example/data/test_3/test_3.png')
+
+% --- TEST 4 --------------------------------------------------------------
+
+set(handles.radiobutton7,'Value',1)
+set(handles.radiobutton8,'Value',1)
+
+pushbutton4_Callback([], [], handles)
+
+savename = getappdata(0,'savename');
+
+movefile(strcat('./example/data/',savename),strcat('./example/data/','test_4'))
+
+frame = getappdata(0,'frame');
+imwrite(frame.cdata,'./example/data/test_4/test_4.png')
+
+% --- POSTFLIGHT ALTERATIONS ----------------------------------------------
+
+% Change tc_example.tiff back to tc.tiff
+movefile('./calibration/tc.tiff','./example/tc_example.tiff')
+movefile('./calibration/tc_temp.tiff','./calibration/tc.tiff')
+
