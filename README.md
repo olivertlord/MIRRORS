@@ -56,7 +56,7 @@ To check that MIRRORS is working correctly, a set of example data files are prov
 
 To test your insatallation:
 
-1. Copy ```MIRRORS/example/tc_example.tiff``` to ```NIRRORS/calibration``` and rename it to ```tc.tiff```.
+1. Copy ```MIRRORS/example/tc_example.tiff``` to ```NIRRORS/calibration``` and rename it to ```tc.tiff```. 
 
 2. Run MIRRORS by typing ```MIRRORS``` at the Matlab command prompt.
 
@@ -86,24 +86,22 @@ The resulting output should look like this:
 ```
 difference =
 
-   1.0e+03 *
-
-         0    1.0511         0   -0.0000   -0.0000       NaN
-         0    1.0511   -0.0020   -0.0000   -0.0000   -0.0000
-         0    1.0511   -0.0040   -0.0000   -0.0000   -0.0000
-         0    1.0511   -0.0060   -0.0000   -0.0000   -0.0000
-         0    1.0511   -0.0100   -0.0000   -0.0000    0.0000
-         0    1.0511   -0.0120   -0.0000   -0.0000   -0.0000
-         0    1.0511   -0.0140   -0.0000   -0.0000   -0.0000
-         0    1.0511   -0.0160   -0.0000   -0.0000    0.0000
-         0    1.0511   -0.0200   -0.0000   -0.0000   -0.0000
-         0    1.0511   -0.0220   -0.0000         0   -0.0000
-         0    1.0511   -0.0230   -0.0000         0   -0.0000
+         0    0.0016         0         0         0         0         0       NaN
+         0    0.0016         0         0         0         0         0         0
+         0    0.0016         0         0         0         0         0         0
+         0    0.0016         0         0         0         0         0         0
+         0    0.0040  206.0000         0         0         0         0         0
+         0    0.0040  206.0000         0         0         0         0         0
+         0    0.0040  206.0000         0         0         0         0         0
+         0    0.0040  206.0000         0         0         0         0         0
+         0    0.0040  206.0000         0         0         0         0         0
+         0    0.0040  206.0000         0         0         0         0         0
+         0    0.0040  206.0000         0         0         0         0         0
 ```
 
-The differences in column 2 and 3 simply reflect the fact that when downloading files from the internet, their modification date is set as the download time, rather than the time they were acquired. However, this is not a problem with MIRRORS and can be ignored. 
+The differences in column 2 and 3 simply reflect the fact that when downloading files from the internet, their modification date is set as the download time, rather than the time they were acquired. MIRRORS automatically resets these timestamps when you run the test routine so there is at least 1 second between each. This allows the data to be plotted as a function of time, but the times will not match those in the example output. This is not a problem with MIRRORS and can be ignored. 
 
-10. Repeat steps 6-9 for each of the 8 tests. If the resulting output looks like that in step 9 for every test, then the software is working correctly. Note that the image difference metric and temperature history (top middle) plots will not look correct because of the issue with modification dates noted in 9. Again this can be ignored.
+11. Repeat steps 7-10 for each of the 4 tests. If the resulting output looks like that in step 10 for every test, then the software is working correctly.
 
 ### Hardware specific code edits
 
