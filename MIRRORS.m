@@ -121,7 +121,7 @@ plots = [handles.axes2 handles.axes3 handles.axes4 handles.axes5...
     handles.axes6 handles.axes7];
 
 % Hide EXAMPLE DATA button
-%set(handles.pushbutton5,'visible','off');
+set(handles.pushbutton5,'visible','on');
 
 % Sets aspect ratio for all axes within the GUI to 1:1
 for i=1:6
@@ -688,6 +688,10 @@ set(handles.text12,'String',strcat(num2str(round(slider_val)),{' '},'%'));
 function checkbox1_Callback(~, ~, handles) %#ok<DEFNU>
 pushbutton2_Callback([], [], handles)
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% DEVELPOPER CODE - DO NOT EDIT BELOW THIS LINE ---------------------------
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 %--------------------------------------------------------------------------
 % --- Executes when EXAMPLE DATA button is pushed
 function pushbutton5_Callback(~, ~, handles)
@@ -709,29 +713,15 @@ set(handles.edit2,'string','11')
 setappdata(0,'filenumber',[1 2 3 4 5 6 7 8 9 10 11]);
 setappdata(0,'upath','./example/data');
 
-% Set dir_content and listpos variables
+% Get current directory content
 dir_content = dir('./example/data');
-assignin('base','dir_content',dir_content)
-setappdata(0,'dir_content',dir_content)
-listpos = [length(dir_content)-10:1:length(dir_content)];
-setappdata(0,'listpos',listpos)
 
-% Update timestamps by reading a re-writing a single byte
-for i = 1:11
-    current = dir_content(listpos(i)).name
-    fid = fopen(strcat('./example/data/',current),'r+');
-    byte = fread(fid, 1);
-    fseek(fid, 0, 'bof');
-    fwrite(fid, byte);
-    fclose(fid);
-    pause(1);
+% Remove existing folders
+for i = 1:length(dir_content) 
+    if dir_content(i).isdir == 1 & dir_content(i).name ~= '.' %#ok<AND2>
+       rmdir(strcat('./example/data/',dir_content(i).name),'s');
+    end
 end
-
-% Remove existing folders - DANGEROUS
-% isub = [dir_content(:).isdir];
-% old_folders = {dir_content(isub).name}';
-% old_folders(ismember(old_folders,{'.','..'})) = [];
-% rmdir(strcat('./example/data/',old_folders{:}),'s')
 
 % --- TEST 1 --------------------------------------------------------------
 
@@ -802,4 +792,3 @@ imwrite(frame.cdata,'./example/data/test_4/test_4.png')
 % Change tc_example.tiff back to tc.tiff
 movefile('./calibration/tc.tiff','./example/tc_example.tiff')
 movefile('./calibration/tc_temp.tiff','./calibration/tc.tiff')
-

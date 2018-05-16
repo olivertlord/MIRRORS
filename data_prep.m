@@ -69,8 +69,8 @@ fl = eval(get(handles.edit2,'string'));
 %--------------------------------------------------------------------------
 % Gets list of positions of good data in the folder, filenumbers of those
 % data and the path to the folder
-filenumber = getappdata(0,'filenumber')
-upath = getappdata(0,'upath')
+filenumber = getappdata(0,'filenumber');
+upath = getappdata(0,'upath');
 
 
 %--------------------------------------------------------------------------
@@ -105,6 +105,39 @@ cal_b=cal_b(y-w+bya-4:y+w+bya+4,x-w+bxa-4:x+w+bxa+4);
 cal_c=cal_c(y-w+cya-4:y+w+cya+4,x-w+cxa-4:x+w+cxa+4);
 cal_d=cal_d(y-w+dya-4:y+w+dya+4,x-w+dxa-4:x+w+dxa+4);
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% DEVELPOPER CODE - DO NOT EDIT BELOW THIS LINE ---------------------------
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%--------------------------------------------------------------------------
+% Update timestamps by reading and re-writing a single byte when processing
+% example data
+
+if ~isempty(strfind(upath,'MIRRORS/example/data')) == 1
+    
+    % Get new directory content and determine listpos
+    dir_content = dir('./example/data/example*');
+    setappdata(0,'dir_content',dir_content)
+    listpos = length(dir_content)-10:1:length(dir_content)
+    setappdata(0,'listpos',listpos)
+    
+    % Update timestamps by reading and re-writing a single byte
+    for i = 1:length(dir_content)
+        current = dir_content(i).name
+        fid = fopen(strcat('./example/data/',current),'r+');
+        byte = fread(fid, 1);
+        fseek(fid, 0, 'bof');
+        fwrite(fid, byte);
+        pause(1.1);
+        fclose(fid);
+        dir_content(i).date
+    end
+    
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% DEVELPOPER CODE - DO NOT EDIT ABOVE THIS LINE ---------------------------
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %--------------------------------------------------------------------------
 % Create output directory
@@ -123,6 +156,3 @@ videofile = char(strcat(upath,'/',savename,'/',expname(end),'_VIDEO.avi'));
 writerObj = VideoWriter(videofile);
 writerObj.FrameRate = 2;
 open(writerObj);
-
-end
-
