@@ -124,7 +124,7 @@ plots = [handles.axes2 handles.axes3 handles.axes4 handles.axes5...
 set(handles.pushbutton5,'visible','off');
 
 % VERSION NUMBER
-set(handles.text17,'String','1.6.15');
+set(handles.text17,'String','1.6.14');
 
 % Sets aspect ratio for all axes within the GUI to 1:1
 for i=1:6

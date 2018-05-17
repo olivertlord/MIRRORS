@@ -195,34 +195,34 @@ elseif get(handles.radiobutton5,'Value') == 1
     title('Temperature Cross Sections','FontSize',18);
     legend('horizontal','vertical','location','northwest');
     
-% Emissivity vs Temperature
+% Emissivity vs Temperature Cross-sections
 elseif get(handles.radiobutton6,'Value') == 1
     
     % centre lines on middle of hotspot
-    plot(epsilon(1:length(T),dy),T(1:length(T),dy),...
+    plot(T(1:length(T),dy),epsilon(1:length(T),dy),...
         'go-','MarkerFaceColor','g');
     hold on
-    plot(epsilon(dx,(1:length(T))),T(dx,(1:length(T))),...
+    plot(T(dx,(1:length(T))),epsilon(dx,(1:length(T))),...
         'ro-','MarkerFaceColor','r')
     hold off
     
     % Set axes labels and plot title
     ylabel('Temperature (K)', 'FontSize', 16);
-    xlabel('Emissivity', 'FontSize', 16);
+    xlabel('Emissivity (nm^5/Jm)', 'FontSize', 16);
     title('Emissivity vs Temperature','FontSize',18);
     legend('horizontal','vertical','location','northwest');
     xlim('auto');
 
-% Emissivity History
+% Emissivity vs Temperature at the peak
 elseif get(handles.radiobutton8,'Value') == 1
     cla
 
-    errorbar(T_max,C_max,E_E_max,'--bO','LineWidth',1,...
+    errorbar(C_max,T_max,E_E_max,'--bO','LineWidth',1,...
         'MarkerEdgeColor','b','MarkerFaceColor','b','MarkerSize',10);
 
     % Set axes labels and plot title
-    xlabel('Elapsed Time (s)', 'FontSize', 16);
-    ylabel('Emissivity (nm^5/Jm)', 'FontSize', 16);
+    xlabel('Emissivity (nm^5/Jm)', 'FontSize', 16);
+    ylabel('Temperature (K)', 'FontSize', 16);
     title('Emissivity vs. Temperature at peak','Fontsize',18);
     xlim('auto');
 
