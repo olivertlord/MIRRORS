@@ -56,7 +56,7 @@ function varargout = MIRRORS(varargin)
 
 % Edit the above text to modify the response to help MIRRORS
 
-% Last Modified by GUIDE v2.5 15-May-2018 15:01:02
+% Last Modified by GUIDE v2.5 17-May-2018 10:36:06
 
 
 %--------------------------------------------------------------------------
@@ -122,6 +122,9 @@ plots = [handles.axes2 handles.axes3 handles.axes4 handles.axes5...
 
 % Hide EXAMPLE DATA button
 set(handles.pushbutton5,'visible','off');
+
+% VERSION NUMBER
+set(handles.text17,'String','1.6.13');
 
 % Sets aspect ratio for all axes within the GUI to 1:1
 for i=1:6

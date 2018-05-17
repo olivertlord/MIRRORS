@@ -113,27 +113,26 @@ cal_d=cal_d(y-w+dya-4:y+w+dya+4,x-w+dxa-4:x+w+dxa+4);
 % Update timestamps by reading and re-writing a single byte when processing
 % example data
 
-ex_dir=regexprep(upath,'/|\','');
+ex_dir=regexprep(upath,'/|\','')
 
 if ~isempty(strfind(ex_dir,'MIRRORSexampledata')) == 1
     
     % Get new directory content and determine listpos
     dir_content = dir('./example/data/example*');
     setappdata(0,'dir_content',dir_content)
-    listpos = length(dir_content)-10:1:length(dir_content);
+    listpos = length(dir_content)-10:1:length(dir_content)
     setappdata(0,'listpos',listpos)
     
     % Update timestamps by reading and re-writing a single byte
     for i = 1:length(dir_content)
-        current = dir_content(i).name;
+        current = dir_content(i).name
         pause(1)
         fid = fopen(strcat('./example/data/',current),'r+');
         byte = fread(fid, 1);
         fseek(fid, 0, 'bof');
         fwrite(fid, byte);
-        pause(1.1);
         fclose(fid);
-        dir_content(i).date;
+        dir_content(i).date
     end
     
 end
