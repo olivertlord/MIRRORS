@@ -217,14 +217,14 @@ elseif get(handles.radiobutton6,'Value') == 1
 elseif get(handles.radiobutton8,'Value') == 1
     cla
 
-    errorbar(elapsedSec,C_max,E_E_max,'--bO','LineWidth',1,...
+    errorbar(T_max,C_max,E_E_max,'--bO','LineWidth',1,...
         'MarkerEdgeColor','b','MarkerFaceColor','b','MarkerSize',10);
 
     % Set axes labels and plot title
     xlabel('Elapsed Time (s)', 'FontSize', 16);
     ylabel('Emissivity (nm^5/Jm)', 'FontSize', 16);
-    title('Peak Emissivity History','Fontsize',18);
-    xlim([min(elapsedSec) max(elapsedSec)+1])
+    title('Emissivity vs. Temperature at peak','Fontsize',18);
+    xlim('auto');
 
 end
 pbaspect([1 1 1])

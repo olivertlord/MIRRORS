@@ -107,7 +107,7 @@ pixel_width = 9;
 system_mag = 50;
 
 % Numerical aperture of system
-NA = .4;
+NA = .26;
 %//////////////////////////////////////////////////////////////////////////
 
 % Determines normalised wavelengths for the four filters
@@ -176,7 +176,7 @@ for m=bw:length(a)-bw
                 reshape(Jb(m-bhw:m+bhw,n-bhw:n+bhw),1,bsz^2)...
                 reshape(Jc(m-bhw:m+bhw,n-bhw:n+bhw),1,bsz^2)...
                 reshape(Jd(m-bhw:m+bhw,n-bhw:n+bhw),1,bsz^2)]';
-            
+                   
             % Remove an -Inf values
             u(u==-Inf)=NaN;
             

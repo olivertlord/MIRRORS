@@ -124,7 +124,7 @@ plots = [handles.axes2 handles.axes3 handles.axes4 handles.axes5...
 set(handles.pushbutton5,'visible','off');
 
 % VERSION NUMBER
-set(handles.text17,'String','1.6.13');
+set(handles.text17,'String','1.6.15');
 
 % Sets aspect ratio for all axes within the GUI to 1:1
 for i=1:6
@@ -282,7 +282,7 @@ else
             % emissivity maps, and also returns maximum T and associated
             % errors, intensities, wien slope and intercept and map indices
             % and smoothed b quadrant for plotting countours later
-            [T,E_T,~,epsilon,T_max(c1),E_T_max(c1),E_E_max(c1),U_max,...
+            [T,E_T,E_E,epsilon,T_max(c1),E_T_max(c1),E_E_max(c1),U_max,...
                 m_max,C_max(c1),dx,dy,sb,nw] = mapper(cal_a,cal_b,cal_c,...
                 cal_d,d,a,c,b,handles,filepath); %#ok<AGROW>
             
@@ -295,7 +295,7 @@ else
             % workspace and save current map data to .txt file
             [result(c1,:),timevector] = data_output(dir_content(c1),...
                 1,c1,T_max(c1),E_T_max(c1),C_max(c1),E_E_max(c1),...
-                T_dif_metric(c1),T,E_T,epsilon,T_dif,upath,savename); %#ok<AGROW>
+                T_dif_metric(c1),T,E_T,epsilon,E_E,T_dif,upath,savename); %#ok<AGROW>
             assignin('base', 'result', result);
             
             % Extracts filenumber from filename
@@ -568,7 +568,7 @@ setappdata(0,'auto_flag','0');
     writerObj,expname] = data_prep(handles);
 
 % Get list of .TIFF files from appdata
-dir_content = getappdata(0,'dir_content');
+dir_content = getappdata(0,'dir_content')
 
 %Get list of positions in folder of files to be fitted
 listpos = getappdata(0,'listpos');
@@ -583,7 +583,9 @@ c1 = 1;
 % Calculates temperature, error and difference maps and associated output
 % for each file and plots and stores the results.
 for i=start_file:end_file
-
+    i
+    listpos
+    dir_content.name
     % Determines path to unknown file
     filepath = char(strcat(upath,'/',(dir_content(listpos(i)).name)));
     
@@ -625,7 +627,7 @@ for i=start_file:end_file
     % maps, and also returns maximum T and associated errors, intensities,
     % wien slope and intercept and map indices and smoothed b quadrant for
     % plotting countours later
-    [T,E_T,~,epsilon,T_max(c1),E_T_max(c1),E_E_max(c1),U_max,m_max,...
+    [T,E_T,E_E,epsilon,T_max(c1),E_T_max(c1),E_E_max(c1),U_max,m_max,...
         C_max(c1),dx,dy,sb,nw] = mapper(cal_a,cal_b,cal_c,cal_d,d,a,c,b,...
         handles,filepath); %#ok<AGROW>
     
@@ -638,7 +640,7 @@ for i=start_file:end_file
     % save current map data to .txt file
     [result(c1,:),timevector] = data_output(dir_content(listpos(i)),...
         1,c1,T_max(c1),E_T_max(c1),C_max(c1),E_E_max(c1),...
-        T_dif_metric(c1),T,E_T,epsilon,T_dif,upath,savename); %#ok<AGROW>
+        T_dif_metric(c1),T,E_T,epsilon,E_E,T_dif,upath,savename); %#ok<AGROW>
     assignin('base', 'result', result);
     
     % Calculates job progress
@@ -731,7 +733,7 @@ end
 % Set user options
 set(handles.slider1,'Value',0.25)
 set(handles.checkbox1,'Value',1)
-set(handles.checkbox2,'Value',1)
+set(handles.checkbox2,'Value',0)
 set(handles.radiobutton1,'Value',1)
 set(handles.radiobutton4,'Value',1)
 
