@@ -121,7 +121,7 @@ plots = [handles.axes2 handles.axes3 handles.axes4 handles.axes5...
     handles.axes6 handles.axes7];
 
 % Hide EXAMPLE DATA button
-set(handles.pushbutton5,'visible','on');
+set(handles.pushbutton5,'visible','off');
 
 % Sets aspect ratio for all axes within the GUI to 1:1
 for i=1:6
