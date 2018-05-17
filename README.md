@@ -52,7 +52,7 @@ Where ```~/MIRRORS``` is the full path to your MIRRORS directory. Now, next time
 
 ### Testing
 
-To check that MIRRORS is working correctly, a set of example data files are provided, along with screnshots of the MIRRORS GUI after processing and output files containing the epected results. Below are instructions on how to process these files and check that the output matches expectations.
+To check that MIRRORS is working correctly, a set of example data files are provided, along with screnshots of the MIRRORS GUI after processing and output files containing the epected results. Below are instructions on how to process these files and check that the output matches expectations. Note that it is important to complete testing BEFORE making any hardware specific edits to the code (see next section.
 
 To test your insatallation:
 
