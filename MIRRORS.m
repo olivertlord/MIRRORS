@@ -121,7 +121,7 @@ plots = [handles.axes2 handles.axes3 handles.axes4 handles.axes5...
     handles.axes6 handles.axes7];
 
 % Hide EXAMPLE DATA button
-set(handles.pushbutton5,'visible','on');
+set(handles.pushbutton5,'visible','off');
 
 % VERSION NUMBER
 set(handles.text17,'String','1.6.14');
