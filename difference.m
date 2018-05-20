@@ -1,4 +1,4 @@
-function [T_dif,T_dif_metric] = difference(T, sb, c1, background)
+function [T_dif,T_dif_metric] = difference(T, sb, bsz, c1, background)
 %--------------------------------------------------------------------------
 % Function DIFFERENCE
 %--------------------------------------------------------------------------
@@ -59,14 +59,18 @@ if (c1 == 1) || (max(sb(:)) < background*4)
 % melting behavior of tin up to 105 GPa. Physical Review B, 95(5), 054102.
 % http://doi.org/10.1103/PhysRevB.95.054102 (See Supplementary Information)
 else
+    % Calculate start pixel
+    sp = (bsz-1)/2+1;
+    
     % Get previous normalised temperature map
     T0_field = getappdata(0,'T0_field');
     
     % Compute current normalised temperature map
     T1_field = (T - min(T(:)))/(max(T(:)) - min(T(:)));
-    
+    assignin('base','T',T)
+    assignin('base','sb',sb(sp:end-sp,sp:end-sp))
     % Compute current normalised intensity map
-    I1_field = (sb - min(sb(:)))/(max(sb(:)) - min(sb(:)));
+    I1_field = (sb(sp:end-sp,sp:end-sp) - min(sb(:)))/(max(sb(:)) - min(sb(:)));
     
     % Compute intensity weighted difference map
     T_dif = abs(T1_field-T0_field).*I1_field;

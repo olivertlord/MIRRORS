@@ -34,7 +34,6 @@ function [bya,bxa,cya,cxa,dya,dxa] = correlate(a,b,c,d)
 %   OUTPUTS: bya,bxa,cya,cxa,dya,dxa = x and y offsects of b, c and d
 %            relative to a
 
-
 %--------------------------------------------------------------------------
 cc = xcorr2(b,a);
 [~, imax] = max(abs(cc(:)));

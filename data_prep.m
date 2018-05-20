@@ -55,10 +55,9 @@ function [w,x,y,fi,fl,filenumber,upath,cal_a,cal_b,cal_c,...
 %--------------------------------------------------------------------------
 % Calculate center and half-width of subframe
 subframe = getappdata(0,'subframe');
-w = round(subframe(3)/2);
-x = round(subframe(1))+w-384;
+w = 2*floor((subframe(3)/2)/2)+1;
+x = round(subframe(1))+w;
 y = round(subframe(2))+w;
-
 
 %--------------------------------------------------------------------------
 % Get user inputted first and last files to be analysed    
@@ -99,7 +98,7 @@ cal_d = cal(size(cal,1)/2+1:size(cal,1),size(cal,2)/2+1:size(cal,2),:);
 % Returns spatially correlated calibration subframes
 [bya,bxa,cya,cxa,dya,dxa] = correlate(cal_a,cal_b,cal_c,cal_d);
 
-% Shifts quadrants based on offsets and pads by 4 pixels
+% Shifts quadrants based on offsets and pads by 10 pixels
 cal_a=cal_a(y-w-4:y+w+4,x-w-4:x+w+4);
 cal_b=cal_b(y-w+bya-4:y+w+bya+4,x-w+bxa-4:x+w+bxa+4);
 cal_c=cal_c(y-w+cya-4:y+w+cya+4,x-w+cxa-4:x+w+cxa+4);
@@ -123,16 +122,20 @@ if ~isempty(strfind(ex_dir,'exampledata')) == 1
     listpos = length(dir_content)-10:1:length(dir_content);
     setappdata(0,'listpos',listpos)
     
-    % Update timestamps by reading and re-writing a single byte
-    for i = 1:length(dir_content)
-        current = dir_content(i).name;
-        pause(1)
-        fid = fopen(strcat('./example/data/',current),'r+');
-        byte = fread(fid, 1);
-        fseek(fid, 0, 'bof');
-        fwrite(fid, byte);
-        fclose(fid);
-        dir_content(i).date;
+    % Update timestamps by reading and re-writing a single byte IF they are
+    % equal
+    if dir_content(1).date ~= dir_content(2).date
+        
+        for i = 1:length(dir_content)
+            current = dir_content(i).name;
+            pause(1)
+            fid = fopen(strcat('./example/data/',current),'r+');
+            byte = fread(fid, 1);
+            fseek(fid, 0, 'bof');
+            fwrite(fid, byte);
+            fclose(fid);
+            dir_content(i).date;
+        end
     end
     
 end
@@ -142,19 +145,25 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %--------------------------------------------------------------------------
-% Create output directory
-savename = strcat('MIRRORS_output_',regexprep(datestr(clock),...
-    ' |-|:','_'));
-mkdir(upath,savename);
-setappdata(0,'savename',savename);
-
-% Extract parent folder name
-expname = strsplit(upath,{'/','\'});
-
-% Open video file
-videofile = char(strcat(upath,'/',savename,'/',expname(end),'_VIDEO.avi'));
-
-% Sets up video recording of ouput screen
-writerObj = VideoWriter(videofile);
-writerObj.FrameRate = 2;
-open(writerObj);
+% Create output directory if Save Output checkbox is ticked
+if get(handles.checkbox2,'Value') == 1
+    
+    % Create output folder
+    savename = strcat('MIRRORS_output_',regexprep(datestr(clock),...
+        ' |-|:','_'));
+    mkdir(upath,savename);
+    setappdata(0,'savename',savename);
+    
+    % Extract parent folder name
+    expname = strsplit(upath,{'/','\'});
+    
+    % Open video file
+    videofile = char(strcat(upath,'/',savename,'/',expname(end),'_VIDEO.avi'));
+    
+    % Sets up video recording of ouput screen
+    writerObj = VideoWriter(videofile);
+    writerObj.FrameRate = 2;
+    open(writerObj);
+else
+    [savename,expname,writerObj] = deal([]);
+end

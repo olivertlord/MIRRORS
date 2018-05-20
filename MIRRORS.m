@@ -56,7 +56,7 @@ function varargout = MIRRORS(varargin)
 
 % Edit the above text to modify the response to help MIRRORS
 
-% Last Modified by GUIDE v2.5 17-May-2018 10:36:06
+% Last Modified by GUIDE v2.5 20-May-2018 12:18:40
 
 
 %--------------------------------------------------------------------------
@@ -121,7 +121,7 @@ plots = [handles.axes2 handles.axes3 handles.axes4 handles.axes5...
     handles.axes6 handles.axes7];
 
 % Hide EXAMPLE DATA button
-set(handles.pushbutton5,'visible','off');
+set(handles.pushbutton5,'visible','on');
 
 % VERSION NUMBER
 set(handles.text17,'String','1.6.14');
@@ -163,10 +163,8 @@ varargout{1} = handles.output;
 %--------------------------------------------------------------------------
 % UNUSED CALLBACK FUNCTIONS
 
-
 % --- Executes on button press in checkbox2.
-function checkbox2_Callback(~, ~, ~) %#ok<DEFNU>
-
+function checkbox2_Callback(~, ~, handles) %#ok<DEFNU,INUSD>
 
 %--------------------------------------------------------------------------
 % --- Executes when user presses LIVE button
@@ -192,6 +190,9 @@ else
     % Reset textboxes to 0
     set(handles.edit1,'String','0')
     set(handles.edit2,'String','0')
+    
+    % Switch on Save Output and disable
+    set(handles.checkbox2,'Value',1,'Enable','off');
     
     % Update button states
     control_colors({1 0 0 0 0 0 1 1 0 0 0 0}, handles)
@@ -244,7 +245,7 @@ else
             if c1 == 1
                 
                 % Determine center of top right quadrant and set halfwidth
-                x = round(0.75*(length(raw(1,:))));
+                x = round(0.25*(length(raw(1,:))));
                 y = round(0.25*(length(raw(:,1))));
                 w = 200;
                 setappdata(0,'subframe',[x-(w/2) y-(w/2) w w])
@@ -283,19 +284,22 @@ else
             % errors, intensities, wien slope and intercept and map indices
             % and smoothed b quadrant for plotting countours later
             [T,E_T,E_E,epsilon,T_max(c1),E_T_max(c1),E_E_max(c1),U_max,...
-                m_max,C_max(c1),dx,dy,sb,nw] = mapper(cal_a,cal_b,cal_c,...
+                m_max,C_max(c1),dx,dy,sb,bsz,nw] = mapper(cal_a,cal_b,cal_c,...
                 cal_d,d,a,c,b,handles,filepath); %#ok<AGROW>
             
             % Calls difference function to calculate the difference map and
             % associated metric.
-            [T_dif,T_dif_metric(c1)] = difference(T, sb, c1,...
+            [T_dif,T_dif_metric(c1)] = difference(T, sb, bsz, c1,...
                 background); %#ok<AGROW>
             
             % Create concatenated summary output array and save to
-            % workspace and save current map data to .txt file
-            [result(c1,:),timevector] = data_output(dir_content(c1),...
+            % workspace and save current map data to .txt file if Save
+            % OUtput checkbox is ticked
+            
+            [result(c1,:),timevector] = data_output(handles,dir_content(c1),...
                 1,c1,T_max(c1),E_T_max(c1),C_max(c1),E_E_max(c1),...
-                T_dif_metric(c1),T,E_T,epsilon,E_E,T_dif,upath,savename); %#ok<AGROW>
+                T_dif_metric(c1),T,E_T,epsilon,E_E,T_dif,upath,...
+                savename); %#ok<AGROW>
             assignin('base', 'result', result);
             
             % Extracts filenumber from filename
@@ -314,12 +318,14 @@ else
             % Calls data_plot function
             data_plot(handles,nw,T_max,E_T_max,E_E_max,U_max,m_max,C_max,c1,...
                 filenumber,raw,timevector,result(:,3),T_dif_metric,T,...
-                dx,dy,progress,T_dif,E_T,Clim_min,Clim_max,sb,epsilon,1);
+                dx,dy,progress,T_dif,E_T,Clim_min,Clim_max,sb,bsz,epsilon,1);
             
-            % Writes current GUI frame to movie
-            movegui(gcf,'center')
-            frame=getframe(gcf);
-            writeVideo(writerObj,frame);
+            if get(handles.checkbox2,'Value') == 1
+                % Writes current GUI frame to movie
+                movegui(gcf,'center')
+                frame=getframe(gcf);
+                writeVideo(writerObj,frame);
+            end
             
             % Increment counter c1
             c1 = c1 + 1;
@@ -328,14 +334,15 @@ else
         end
     end
     
-    % Closes video file on loop exit
-    close(writerObj);
+    if get(handles.checkbox2,'Value') == 1
+        % Closes video file on loop exit
+        close(writerObj);
 
-    % Saves summary data to text file
-    summary_file = char(strcat(upath,'/',savename,'/',expname(end),...
-        '_SUMMARY.txt'));
-    save (summary_file,'result','-ASCII','-double');
-    
+        % Saves summary data to text file
+        summary_file = char(strcat(upath,'/',savename,'/',expname(end),...
+            '_SUMMARY.txt'));
+        save (summary_file,'result','-ASCII','-double');
+    end
 end
 
 
@@ -363,6 +370,7 @@ delete(hfindROI)
 set(handles.slider1,'Value',0.25);
 set(handles.text12,'String','25 %');
 set(handles.slider1,'Enable','on');
+set(handles.checkbox2,'Enable','on');
 
 % Ask user to point to folder containing .TIF files to be processed
 [upath]=uigetdir('/Users/oliverlord/Dropbox/Work/EXPERIMENTS/');
@@ -398,7 +406,7 @@ for i=1:total
         raw(end-9:end,1:10) raw(end-9:end,end-9:end)]));
     
     % Forces top right plot option to 'difference'
-    set(handles.radiobutton4,'Value',1);
+    set(handles.radiobutton5,'Value',1);
     
     % Divides background subtracted image into four quadrants
     a = raw(1:round(size(raw,1))/2,1:round(size(raw,2))/2,:);
@@ -428,7 +436,7 @@ for i=1:total
             listpos(c1)=i;
             data_plot(handles,[0 1],[NaN NaN],[NaN NaN],[NaN NaN],NaN,...
                 NaN,NaN,c1,filenumber,raw,0,[0 1],NaN,[1 2],1,1,[0 1],0,...
-                [0 1],[1 2],0,1,[0,1;0,1],[NaN,NaN])
+                [0 1],[1 2],0,1,0,[0,1;0,1],[NaN,NaN])
             
             c1 = c1+1;
         end
@@ -444,7 +452,7 @@ for i=1:total
             listpos(c1)=i;
             data_plot(handles,[0 1],[NaN NaN],[NaN NaN],[NaN NaN],NaN,...
                 NaN,NaN,c1,filenumber,raw,0,[0 1],NaN,[1 2],1,1,[0 1],0,...
-                [0 1],[1 2],0,1,[0,1;0,1],[NaN,NaN],c1)
+                [0 1],[1 2],0,1,0,[0,1;0,1],[NaN,NaN])
             c1 = c1+1;
         end
     end
@@ -484,14 +492,14 @@ delete(hfindrect)
 % and size (constrined to a square, and a region with a 20 pixel hold off
 % from the edge of the frame to allow space for misalignment and padding
 % pixel binning).
-ROI = imrect(handles.axes1, [474 28 200 200]);
-fcn = makeConstrainToRectFcn('imrect',[364 745],[20 235]);
+ROI = imrect(handles.axes1, [91 28 200 200]);
+fcn = makeConstrainToRectFcn('imrect',[20 344],[20 235]);
 setPositionConstraintFcn(ROI,fcn);
 setFixedAspectRatioMode(ROI,'True');
 subframe = wait(ROI);
 
 % Make ROI position avaialble to other functions
-setappdata(0,'subframe',subframe);
+setappdata(0,'subframe',subframe)
 
 % Updates button states
 flag = getappdata(0,'flag');
@@ -568,7 +576,7 @@ setappdata(0,'auto_flag','0');
     writerObj,expname] = data_prep(handles);
 
 % Get list of .TIFF files from appdata
-dir_content = getappdata(0,'dir_content')
+dir_content = getappdata(0,'dir_content');
 
 %Get list of positions in folder of files to be fitted
 listpos = getappdata(0,'listpos');
@@ -583,9 +591,7 @@ c1 = 1;
 % Calculates temperature, error and difference maps and associated output
 % for each file and plots and stores the results.
 for i=start_file:end_file
-    i
-    listpos
-    dir_content.name
+
     % Determines path to unknown file
     filepath = char(strcat(upath,'/',(dir_content(listpos(i)).name)));
     
@@ -613,38 +619,42 @@ for i=start_file:end_file
     % d = bottom right (580 nm)
     
     % Returns spatial correlation parameters for first file in the dataset
-    if c1 == 1
+    % or if there is a gap of more than 1 between the last good file and
+    % the current file
+    if c1 == 1 || (c1 > 1 && filenumber(c1)-filenumber(c1-1) > 1)
         [bya,bxa,cya,cxa,dya,dxa] = correlate(a,b,c,d);
     end
     
     % Shifts quadrants based on offsets and pads by 4 pixels
-    a=a(y-w-4:y+w+4,x-w-4:x+w+4);
-    b=b(y-w+bya-4:y+w+bya+4,x-w+bxa-4:x+w+bxa+4);
-    c=c(y-w+cya-4:y+w+cya+4,x-w+cxa-4:x+w+cxa+4);
-    d=d(y-w+dya-4:y+w+dya+4,x-w+dxa-4:x+w+dxa+4);
+    a = a(y-w-4:y+w+4,x-w-4:x+w+4);
+    b = b(y-w+bya-4:y+w+bya+4,x-w+bxa-4:x+w+bxa+4);
+    c = c(y-w+cya-4:y+w+cya+4,x-w+cxa-4:x+w+cxa+4);
+    d = d(y-w+dya-4:y+w+dya+4,x-w+dxa-4:x+w+dxa+4);
     
     % Calls mapper function to calculate temperature, error and emissivity
     % maps, and also returns maximum T and associated errors, intensities,
     % wien slope and intercept and map indices and smoothed b quadrant for
     % plotting countours later
     [T,E_T,E_E,epsilon,T_max(c1),E_T_max(c1),E_E_max(c1),U_max,m_max,...
-        C_max(c1),dx,dy,sb,nw] = mapper(cal_a,cal_b,cal_c,cal_d,d,a,c,b,...
+        C_max(c1),dx,dy,sb,bsz,nw] = mapper(cal_a,cal_b,cal_c,cal_d,d,a,c,b,...
         handles,filepath); %#ok<AGROW>
     
     % Calls difference function to calculate the difference map and
     % associated metric.
-    [T_dif,T_dif_metric(c1)] = difference(T, sb, c1, background);...
+    [T_dif,T_dif_metric(c1)] = difference(T, sb, bsz, c1, background);...
         %#ok<AGROW>
     
     % Create concatenated summary output array and save to workspace and
-    % save current map data to .txt file
-    [result(c1,:),timevector] = data_output(dir_content(listpos(i)),...
+    % save current map data to .txt file if Save Output checkbox ticked
+    [result(c1,:),timevector] = data_output(handles,dir_content(listpos(i)),...
         1,c1,T_max(c1),E_T_max(c1),C_max(c1),E_E_max(c1),...
-        T_dif_metric(c1),T,E_T,epsilon,E_E,T_dif,upath,savename); %#ok<AGROW>
+        T_dif_metric(c1),T,E_T,epsilon,E_E,T_dif,upath,savename);...
+        %#ok<AGROW>
     assignin('base', 'result', result);
     
+    
     % Calculates job progress
-    progress = ceil(c1/(fl-fi+1)*100);
+    progress = ceil(c1/length(listpos(start_file:end_file))*100);
     
     % Set Colour Limits for difference plot such that it is only extended
     % but never reduced
@@ -656,26 +666,30 @@ for i=start_file:end_file
     % Calls data_plot function
     data_plot(handles,nw,T_max,E_T_max,E_E_max,U_max,m_max,C_max,i,...
         filenumber,raw,timevector,result(:,3),T_dif_metric,T,dx,dy,...
-        progress,T_dif,E_T,Clim_min,Clim_max,sb,epsilon,1);
+        progress,T_dif,E_T,Clim_min,Clim_max,sb,bsz,epsilon,1);
     
-    % Writes current GUI frame to movie
-    movegui(gcf,'center')
-    frame=getframe(gcf);
-    setappdata(0,'frame',frame);
-    writeVideo(writerObj,frame);
+    if get(handles.checkbox2,'Value') == 1
+        % Writes current GUI frame to movie
+        movegui(gcf,'center')
+        frame=getframe(gcf);
+        setappdata(0,'frame',frame);
+        writeVideo(writerObj,frame);
+    end
     
     % Increment counter c1
     c1 = c1 + 1;
   
 end
 
-% Closes video file on loop exit
-close(writerObj);
-
-% Saves summary data to text file
-summary_file = char(strcat(upath,'/',savename,'/',expname(end),...
-    '_SUMMARY.txt'));
-save (summary_file,'result','-ASCII','-double');
+if get(handles.checkbox2,'Value') == 1
+    % Closes video file on loop exit
+    close(writerObj);
+    
+    % Saves summary data to text file
+    summary_file = char(strcat(upath,'/',savename,'/',expname(end),...
+        '_SUMMARY.txt'));
+    save (summary_file,'result','-ASCII','-double');
+end
 
 
 %--------------------------------------------------------------------------
@@ -708,7 +722,7 @@ movefile('./calibration/tc.tiff','./calibration/tc_temp.tiff')
 movefile('./example/tc_example.tiff','./calibration/tc.tiff')
 
 % Fix subframe position
-setappdata(0,'subframe',[474 28 200 200])
+setappdata(0,'subframe',[91 28 200 200])
 
 % Fix file range
 set(handles.edit1,'string','1')
@@ -728,69 +742,45 @@ for i = 1:length(dir_content)
     end
 end
 
-% --- TEST 1 --------------------------------------------------------------
-
 % Set user options
 set(handles.slider1,'Value',0.25)
 set(handles.checkbox1,'Value',1)
-set(handles.checkbox2,'Value',0)
-set(handles.radiobutton1,'Value',1)
-set(handles.radiobutton4,'Value',1)
+set(handles.checkbox2,'Value',1)
 
-% Run PROCESS button
-pushbutton4_Callback([], [], handles)
+% --- TEST LOOP -----------------------------------------------------------
+% Tests every peak temperature option against every optional plot option in
+% turn with cutoff at 25% and fit saturated images on.
 
-% Get folder name of output directory
-savename = getappdata(0,'savename');
+% Initialise counter
+t1 = 1
 
-% Change output folder name to test_1
-movefile(strcat('./example/data/',savename),strcat('./example/data/','test_1'))
+for m = 1:4
+    for n = 5:8
+        % Set peak temperature radiobutton
+        set(handles.(['radiobutton' num2str(m)]),'Value',1)
+        
+        % Set optional plot radiobutton
+        set(handles.(['radiobutton' num2str(n)]),'Value',1)
 
-% Get last frame of GUI window
-frame = getappdata(0,'frame');
-imwrite(frame.cdata,'./example/data/test_1/test_1.png')
+        % Run PROCESS button
+        pushbutton4_Callback([], [], handles)
 
-% --- TEST 2 --------------------------------------------------------------
+        % Get folder name of output directory
+        savename = getappdata(0,'savename');
+        
+        % Change output folder name to test_1
+        movefile(strcat('./example/data/',savename),...
+            strcat('./example/data/','test_',num2str(t1)))
 
-set(handles.radiobutton2,'Value',1)
-set(handles.radiobutton5,'Value',1)
-
-pushbutton4_Callback([], [], handles)
-
-savename = getappdata(0,'savename');
-
-movefile(strcat('./example/data/',savename),strcat('./example/data/','test_2'))
-
-frame = getappdata(0,'frame');
-imwrite(frame.cdata,'./example/data/test_2/test_2.png')
-
-% --- TEST 3 --------------------------------------------------------------
-
-set(handles.radiobutton3,'Value',1)
-set(handles.radiobutton6,'Value',1)
-
-pushbutton4_Callback([], [], handles)
-
-savename = getappdata(0,'savename');
-
-movefile(strcat('./example/data/',savename),strcat('./example/data/','test_3'))
-
-frame = getappdata(0,'frame');
-imwrite(frame.cdata,'./example/data/test_3/test_3.png')
-
-% --- TEST 4 --------------------------------------------------------------
-
-set(handles.radiobutton7,'Value',1)
-set(handles.radiobutton8,'Value',1)
-
-pushbutton4_Callback([], [], handles)
-
-savename = getappdata(0,'savename');
-
-movefile(strcat('./example/data/',savename),strcat('./example/data/','test_4'))
-
-frame = getappdata(0,'frame');
-imwrite(frame.cdata,'./example/data/test_4/test_4.png')
+        % Get last frame of GUI window
+        frame = getappdata(0,'frame');
+        imwrite(frame.cdata,strcat('./example/data/test_',num2str(t1),...
+            '/test_',num2str(t1),'.png'))
+        
+        % Increement counter
+        t1 = t1 + 1
+    end
+end
 
 % --- POSTFLIGHT ALTERATIONS ----------------------------------------------
 

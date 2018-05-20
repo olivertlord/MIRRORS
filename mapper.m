@@ -1,5 +1,5 @@
 function [T,E_T,E_E,epsilon,T_max,E_T_max,E_E_max,U_max,m_max,C_max,pr,...
-    pc,sb,nw] = mapper(cal_a,cal_b,cal_c,cal_d,d,a,c,b,handles,filepath)
+    pc,sb,bsz,nw] = mapper(cal_a,cal_b,cal_c,cal_d,d,a,c,b,handles,filepath)
 %--------------------------------------------------------------------------
 % Function MAPPER
 %--------------------------------------------------------------------------
@@ -143,9 +143,16 @@ bw = bhw+1;
 nw = horzcat(ones(bsz^2*4,1),[repmat(nwa,bsz^2,1);repmat(nwb,bsz^2,1);...
     repmat(nwc,bsz^2,1);repmat(nwd,bsz^2,1);]);
 
-% Produces smoothed b quadrant for cutoff and contouring
-sb = conv2(b(bw:length(b)-bw,bw:length(b)-bw),ones(bsz,bsz),'same');
-sb = sb*(max(b(:))/max(sb(:)));
+% Create 3D array stacks of unknown and calibration ROIs
+abcd = cat(3,a,b,c,d);
+cal_abcd = cat(3,cal_a,cal_b,cal_c,cal_d);
+
+% Determine which quadrant is the brightest
+[~,~,v] = ind2sub(size(abcd),find(abcd == max(abcd(:))));
+
+% Produces smoothed brightest quadrant for contouring
+sb = conv2(abcd(:,:,v)./(cal_abcd(:,:,v)),ones(bsz,bsz),'same');
+sb_a = sb(bw:end-bw,bw:end-bw);
 
 % Set intensity limit
 il = max(sb(:))*get(handles.slider1,'value');
@@ -156,7 +163,7 @@ image_info = imfinfo(char(filepath));
 sl = 2^image_info.BitDepth*.99;
 
 % Pre-allocate arrays with NaN
-[T,E_T,E_E,epsilon,t_error,slope,intercept] = deal(NaN(length(sb)));
+[T,E_T,E_E,epsilon,t_error,slope,intercept] = deal(NaN(length(sb)-bsz));
 
 % Loop over ROI to determine temperature and emissivity at each pixel
 % Bin in x
@@ -168,7 +175,7 @@ for m=bw:length(a)-bw
         % Only fit data if the peak intensity of quadrant b is larger than
         % the value set by the user AND none of the quadrants contain a
         % pixel with a value of > 99% of the bitdepth of the TIFF file
-        if  il < sb(m-bhw,n-bhw) & a(m,n) < sl & b(m,n) < sl...
+        if  il < sb(m,n) & a(m,n) < sl & b(m,n) < sl...
                 & c(m,n) < sl & d(m,n)< sl
             
             % Concatenate calibrated pixels from each subframe
@@ -203,26 +210,11 @@ for m=bw:length(a)-bw
     end
 end
 
-% Perform T correction if user has selected it. In this implementation it
-% is assumed that the error associated with the maximum intensity pixel is
-% optimal and that any error greater than that value is due to chromatic
-% aberration.
-% After: Walter, M. J., & Koga, K. T. (2004). The effects of chromatic
-% dispersion on temperature measurement in the laser-heated diamond anvil
-% cell. Physics of the Earth and Planetary Interiors, 143-144, 541?558.
-% http://doi.org/10.1016/j.pepi.2003.09.019
-if get(handles.checkbox2,'Value') == 1
-    [~, p] = max(sb(:));
-    [pr, pc] = ind2sub(size(E_T),p);
-    Ex = E_T - E_T(pr,pc);
-    T = T - ((-0.0216.*(Ex.*Ex))+(17.882.*Ex));
-end
-
 % Determine peak temperature based on user choice
 if get(handles.radiobutton1,'value') == 1   
-    
+
     % Find max intensity point
-    [~, p] = max(sb(:));
+    [~, p] = max(sb_a(:));
     
 elseif get(handles.radiobutton2,'value') == 1
     
@@ -232,14 +224,16 @@ elseif get(handles.radiobutton2,'value') == 1
     
 elseif get(handles.radiobutton3,'Value') == 1
     
-    % Find max T point
-    [~, p] = max(T(:));
+    % Find max T point as long as it is within 200% of the minimum error to
+    % prevent it finding the edge
+    maxT = max(T(E_T<5*min(E_T(:))))
+    [p,~] = find(T(:)==maxT)
     
-elseif get(handles.radiobutton7,'Value') == 1
+elseif get(handles.radiobutton4,'Value') == 1
     
     % Cutoff for averaging
-    cut = 0.8*max(sb(:));
-    points = length(sb(sb>cut));
+    cut = 0.8*max(sb_a(:));
+    points = length(sb(sb_a>cut));
     
     % Re-create U_max from all pixels for which the corresponding pixel in
     % sb is > cut
@@ -260,19 +254,19 @@ elseif get(handles.radiobutton7,'Value') == 1
     
     % Find average T within top 10 percentile intensity contour, and
     % associated standard error
-    [T_max,E_T_max,E_E_max] = deal(nanmean(T(sb>cut)),...
-        std(T(sb>cut))/sqrt(points),std(intercept(sb>cut))/sqrt(points));
+    [T_max,E_T_max,E_E_max] = deal(nanmean(T(sb_a>cut)),...
+        std(T(sb_a>cut))/sqrt(points),std(intercept(sb_a>cut))/sqrt(points));
     
     % Determine indices of max intensity peak and pass to variables pr
     % and pc so that peak position / cross sections can be plotted
-    [~, p] = max(sb(:));
-    [pr, pc] = ind2sub(size(sb),p);
+    [~, p] = max(sb_a(:));
+    [pr, pc] = ind2sub(size(sb_a),p);
 
 end
 
 % Compute variables if maximum intensity, minimum error or maximum
 % temperature selected by user
-if get(handles.radiobutton7,'Value') ~= 1
+if get(handles.radiobutton4,'Value') ~= 1
     
     % Determine indices of selected peak and pass to variables pr and pc so
     % that peak position / cross sections can be plotted

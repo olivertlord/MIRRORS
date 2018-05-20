@@ -1,6 +1,6 @@
 function [] = data_plot(handles,nw,T_max,E_T_max,E_E_max,U_max,m_max,...
     C_max,i,filenumber,raw,timevector,elapsedSec,T_dif_metric,T,dx,dy,...
-    progress,T_dif,E_T,Clim_min,Clim_max,sb,epsilon,c1)
+    progress,T_dif,E_T,Clim_min,Clim_max,sb,bsz,epsilon,c1)
 %--------------------------------------------------------------------------
 % Function DATA_PLOT
 %--------------------------------------------------------------------------
@@ -61,7 +61,7 @@ function [] = data_plot(handles,nw,T_max,E_T_max,E_E_max,U_max,m_max,...
 
 %           dx,dy = co-ordinates of peak pixel
 
-%           micorns = array containing distances in microns from the
+%           micorns = array containing distances in mu_pad from the
 %           subframe center for each pixel
 
 %           progress = percentage progress through current processing job
@@ -70,7 +70,7 @@ function [] = data_plot(handles,nw,T_max,E_T_max,E_E_max,U_max,m_max,...
 
 %           E_T = computed temperature error map
 
-%           Clim_min,Clim_max = minimum and maximum colour limits for
+%           Clim_min,Clim_max = minimu_padm and maximu_padm colour limits for
 %           differnece map
 
 %           sb = smoothed form of subframe b for contouring
@@ -88,8 +88,11 @@ fclose('all');
 
 %--------------------------------------------------------------------------
 % Pixel to micron conversion
-microns = linspace(-((length(sb)/2)*.18),((length(sb)/2)*.18),...
+mu_pad = linspace(-((length(sb)/2)*.18),((length(sb)/2)*.18),...
     (((length(sb)/2)*2)));
+
+mu = linspace(-(((length(sb)-bsz)/2)*.18),(((length(sb)-bsz)/2)*.18),...
+    ((((length(sb)-bsz)/2)*2)));
 
 %--------------------------------------------------------------------------
 % SUMMARY PLOT: raw image data
@@ -172,7 +175,7 @@ axes(handles.axes4)
 cla
 
 % Difference Metric
-if get(handles.radiobutton4,'Value') == 1    
+if get(handles.radiobutton5,'Value') == 1    
     plot(elapsedSec,T_dif_metric,'--bO','LineWidth',1,'MarkerEdgeColor',...
         'b','MarkerFaceColor','b','MarkerSize',10);
     
@@ -183,26 +186,27 @@ if get(handles.radiobutton4,'Value') == 1
     xlim([min(elapsedSec) max(elapsedSec)+1])
     
 % Temperature cross Sections
-elseif get(handles.radiobutton5,'Value') == 1
+elseif get(handles.radiobutton6,'Value') == 1
     cla
-    
+    length(T)
+    length(mu)
     % centre lines on middle of hotspot
-    plot(microns,T(dx,(1:length(T))),'r',microns,T(1:length(T),dy),'g');
+    plot(mu,T(dx,(1:length(T))),'r',mu,T(1:length(T),dy),'g');
 
     % Set axes labels and plot title
     xlabel('Distance (microns)', 'FontSize', 16);
     ylabel('Temperature (K)', 'FontSize', 16);
     title('Temperature Cross Sections','FontSize',18);
-    legend('horizontal','vertical','location','northwest');
+    legend('horizontal','vertical','location','northeast');
     
 % Emissivity vs Temperature Cross-sections
-elseif get(handles.radiobutton6,'Value') == 1
+elseif get(handles.radiobutton7,'Value') == 1
     
     % centre lines on middle of hotspot
-    plot(T(1:length(T),dy),epsilon(1:length(T),dy),...
+    plot(epsilon(1:length(T),dy),T(1:length(T),dy),...
         'go-','MarkerFaceColor','g');
     hold on
-    plot(T(dx,(1:length(T))),epsilon(dx,(1:length(T))),...
+    plot(epsilon(dx,(1:length(T))),T(dx,(1:length(T))),...
         'ro-','MarkerFaceColor','r')
     hold off
     
@@ -210,14 +214,14 @@ elseif get(handles.radiobutton6,'Value') == 1
     ylabel('Temperature (K)', 'FontSize', 16);
     xlabel('Emissivity (nm^5/Jm)', 'FontSize', 16);
     title('Emissivity vs Temperature','FontSize',18);
-    legend('horizontal','vertical','location','northwest');
+    legend('horizontal','vertical','location','northeast');
     xlim('auto');
 
 % Emissivity vs Temperature at the peak
 elseif get(handles.radiobutton8,'Value') == 1
     cla
 
-    errorbar(C_max,T_max,E_E_max,'--bO','LineWidth',1,...
+    errorbar(real(C_max),T_max,E_E_max,'--bO','LineWidth',1,...
         'MarkerEdgeColor','b','MarkerFaceColor','b','MarkerSize',10);
 
     % Set axes labels and plot title
@@ -236,7 +240,7 @@ axes(handles.axes5)
 cla
 
 if ~isnan(U_max)
-    imagesc(microns,microns,T,[(min(min(T(T>0)))) max(T(:))]);
+    imagesc(mu_pad,mu_pad,T,[(min(min(T(T>0)))) max(T(:))]);
 
     % add colorbar and intensity contour
     originalSize = get(gca, 'Position');
@@ -244,9 +248,11 @@ if ~isnan(U_max)
     colorbar('location','NorthOutside');
     set(gca, 'Position', originalSize);
     hold on
-    contour(microns,microns,sb,10,'k');
-    plot(microns(dy),microns(dx),'ws','LineWidth',2,'MarkerSize',10,...
+    contour(mu_pad,mu_pad,sb,10,'k');
+    plot(mu(dy),mu(dx),'ws','LineWidth',2,'MarkerSize',10,...
         'MarkerEdgeColor','w','MarkerFaceColor','w')
+    xlim([min(mu) max(mu)])
+    ylim([min(mu) max(mu)])
     hold off
 end
 
@@ -263,7 +269,7 @@ axes(handles.axes6)
 cla
 
 if ~isnan(U_max)
-    imagesc(microns,microns,E_T,[(min(E_T(:))) (max(E_T(:)))]);
+    imagesc(mu_pad,mu_pad,E_T,[(min(E_T(:))) (max(E_T(:)))]);
 
     % add colorbar and intensity contour
     originalSize = get(gca, 'Position');
@@ -271,9 +277,11 @@ if ~isnan(U_max)
     colorbar('location','NorthOutside');
     set(gca, 'Position', originalSize);
     hold on
-    contour(microns,microns,sb,10,'k');
-    plot(microns(dy),microns(dx),'ws','LineWidth',2,'MarkerSize',10,...
+    contour(mu_pad,mu_pad,sb,10,'k');
+    plot(mu(dy),mu(dx),'ws','LineWidth',2,'MarkerSize',10,...
         'MarkerEdgeColor','w','MarkerFaceColor','w')
+    xlim([min(mu) max(mu)])
+    ylim([min(mu) max(mu)])
     hold off
 end
 
@@ -290,7 +298,7 @@ axes(handles.axes7)
 cla
 
 if ~isnan(U_max)
-    imagesc(microns,microns,T_dif,[min(Clim_min) max(Clim_max)]);
+    imagesc(mu_pad,mu_pad,T_dif,[min(Clim_min) max(Clim_max)]);
 
     % add colorbar and intensity contour
     originalSize = get(gca, 'Position');
@@ -298,9 +306,11 @@ if ~isnan(U_max)
     colorbar('location','NorthOutside');
     set(gca, 'Position', originalSize);
     hold on
-    contour(microns,microns,sb,10,'k');
-    plot(microns(dy),microns(dx),'ws','LineWidth',2,'MarkerSize',10,...
+    contour(mu_pad,mu_pad,sb,10,'k');
+    plot(mu(dy),mu(dx),'ws','LineWidth',2,'MarkerSize',10,...
         'MarkerEdgeColor','w','MarkerFaceColor','w')
+    xlim([min(mu) max(mu)])
+    ylim([min(mu) max(mu)])
     hold off
 end
 
