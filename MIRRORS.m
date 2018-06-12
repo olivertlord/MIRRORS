@@ -566,7 +566,7 @@ control_colors(flag, handles)
 %--------------------------------------------------------------------------
 % --- Executes when user presses PROCESS button
 function pushbutton4_Callback(~, ~, handles) %#ok<DEFNU>
-
+tic
 % Reset auto_flag to 0
 setappdata(0,'auto_flag','0');
     
@@ -690,7 +690,7 @@ if get(handles.checkbox2,'Value') == 1
         '_SUMMARY.txt'));
     save (summary_file,'result','-ASCII','-double');
 end
-
+toc
 
 %--------------------------------------------------------------------------
 % --- Executes on slider movement.

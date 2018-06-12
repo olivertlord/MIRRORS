@@ -121,10 +121,10 @@ if ~isempty(strfind(ex_dir,'exampledata')) == 1
     setappdata(0,'dir_content',dir_content)
     listpos = length(dir_content)-10:1:length(dir_content);
     setappdata(0,'listpos',listpos)
-    
+
     % Update timestamps by reading and re-writing a single byte IF they are
     % equal
-    if dir_content(1).date ~= dir_content(2).date
+    if strcmp(dir_content(1).date,dir_content(2).date) == 0
         
         for i = 1:length(dir_content)
             current = dir_content(i).name;
@@ -134,7 +134,6 @@ if ~isempty(strfind(ex_dir,'exampledata')) == 1
             fseek(fid, 0, 'bof');
             fwrite(fid, byte);
             fclose(fid);
-            dir_content(i).date;
         end
     end
     

@@ -151,7 +151,7 @@ cal_abcd = cat(3,cal_a,cal_b,cal_c,cal_d);
 [~,~,v] = ind2sub(size(abcd),find(abcd == max(abcd(:))));
 
 % Produces smoothed brightest quadrant for contouring
-sb = conv2(abcd(:,:,v)./(cal_abcd(:,:,v)),ones(bsz,bsz),'same');
+sb = conv2(abcd(:,:,v(1))./(cal_abcd(:,:,v(1))),ones(bsz,bsz),'same');
 sb_a = sb(bw:end-bw,bw:end-bw);
 
 % Set intensity limit
