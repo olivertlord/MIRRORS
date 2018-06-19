@@ -624,6 +624,21 @@ for i=start_file:end_file
     if c1 == 1 || (c1 > 1 && filenumber(c1)-filenumber(c1-1) > 1)
         [bya,bxa,cya,cxa,dya,dxa] = correlate(a,b,c,d);
     end
+
+% Testing overlap catching routine
+%     crash_1 = [y-w-4 y-w+bya-4 y-w+cya-4 y-w+dya-4 x-w-4 x-w+bxa-4,...
+%         x-w+cxa-4 x-w+dxa-4];
+%     crash_2 = [y+w+4 y+w+bya+4 y+w+cya+4 y+w+dya+4];
+%     crash_3 = [x+w+4 x+w+bxa+4 x+w+cxa+4 x+w+dxa+4];
+%     
+%     overlap = abs(min([crash_1,255-crash_2,382-crash_3]))
+%     w
+%     if min(crash_1) < 0 || max(crash_2) > 255 || max(crash_3) > 382
+%         w = (w - (overlap+1))
+%         setappdata(0,'subframe',[x y w*2 w*2])
+%         [w,x,y,~,~,filenumber,upath,cal_a,cal_b,cal_c,...
+%             cal_d,savename,writerObj,expname] = data_prep(handles)
+%     end
     
     % Shifts quadrants based on offsets and pads by 4 pixels
     a = a(y-w-4:y+w+4,x-w-4:x+w+4);
