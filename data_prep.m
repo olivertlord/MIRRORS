@@ -54,8 +54,8 @@ function [w,x,y,fi,fl,filenumber,upath,cal_a,cal_b,cal_c,...
 
 %--------------------------------------------------------------------------
 % Calculate center and half-width of subframe
-subframe = getappdata(0,'subframe')
-w = 2*floor((subframe(3)/2)/2)+1
+subframe = getappdata(0,'subframe');
+w = 2*floor((subframe(3)/2)/2)+1;
 x = round(subframe(1))+w;
 y = round(subframe(2))+w;
 
@@ -99,9 +99,6 @@ cal_d = cal(size(cal,1)/2+1:size(cal,1),size(cal,2)/2+1:size(cal,2),:);
 [bya,bxa,cya,cxa,dya,dxa] = correlate(cal_a,cal_b,cal_c,cal_d);
 
 % Shifts quadrants based on offsets and pads by 10 pixels
-y
-w
-x
 cal_a=cal_a(y-w-4:y+w+4,x-w-4:x+w+4);
 cal_b=cal_b(y-w+bya-4:y+w+bya+4,x-w+bxa-4:x+w+bxa+4);
 cal_c=cal_c(y-w+cya-4:y+w+cya+4,x-w+cxa-4:x+w+cxa+4);

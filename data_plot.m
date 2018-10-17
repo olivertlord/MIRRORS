@@ -324,7 +324,7 @@ ylabel('Distance (microns)', 'FontSize', 16);
 title('DIFFERENCE MAP','FontSize',18);
 pbaspect([1 1 1])
 
-end;
+end
 
 drawnow;
 

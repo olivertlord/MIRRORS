@@ -78,37 +78,15 @@ function [T,E_T,E_E,epsilon,T_max,E_T_max,E_E_max,U_max,m_max,C_max,pr,...
 
 %--------------------------------------------------------------------------   
 
-% Constant c1 = 2hc^2*?*1e4 in W cm2 where h is Planck's constant in J s, c
-% is the speed of light in m s-1, ? = 3.1415926
+% Constant c1 = 2hc^2*pi*1e4 in W cm2 where h is Planck's constant in J s, c
+% is the speed of light in m s-1
 c1 = 3.74177e-12;
 
 % Constant c2 = hc/k*1e9 nm K where h is Planck's constant in J s, c is the
 % speed of light in m s-1 and k is Boltzmann's constant in J K-1.
 c2 = 14387773.54;
 
-%//////////////////////////////////////////////////////////////////////////
-% HARDWARE SPECIFIC - REQUIRES EDITING
-% Wavelengths in nm
-wa = 670.08; %top left
-wb = 851.32; %bottom left
-wc = 752.97; %top right
-wd = 578.61; %bottom right
-
-% Values of Spectral Radiance of calibration source at each wavelength in 
-sr_wa = 7.26917; 
-sr_wb = 12.0780; 
-sr_wc = 9.86540;
-sr_wd = 4.19100;
-
-% Width of CCD pixels in microns
-pixel_width = 9;
-
-% Magnification of temperature measurement system
-system_mag = 50;
-
-% Numerical aperture of system
-NA = .26;
-%//////////////////////////////////////////////////////////////////////////
+load('hardware_parameters.mat');
 
 % Determines normalised wavelengths for the four filters
 nwa = c2/wa; %top left
@@ -226,8 +204,8 @@ elseif get(handles.radiobutton3,'Value') == 1
     
     % Find max T point as long as it is within 200% of the minimum error to
     % prevent it finding the edge
-    maxT = max(T(E_T<5*min(E_T(:))))
-    [p,~] = find(T(:)==maxT)
+    maxT = max(T(E_T<5*min(E_T(:))));
+    [p,~] = find(T(:)==maxT);
     
 elseif get(handles.radiobutton4,'Value') == 1
     

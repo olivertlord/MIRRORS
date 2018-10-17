@@ -437,7 +437,7 @@ for i=1:total
     % chosen to fit saturated images
 
     if saturate == 1 
-        if min(max([d(:) a(:) c(:) b(:)])) > 2*background;
+        if min(max([d(:) a(:) c(:) b(:)])) > 2*background
             filenumber(c1) = extract_filenumber(cell2mat(filenames(i)))...
                ; %#ok<AGROW>
             listpos(c1)=i;
@@ -453,7 +453,7 @@ for i=1:total
     %saturated images    
     else
         if (min(max([d(:) a(:) c(:) b(:)])) > 2*background) &&...
-                (max(max([d(:) a(:) c(:) b(:)])) < saturation_limit);
+                (max(max([d(:) a(:) c(:) b(:)])) < saturation_limit)
             filenumber(c1) = extract_filenumber(cell2mat(filenames(i)))...
                 ; %#ok<AGROW>  
             listpos(c1)=i;
@@ -572,7 +572,7 @@ control_colors(flag, handles)
 
 %--------------------------------------------------------------------------
 % --- Executes when user presses PROCESS button
-function pushbutton4_Callback(~, ~, handles) %#ok<DEFNU>
+function pushbutton4_Callback(~, ~, handles) 
 tic
 % Reset auto_flag to 0
 setappdata(0,'auto_flag','0');
@@ -731,8 +731,8 @@ pushbutton2_Callback([], [], handles)
 
 %--------------------------------------------------------------------------
 % --- Executes when user clicks on the Update Hardware Parameters button
-function pushbutton6_Callback(~, ~, handles)
-
+function pushbutton6_Callback(~, ~, ~)
+hardware_parameters
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % DEVELPOPER CODE - DO NOT EDIT BELOW THIS LINE ---------------------------
@@ -759,15 +759,17 @@ set(handles.edit2,'string','11')
 setappdata(0,'filenumber',[1 2 3 4 5 6 7 8 9 10 11]);
 setappdata(0,'upath','./example/data');
 
-% Get current directory content
-dir_content = dir('./example/data');
+% UNCOMMENT TO GENERATE NEW BENCHMARK -------------------------------------
+% % Get current directory content
+%dir_content = dir('./example/data');
 
-% Remove existing folders
-for i = 1:length(dir_content) 
-    if dir_content(i).isdir == 1 & dir_content(i).name ~= '.' %#ok<AND2>
-       rmdir(strcat('./example/data/',dir_content(i).name),'s');
-    end
-end
+% % Remove existing folders
+% for i = 1:length(dir_content) 
+%     if dir_content(i).isdir == 1 & dir_content(i).name ~= '.' %#ok<AND2>
+%        rmdir(strcat('./example/data/',dir_content(i).name),'s');
+%     end
+% end
+% UNCOMMENT TO GENERATE NEW BENCHMARK -------------------------------------
 
 % Set user options
 set(handles.slider1,'Value',0.25)
@@ -779,7 +781,7 @@ set(handles.checkbox2,'Value',1)
 % turn with cutoff at 25% and fit saturated images on.
 
 % Initialise counter
-t1 = 1
+t1 = 1;
 
 for m = 1:4
     for n = 5:8
@@ -794,18 +796,28 @@ for m = 1:4
 
         % Get folder name of output directory
         savename = getappdata(0,'savename');
-        
-        % Change output folder name to test_1
-        movefile(strcat('./example/data/',savename),...
-            strcat('./example/data/','test_',num2str(t1)))
 
-        % Get last frame of GUI window
-        frame = getappdata(0,'frame');
-        imwrite(frame.cdata,strcat('./example/data/test_',num2str(t1),...
-            '/test_',num2str(t1),'.png'))
+% UNCOMMENT TO GENERATE NEW BENCHMARK -------------------------------------
+%         % Change output folder name to test_1
+%         movefile(strcat('./example/data/',savename),...
+%             strcat('./example/data/','test_',num2str(t1)))
+% 
+%         % Get last frame of GUI window
+%         frame = getappdata(0,'frame');
+%         imwrite(frame.cdata,strcat('./example/data/test_',num2str(t1),...
+%             '/test_',num2str(t1),'.png'))
+% UNCOMMENT TO GENERATE NEW BENCHMARK -------------------------------------
         
-        % Increement counter
-        t1 = t1 + 1
+% COMMENT TO GENERATE NEW BENCHMARK ---------------------------------------
+        new = textread(strcat('example/data/',savename,...
+            '/data_SUMMARY.txt'));
+        benchmark = textread(strcat('example/data/test_',num2str(t1),...
+            '/data_SUMMARY.txt'));
+        difference = new-benchmark
+% COMMENT TO GENERATE NEW BENCHMARK ---------------------------------------
+
+        % Increment counter
+        t1 = t1 + 1;
     end
 end
 
