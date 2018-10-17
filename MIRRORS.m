@@ -56,7 +56,7 @@ function varargout = MIRRORS(varargin)
 
 % Edit the above text to modify the response to help MIRRORS
 
-% Last Modified by GUIDE v2.5 20-May-2018 12:18:40
+% Last Modified by GUIDE v2.5 17-Oct-2018 13:16:45
 
 
 %--------------------------------------------------------------------------
@@ -98,10 +98,17 @@ end
 % --- Executes during object creation, after setting all properties.
 function slider1_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
 
-% Hint: slider controls usually have a light gray background.
 if isequal(get(hObject,'BackgroundColor'), get(0,...
         'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor',[.9 .9 .9]);
+end
+
+% --- Executes during object creation, after setting all properties.
+function popupmenu1_CreateFcn(hObject, ~, ~)
+
+if ispc && isequal(get(hObject,'BackgroundColor'),...
+        get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
 end
 
 
@@ -119,9 +126,6 @@ guidata(hObject, handles);
 % Creates array of handles to axes within the GUI
 plots = [handles.axes2 handles.axes3 handles.axes4 handles.axes5...
     handles.axes6 handles.axes7];
-
-% Hide EXAMPLE DATA button
-set(handles.pushbutton5,'visible','off');
 
 % VERSION NUMBER
 set(handles.text17,'String','1.6.16');
@@ -165,6 +169,9 @@ varargout{1} = handles.output;
 
 % --- Executes on button press in checkbox2.
 function checkbox2_Callback(~, ~, handles) %#ok<DEFNU,INUSD>
+
+% --- Executes on selection change in popupmenu1.
+function popupmenu1_Callback(~, ~, handles)
 
 %--------------------------------------------------------------------------
 % --- Executes when user presses LIVE button
@@ -721,6 +728,11 @@ set(handles.text12,'String',strcat(num2str(round(slider_val)),{' '},'%'));
 % --- Executes on button press in Fit saturated images chackbox.
 function checkbox1_Callback(~, ~, handles) %#ok<DEFNU>
 pushbutton2_Callback([], [], handles)
+
+%--------------------------------------------------------------------------
+% --- Executes when user clicks on the Update Hardware Parameters button
+function pushbutton6_Callback(~, ~, handles)
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % DEVELPOPER CODE - DO NOT EDIT BELOW THIS LINE ---------------------------

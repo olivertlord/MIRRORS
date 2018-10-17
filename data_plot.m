@@ -94,6 +94,10 @@ mu_pad = linspace(-((length(sb)/2)*.18),((length(sb)/2)*.18),...
 mu = linspace(-(((length(sb)-bsz)/2)*.18),(((length(sb)-bsz)/2)*.18),...
     ((((length(sb)-bsz)/2)*2)));
 
+% Get colour map chosen by user
+contents = cellstr(get(handles.popupmenu1,'String'));
+colour_scheme = contents{get(handles.popupmenu1,'Value')};
+
 %--------------------------------------------------------------------------
 % SUMMARY PLOT: raw image data
 axes(handles.axes1)
@@ -244,7 +248,7 @@ if ~isnan(U_max)
 
     % add colorbar and intensity contour
     originalSize = get(gca, 'Position');
-    colormap jet;
+    colormap(colour_scheme);
     colorbar('location','NorthOutside');
     set(gca, 'Position', originalSize);
     hold on
@@ -273,7 +277,7 @@ if ~isnan(U_max)
 
     % add colorbar and intensity contour
     originalSize = get(gca, 'Position');
-    colormap jet;
+    colormap(colour_scheme);
     colorbar('location','NorthOutside');
     set(gca, 'Position', originalSize);
     hold on
@@ -302,7 +306,7 @@ if ~isnan(U_max)
 
     % add colorbar and intensity contour
     originalSize = get(gca, 'Position');
-    colormap jet;
+    colormap(colour_scheme)
     colorbar('location','NorthOutside');
     set(gca, 'Position', originalSize);
     hold on
