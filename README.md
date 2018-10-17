@@ -4,7 +4,7 @@
 
 MIRRORS is a Graphical User Interface (GUI) created using the Matlab© GUIDE© program and was written in Matlab©. The software is designed to process .TIFF images from a four colour multispectral imaging radiometry system like the one developed by Campbell (2008) for temperature measurement of samples laser heated in a diamond anvil cell and which has been copied at the School of Earth Sciences at the University of Bristol, UK (Lord et al. 2014).
 
-The GUI can work in either a live mode (during an experiment) or in a post-processing mode, and performs both spatial and thermal calibrations on the data before producing maps of temprature, temperature error and image difference (i.e. the change in shape of the temperature field, based on the work presented in the Supplementary Information of Briggs et al. 2017). The software also provides the user with an example Wien fit, peak temperature as a function of elapsed time, an image difference metric (also as a function of elapsed time), orthoganol temperature cross-sections centered on the peak pixel and finally emissivity as a function of temperature (as described in Fischer & Campbell (2010). A correction routine designed to account for the effects of chromatic dispersion is also provided, based on the work of Walter & Koga (2004).
+The GUI can work in either a live mode (during an experiment) or in a post-processing mode, and performs both spatial and thermal calibrations on the data before producing maps of temprature, temperature error and image difference (i.e. the change in shape of the temperature field, based on the work presented in the Supplementary Information of Briggs et al. 2017). The software also provides the user with an example Wien fit, peak temperature as a function of elapsed time, an image difference metric (also as a function of elapsed time), orthoganol temperature cross-sections centered on the peak pixel and finally emissivity as a function of temperature (as described in Fischer & Campbell (2010). 
 
 ## Getting Started
 
@@ -170,5 +170,3 @@ This project is licensed under the GNU General Public Licence Version 3 - see th
 * Fischer, R. A., & Campbell, A. J. (2010). High-pressure melting of wustite. American Mineralogist, 95(10), 1473–1477. http://doi.org/10.2138/am.2010.3463
 
 * Lord, O. T., Wood, I. G., Dobson, D. P., Vočadlo, L., Wang, W., Thomson, A. R., et al. (2014). The melting curve of Ni to 1 Mbar. Earth and Planetary Science Letters, 408, 226–236. http://doi.org/moving 10.1016/j.epsl.2014.09.046
-
-* Walter, M. J., & Koga, K. T. (2004). The effects of chromatic dispersion on temperature measurement in the laser-heated diamond anvil cell. Physics of the Earth and Planetary Interiors, 143-144, 541–558. http://doi.org/10.1016/j.pepi.2003.09.019
