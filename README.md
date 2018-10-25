@@ -78,7 +78,7 @@ You will also need to change the following constants to values appropriate for y
 
 ## Testing
 
-To check that MIRRORS is working correctly, a set of example data files are provided, along with screnshots of the MIRRORS GUI after processing plus output files containing the epected results. The example data can be downloaded from https://github.com/olivertlord/MIRRORS/releases/latest. 
+To check that MIRRORS is working correctly, a set of example data files are provided, along with screnshots of the MIRRORS GUI after processing plus output files containing the epected results. The example data can be downloaded as a .zip archive from https://github.com/olivertlord/MIRRORS/releases/latest. 
 
 Before testing mirrors, whether you are running it from the Matlab command line or the standalone app, you must ensure that it is set up the way it was when the benchmarking output was created. To do this you need to do two things:
 
@@ -114,7 +114,7 @@ The differences in column 2 and 3 simply reflect the fact that when downloading 
 
 If you are using the standalone MIRRORS app, you probably don't have access to Matlab but you can still check that MIRRORS is working.
 
-First, download the example data from https://github.com/olivertlord/MIRRORS/releases/latest. Next, click the ```Update Calibration Image``` button and select ```tc_example.tiff``` within the ```example``` folder. Then click on the ```Benchmark``` button in the MIRRORS GUI. 
+First, download ```example.zip``` from https://github.com/olivertlord/MIRRORS/releases/latest and expand it to a location of your choice. Next, click the ```Update Calibration Image``` button and select ```tc_example.tiff``` within the ```example``` folder. Then click on the ```Benchmark``` button in the MIRRORS GUI. 
 
 The tests will run, but you will not see the numerical output. Instead, you will find 16 new folders within the ```example``` folder with names of the form ```MIRRORS_output_xx_xxx_xxx_xx_xx_xx``` containing a ```data_SUMMARY.txt``` file. Looking at the first of these folders, compare the contents of ```data_SUMMARY.txt``` with ```example/data/test_1/data_SUMMARY.txt```. The contents should be identical, except for columns two and three. Repeat this for the second folder, comparing ```MIRRORS_output_xx_xxx_xxx_xx_xx_xx/data_SUMMARY.txt``` with ```example/data/test_2/data_SUMMARY.txt```, and so on for all 16 folders.
 
