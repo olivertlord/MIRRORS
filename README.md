@@ -84,9 +84,7 @@ Before testing mirrors, whether you are running it from the Matlab command line 
 
 1. Click the ```Update Calibration Image``` button and select ```tc_example.tiff``` within the ```MIRRORS/example``` folder.
 
-2. Click the ```Update Hardware Parameters``` button and change the values to those in the image below:
-
-![alt text](https://raw.githubusercontent.com/olivertlord/MIRRORS/master/hardware_parameters_screenshot.png)
+2. Click the ```Update Hardware Parameters``` button and change the values to those in the image above.
 
 ### Testing MIRRORS when running it from the Matlab command line (Mac OS X and Windows 7)
 
