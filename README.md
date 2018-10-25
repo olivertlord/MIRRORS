@@ -54,9 +54,9 @@ Where ```~/MIRRORS``` is the full path to your MIRRORS directory. Now, next time
 
 ### Instructions for users intending to run MIRRORS from the standalone app (Mac OS X only)
 
-The MIRRORS app requires the Matlab Component Runtime, which can be dowdloaded here: http://ssd.mathworks.com/supportfiles/downloads/R2018b/deployment_files/R2018b/installers/maci64/MCR_R2018b_maci64_installer.dmg.zip
+The MIRRORS app requires the Matlab Component Runtime, which can be dowdloaded [here](http://ssd.mathworks.com/supportfiles/downloads/R2018b/deployment_files/R2018b/installers/maci64/MCR_R2018b_maci64_installer.dmg.zip).
 
-Once this is installed, simply download MIRRORS.app from https://github.com/olivertlord/MIRRORS/releases/latest and mve it to a location of your choosing. Double clicking on the APP should launch MIRRORS.
+Once this is installed, simply download MIRRORS.app from https://github.com/olivertlord/MIRRORS/releases/latest and move it to a location of your choosing. Double clicking on the APP should launch MIRRORS.
 
 ## Customising Mirrors for your system
 
