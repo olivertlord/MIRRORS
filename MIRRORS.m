@@ -2,7 +2,7 @@ function varargout = MIRRORS(varargin)
 %--------------------------------------------------------------------------
 % MIRRORS (MultIspectRal imaging RadiOmetRy Software)
 %--------------------------------------------------------------------------
-% Version 1.6
+% Version 1.7
 % Written and tested on Matlab R2014a (Windows 7) & R2017a (OS X 10.13)
 
 % Copyright 2018 Oliver Lord, Weiwei Wang
@@ -56,7 +56,7 @@ function varargout = MIRRORS(varargin)
 
 % Edit the above text to modify the response to help MIRRORS
 
-% Last Modified by GUIDE v2.5 17-Oct-2018 21:03:43
+% Last Modified by GUIDE v2.5 24-Oct-2018 18:15:22
 
 
 %--------------------------------------------------------------------------
@@ -104,7 +104,7 @@ if isequal(get(hObject,'BackgroundColor'), get(0,...
 end
 
 % --- Executes during object creation, after setting all properties.
-function popupmenu1_CreateFcn(hObject, ~, ~)
+function popupmenu1_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
 
 if ispc && isequal(get(hObject,'BackgroundColor'),...
         get(0,'defaultUicontrolBackgroundColor'))
@@ -128,7 +128,7 @@ plots = [handles.axes2 handles.axes3 handles.axes4 handles.axes5...
     handles.axes6 handles.axes7];
 
 % VERSION NUMBER
-set(handles.text17,'String','1.6.16');
+set(handles.text17,'String','1.7.0');
 
 % Sets aspect ratio for all axes within the GUI to 1:1
 for i=1:6
@@ -155,6 +155,9 @@ control_colors({0 0 0 0 0 0 1 1 0 0 0 0},handles);
 warning('off','MATLAB:colon:nonIntegerIndex');
 warning('off','MATLAB:plot:IgnoreImaginaryXYPart');
 
+% Make Update Test Data button invisible
+set(handles.pushbutton9,'visible','off')
+
 
 %--------------------------------------------------------------------------
 % --- Outputs from this function are returned to the command line.
@@ -171,7 +174,7 @@ varargout{1} = handles.output;
 function checkbox2_Callback(~, ~, handles) %#ok<DEFNU,INUSD>
 
 % --- Executes on selection change in popupmenu1.
-function popupmenu1_Callback(~, ~, handles)
+function popupmenu1_Callback(~, ~, handles) %#ok<DEFNU,INUSD>
 
 %--------------------------------------------------------------------------
 % --- Executes when user presses LIVE button
@@ -303,7 +306,7 @@ else
             % workspace and save current map data to .txt file if Save
             % OUtput checkbox is ticked
             
-            [result(c1,:),timevector] = data_output(handles,dir_content(c1),...
+            [result(c1,:),timevector] = data_output(handles,dir_content(end),...
                 1,c1,T_max(c1),E_T_max(c1),C_max(c1),E_E_max(c1),...
                 T_dif_metric(c1),T,E_T,epsilon,E_E,T_dif,upath,...
                 savename); %#ok<AGROW>
@@ -379,10 +382,23 @@ set(handles.text12,'String','25 %');
 set(handles.slider1,'Enable','on');
 set(handles.checkbox2,'Enable','on');
 
-% Ask user to point to folder containing .TIF files to be processed
-[upath]=uigetdir('/Users/oliverlord/Dropbox/Work/EXPERIMENTS/');
+% Determine path to app location
+if isdeployed
+    appRoot = ctfroot;
+    if ismac
+        appRootSplit = strsplit(appRoot,'MIRRORS.app');
+    elseif ispc
+        appRootSplit = strsplit(appRoot,'MIRRORS.exe');
+    end
+else
+    appRootSplit = strsplit(pwd,'xxxx');
+end
 
-% Create array containing file metadata on all .TIF files in folder
+% Ask user to point to folder containing .TIF files to be processed
+upath = uigetdir(appRootSplit{1},'Select folder containing images to be processed');
+
+% Create array containing file metadata on all .TIF files in folder that
+% have a trailing number
 dir_content = dir(strcat(upath,'/*.tiff'));
 setappdata(0,'dir_content',dir_content);
 
@@ -435,15 +451,17 @@ for i=1:total
     % Assigns each file in sequence to filenumber array if the weakest of
     % the four hotspots is stronger than double the background if user has
     % chosen to fit saturated images
-
+    
     if saturate == 1 
         if min(max([d(:) a(:) c(:) b(:)])) > 2*background
-            filenumber(c1) = extract_filenumber(cell2mat(filenames(i)))...
-               ; %#ok<AGROW>
+            filenumber(c1) = extract_filenumber(cell2mat(filenames(i)));...
+                %#ok<AGROW>
             listpos(c1)=i;
-            data_plot(handles,[0 1],[NaN NaN],[NaN NaN],[NaN NaN],NaN,...
-                NaN,NaN,c1,filenumber,raw,0,[0 1],NaN,[1 2],1,1,[0 1],0,...
-                [0 1],[1 2],0,1,0,[0,1;0,1],[NaN,NaN])
+            if ~isnan(filenumber)
+                data_plot(handles,[0 1],[NaN NaN],[NaN NaN],[NaN NaN],NaN,...
+                    NaN,NaN,c1,filenumber,raw,0,[0 1],NaN,[1 2],1,1,[0 1],0,...
+                    [0 1],[1 2],0,1,0,[0,1;0,1],[NaN,NaN])
+            end
             
             c1 = c1+1;
         end
@@ -457,9 +475,12 @@ for i=1:total
             filenumber(c1) = extract_filenumber(cell2mat(filenames(i)))...
                 ; %#ok<AGROW>  
             listpos(c1)=i;
-            data_plot(handles,[0 1],[NaN NaN],[NaN NaN],[NaN NaN],NaN,...
-                NaN,NaN,c1,filenumber,raw,0,[0 1],NaN,[1 2],1,1,[0 1],0,...
-                [0 1],[1 2],0,1,0,[0,1;0,1],[NaN,NaN])
+            if ~isnan(filenumber)
+                data_plot(handles,[0 1],[NaN NaN],[NaN NaN],[NaN NaN],NaN,...
+                    NaN,NaN,c1,filenumber,raw,0,[0 1],NaN,[1 2],1,1,[0 1],0,...
+                    [0 1],[1 2],0,1,0,[0,1;0,1],[NaN,NaN])
+            end
+            
             c1 = c1+1;
         end
     end
@@ -469,6 +490,10 @@ end
 flag = getappdata(0,'flag');
 [flag{2},flag{9}] = deal(1);
 control_colors(flag, handles)
+
+% Eliminate and NaNs from filenumber; these will be .tiff files in the
+% folder that do not contain a digit in the last position.
+filenumber = filenumber(~isnan(filenumber));
 
 % Make data available between functions within GUI
 setappdata(0,'filenumber',filenumber)
@@ -573,7 +598,7 @@ control_colors(flag, handles)
 %--------------------------------------------------------------------------
 % --- Executes when user presses PROCESS button
 function pushbutton4_Callback(~, ~, handles) 
-tic
+
 % Reset auto_flag to 0
 setappdata(0,'auto_flag','0');
     
@@ -598,7 +623,7 @@ c1 = 1;
 % Calculates temperature, error and difference maps and associated output
 % for each file and plots and stores the results.
 for i=start_file:end_file
-
+    
     % Determines path to unknown file
     filepath = char(strcat(upath,'/',(dir_content(listpos(i)).name)));
     
@@ -712,7 +737,6 @@ if get(handles.checkbox2,'Value') == 1
         '_SUMMARY.txt'));
     save (summary_file,'result','-ASCII','-double');
 end
-toc
 
 %--------------------------------------------------------------------------
 % --- Executes on slider movement.
@@ -731,22 +755,80 @@ pushbutton2_Callback([], [], handles)
 
 %--------------------------------------------------------------------------
 % --- Executes when user clicks on the Update Hardware Parameters button
-function pushbutton6_Callback(~, ~, ~)
+function pushbutton6_Callback(~, ~, ~) %#ok<DEFNU>
 hardware_parameters
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% DEVELPOPER CODE - DO NOT EDIT BELOW THIS LINE ---------------------------
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%--------------------------------------------------------------------------
+% --- Executes when user clisks on the Update Calibration Image button
+function pushbutton8_Callback(~, ~, handles) %#ok<DEFNU>
+
+% Load current hardware_parameters
+calmat = matfile('calibration.mat','Writable',true);
+
+% Determine path to app location
+if isdeployed
+    appRoot = ctfroot;
+    if ismac
+        appRootSplit = strsplit(appRoot,'MIRRORS.app');
+    elseif ispc
+        appRootSplit = strsplit(appRoot,'MIRRORS.exe');
+    end
+else
+    appRootSplit = strsplit(pwd,'xxxx');
+end
+
+% Ask user to select new Calibration Image   
+[cal_file,cal_path] = uigetfile(strcat(appRootSplit{1},'/*.tiff'),'Select new Calibration Image');
+
+% Read in data and convert to double
+cal_image = imread(strcat(cal_path,cal_file));
+cal_data = im2double(cal_image);
+
+% Save data to .MAT file
+calmat.cal = cal_data;
 
 %--------------------------------------------------------------------------
-% --- Executes when EXAMPLE DATA button is pushed
+% --- Executes when BENCHMARK button is pushed
 function pushbutton5_Callback(~, ~, handles)
 
-% --- PREFLIGHT ALTERATIONS -----------------------------------------------
+% Determine path to app location
+if isdeployed
+    appPath = ctfroot;
+    if ismac
+        appRootSplit = strsplit(appRoot,'MIRRORS.app');
+    elseif ispc
+        appRootSplit = strsplit(appRoot,'MIRRORS.exe');
+    end
+else
+    appRootSplit = pwd;
+end
 
-% Change tc.tiff to tc_example.tiff
-movefile('./calibration/tc.tiff','./calibration/tc_temp.tiff')
-movefile('./example/tc_example.tiff','./calibration/tc.tiff')
+% Ask user to select folder containing example data    
+example_data = uigetdir(appRootSplit,'Select folder containing example data');
+    
+% Get new directory content
+dir_content = dir(strcat(example_data,'/example_0*'));
+    
+% Update timestamps by reading and re-writing a single byte IF they are
+% equal
+if strcmp(dir_content(1).date,dir_content(2).date) == 1
+    for i = 1:length(dir_content)
+        current = dir_content(i).name;
+        pause(1)
+        fid = fopen(strcat(example_data,'/',current),'r+');
+        byte = fread(fid, 1);
+        fseek(fid, 0, 'bof');
+        fwrite(fid, byte);
+        fclose(fid);
+    end
+    % Update directory content
+    dir_content = dir(strcat(example_data,'/example_0*'));
+end
+
+% Set directory content and listpos into appdata
+setappdata(0,'dir_content',dir_content)
+listpos = length(dir_content)-10:1:length(dir_content);
+setappdata(0,'listpos',listpos)
 
 % Fix subframe position
 setappdata(0,'subframe',[91 28 200 200])
@@ -757,19 +839,7 @@ set(handles.edit2,'string','11')
 
 % Fix filenumber list and upath
 setappdata(0,'filenumber',[1 2 3 4 5 6 7 8 9 10 11]);
-setappdata(0,'upath','./example/data');
-
-% UNCOMMENT TO GENERATE NEW BENCHMARK -------------------------------------
-% % Get current directory content
-%dir_content = dir('./example/data');
-
-% % Remove existing folders
-% for i = 1:length(dir_content) 
-%     if dir_content(i).isdir == 1 & dir_content(i).name ~= '.' %#ok<AND2>
-%        rmdir(strcat('./example/data/',dir_content(i).name),'s');
-%     end
-% end
-% UNCOMMENT TO GENERATE NEW BENCHMARK -------------------------------------
+setappdata(0,'upath',example_data);
 
 % Set user options
 set(handles.slider1,'Value',0.25)
@@ -797,32 +867,99 @@ for m = 1:4
         % Get folder name of output directory
         savename = getappdata(0,'savename');
 
-% UNCOMMENT TO GENERATE NEW BENCHMARK -------------------------------------
-%         % Change output folder name to test_1
-%         movefile(strcat('./example/data/',savename),...
-%             strcat('./example/data/','test_',num2str(t1)))
-% 
-%         % Get last frame of GUI window
-%         frame = getappdata(0,'frame');
-%         imwrite(frame.cdata,strcat('./example/data/test_',num2str(t1),...
-%             '/test_',num2str(t1),'.png'))
-% UNCOMMENT TO GENERATE NEW BENCHMARK -------------------------------------
-        
-% COMMENT TO GENERATE NEW BENCHMARK ---------------------------------------
-        new = textread(strcat('example/data/',savename,...
-            '/data_SUMMARY.txt'));
-        benchmark = textread(strcat('example/data/test_',num2str(t1),...
-            '/data_SUMMARY.txt'));
+        new = textread(strcat(example_data,'/',savename,...
+            '/example_SUMMARY.txt'));
+        benchmark = textread(strcat(example_data,'/test_',num2str(t1),...
+            '/example_SUMMARY.txt'));
         difference = new-benchmark
-% COMMENT TO GENERATE NEW BENCHMARK ---------------------------------------
 
         % Increment counter
         t1 = t1 + 1;
     end
 end
 
-% --- POSTFLIGHT ALTERATIONS ----------------------------------------------
 
-% Change tc_example.tiff back to tc.tiff
-movefile('./calibration/tc.tiff','./example/tc_example.tiff')
-movefile('./calibration/tc_temp.tiff','./calibration/tc.tiff')
+%--------------------------------------------------------------------------
+% --- Executes when Update Test Data button is pushed
+function pushbutton9_Callback(~, ~, handles)
+
+% Determine path to app location
+if isdeployed
+    appRoot = ctfroot;
+    if ismac
+        appRootSplit = strsplit(appRoot,'MIRRORS.app');
+    elseif ispc
+        appRootSplit = strsplit(appRoot,'MIRRORS.exe');
+    end
+else
+    appRootSplit = pwd;
+end
+
+% Ask user to select folder containing example data    
+example_data = uigetdir(appRootSplit,'Select folder containing example data');
+
+% Get current directory content
+dir_content = dir(example_data);
+
+% Remove existing folders
+for i = 1:length(dir_content) 
+    if dir_content(i).isdir == 1 & dir_content(i).name ~= '.' %#ok<AND2>
+       rmdir(strcat(example_data,'/',dir_content(i).name),'s');
+    end
+end
+
+% Update directory content
+dir_content = dir(strcat(example_data,'/example_0*'));
+
+% Set directory content and listpos into appdata
+setappdata(0,'dir_content',dir_content)
+listpos = length(dir_content)-10:1:length(dir_content);
+setappdata(0,'listpos',listpos)
+
+% Fix subframe position
+setappdata(0,'subframe',[91 28 200 200])
+
+% Fix file range
+set(handles.edit1,'string','1')
+set(handles.edit2,'string','11')
+
+% Fix filenumber list and upath
+setappdata(0,'filenumber',[1 2 3 4 5 6 7 8 9 10 11]);
+setappdata(0,'upath',example_data);
+
+% Set user options
+set(handles.slider1,'Value',0.25)
+set(handles.checkbox1,'Value',1)
+set(handles.checkbox2,'Value',1)
+
+% Initialise counter
+t1 = 1;
+
+for m = 1:4
+    for n = 5:8
+        
+        % Set peak temperature radiobutton
+        set(handles.(['radiobutton' num2str(m)]),'Value',1)
+        
+        % Set optional plot radiobutton
+        set(handles.(['radiobutton' num2str(n)]),'Value',1)
+
+        % Run PROCESS button
+        pushbutton4_Callback([], [], handles)
+
+        % Get folder name of output directory
+        savename = getappdata(0,'savename');
+        
+        % Change output folder name to test_1
+        movefile(strcat(example_data,'/',savename),...
+            strcat(example_data,'/','test_',num2str(t1)))
+
+        % Get last frame of GUI window
+        frame = getappdata(0,'frame');
+        imwrite(frame.cdata,strcat(example_data,'/test_',num2str(t1),...
+            '/test_',num2str(t1),'.png'))
+        
+        % Increment counter
+        t1 = t1 + 1;
+    end
+end

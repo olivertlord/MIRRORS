@@ -169,6 +169,24 @@ handles.output = hObject;
 % Update handles structure
 guidata(hObject, handles);
 
+% Load current hardware_parameters
+m = matfile('hardware_parameters.mat','Writable',true);
+
+set(handles.edit1, 'String', num2str(m.wa));
+set(handles.edit2, 'String', num2str(m.wb));
+set(handles.edit3, 'String', num2str(m.wc));
+set(handles.edit4, 'String', num2str(m.wd));
+ 
+set(handles.edit5, 'String', num2str(m.sr_wa));
+set(handles.edit6, 'String', num2str(m.sr_wb));
+set(handles.edit7, 'String', num2str(m.sr_wc));
+set(handles.edit8, 'String', num2str(m.sr_wd));
+ 
+set(handles.edit9, 'String', num2str(m.pixel_width));
+ 
+set(handles.edit10, 'String', num2str(m.system_mag));
+ 
+set(handles.edit11, 'String', num2str(m.NA));
 
 %--------------------------------------------------------------------------
 % --- Outputs from this function are returned to the command line.
@@ -236,24 +254,26 @@ check_numeric(box)
 %--------------------------------------------------------------------------
 % --- Executes on button press in pushbutton1.
 function pushbutton1_Callback(~, ~, handles)
-wa = eval(get(handles.edit1,'String'));
-wb = eval(get(handles.edit2,'String'));
-wc = eval(get(handles.edit3,'String'));
-wd = eval(get(handles.edit4,'String'));
 
-sr_wa = eval(get(handles.edit5,'String'));
-sr_wb = eval(get(handles.edit6,'String'));
-sr_wc = eval(get(handles.edit7,'String'));
-sr_wd = eval(get(handles.edit8,'String'));
+m = matfile('hardware_parameters.mat','Writable',true);
 
-pixel_width = eval(get(handles.edit9,'String'));
+m.wa = eval(get(handles.edit1,'String'));
+m.wb = eval(get(handles.edit2,'String'));
+m.wc = eval(get(handles.edit3,'String'));
+m.wd = eval(get(handles.edit4,'String'));
 
-system_mag = eval(get(handles.edit10,'String'));
+m.sr_wa = eval(get(handles.edit5,'String'));
+m.sr_wb = eval(get(handles.edit6,'String'));
+m.sr_wc = eval(get(handles.edit7,'String'));
+m.sr_wd = eval(get(handles.edit8,'String'));
 
-NA = eval(get(handles.edit11,'String'));
+m.pixel_width = eval(get(handles.edit9,'String'));
 
-save('hardware_parameters.mat','wa','wb','wc','wd','sr_wa','sr_wb',...
-    'sr_wc','sr_wd','pixel_width','system_mag','NA');
+m.system_mag = eval(get(handles.edit10,'String'));
+
+m.NA = eval(get(handles.edit11,'String'));
+
+close
 
 %--------------------------------------------------------------------------
 % --- Checks that entered data is numerical

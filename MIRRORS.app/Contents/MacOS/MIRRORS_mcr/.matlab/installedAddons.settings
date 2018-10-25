@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings name="installedAddons" xmlns="urn:mathworks.matlab.settings" xsi:schemaLocation="urn:mathworks.matlab.settings settings.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <settings name="artifact_7bbb438e_1c84_473c_971d_db8a99a3fd9a" visible="true">
+        <key name="enabled">
+            <bool>
+                <value>1</value>
+            </bool>
+        </key>
+        <key name="javaClassPathEntries">
+            <string minArraySize="0" maxArraySize="0">
+            </string>
+        </key>
+        <key name="matlabPathEntries">
+            <string minArraySize="0">
+                <value><![CDATA[/Users/oliverlord/Library/Application Support/MathWorks/MATLAB Add-Ons/Toolboxes/Monte Carlo Error Propagation]]></value>
+            </string>
+        </key>
+    </settings>
+</settings>

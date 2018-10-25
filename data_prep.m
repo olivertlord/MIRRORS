@@ -77,11 +77,9 @@ upath = getappdata(0,'upath');
 arrayfun(@cla,findall(0,'type','axes'))
 fclose('all');
 
-
 %--------------------------------------------------------------------------
-% Reads in unknown file and convert to double precision
-cal_image = imread('calibration/tc.tiff');
-cal = im2double(cal_image);
+% Reads in calibration .MAT file
+load('calibration.mat');
 
 % Divides background subtracted image into four quadrants
 cal_a = cal(1:size(cal,1)/2,1:size(cal,2)/2,:);
@@ -103,45 +101,6 @@ cal_a=cal_a(y-w-4:y+w+4,x-w-4:x+w+4);
 cal_b=cal_b(y-w+bya-4:y+w+bya+4,x-w+bxa-4:x+w+bxa+4);
 cal_c=cal_c(y-w+cya-4:y+w+cya+4,x-w+cxa-4:x+w+cxa+4);
 cal_d=cal_d(y-w+dya-4:y+w+dya+4,x-w+dxa-4:x+w+dxa+4);
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% DEVELPOPER CODE - DO NOT EDIT BELOW THIS LINE ---------------------------
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%--------------------------------------------------------------------------
-% Update timestamps by reading and re-writing a single byte when processing
-% example data
-
-ex_dir=regexprep(upath,{'\.','\/','//'},{'','',''});
-
-if ~isempty(strfind(ex_dir,'exampledata')) == 1
-    
-    % Get new directory content and determine listpos
-    dir_content = dir('./example/data/example*');
-    setappdata(0,'dir_content',dir_content)
-    listpos = length(dir_content)-10:1:length(dir_content);
-    setappdata(0,'listpos',listpos)
-
-    % Update timestamps by reading and re-writing a single byte IF they are
-    % equal
-    if strcmp(dir_content(1).date,dir_content(2).date) == 0
-        
-        for i = 1:length(dir_content)
-            current = dir_content(i).name;
-            pause(1)
-            fid = fopen(strcat('./example/data/',current),'r+');
-            byte = fread(fid, 1);
-            fseek(fid, 0, 'bof');
-            fwrite(fid, byte);
-            fclose(fid);
-        end
-    end
-    
-end
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% DEVELPOPER CODE - DO NOT EDIT ABOVE THIS LINE ---------------------------
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %--------------------------------------------------------------------------
 % Create output directory if Save Output checkbox is ticked

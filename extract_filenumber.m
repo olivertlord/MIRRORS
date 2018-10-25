@@ -50,6 +50,9 @@ for i = n:-1:1
         
     % As soon as a non numeric character is detected break the loop
     else
+        if i == n
+            filenumber = '-1';
+        end
         break
     end
 

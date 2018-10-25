@@ -91,7 +91,7 @@ if get(handles.checkbox2,'Value') == 1
     
     % Concatenate output array
     xyz = real([x1(:) y1(:) T(:) E_T(:) epsilon(:) E_E(:) T_dif(:)]);...
-    
+
     % Creates unique file name for map data and saves it
     map=char(strcat(upath,'/',savename,'/',regexprep(dir_content(i)...
         .name,'\.[^\.]*$', ''),'_map.txt'));

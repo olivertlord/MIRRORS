@@ -1,3 +1,8 @@
-example/data/*output*
+example/*output*
+license.txt
+mccExcludedFiles.log
+readme.txt
+requiredMCRproducts.txt
+run_MIRRORS.sh
 *.asv
 *.m~
