@@ -1,28 +1,30 @@
-# MIRRORS (MultIspectRal imaging RadiOmetRy Software)
+# MIRRORS (MultIspectRal imaging RadiOmetRy Software) Version 1.7.0
 
 [![DOI](https://zenodo.org/badge/100439021.svg)](https://zenodo.org/badge/latestdoi/100439021)
 
 MIRRORS is a Graphical User Interface (GUI) created using the Matlab© GUIDE© program and was written in Matlab©. The software is designed to process .TIFF images from a four colour multispectral imaging radiometry system like the one developed by Campbell (2008) for temperature measurement of samples laser heated in a diamond anvil cell and which has been copied at the School of Earth Sciences at the University of Bristol, UK (Lord et al. 2014).
 
-The GUI can work in either a live mode (during an experiment) or in a post-processing mode, and performs both spatial and thermal calibrations on the data before producing maps of temprature, temperature error and image difference (i.e. the change in shape of the temperature field, based on the work presented in the Supplementary Information of Briggs et al. 2017). The software also provides the user with an example Wien fit, peak temperature as a function of elapsed time, an image difference metric (also as a function of elapsed time), orthoganol temperature cross-sections centered on the peak pixel and finally emissivity as a function of temperature (as described in Fischer & Campbell (2010). 
+The GUI can work in either a live mode (during an experiment) or in a post-processing mode, and performs both spatial and thermal calibrations on the data before producing maps of temperature, temperature error and image difference (i.e. the change in shape of the temperature field, based on the work presented in the Supplementary Information of Briggs et al. 2017). The software also provides the user with an example Wien fit, peak temperature as a function of elapsed time, an image difference metric (also as a function of elapsed time), orthoganol temperature cross-sections centered on the peak pixel and finally emissivity as a function of temperature (as described in Fischer & Campbell (2010). 
 
-## Getting Started
+MIRRORS is described in detail in the following publication:
 
-These instructions will get you a copy of the project up and running on your local machine.
+Lord, O. T., & Wang, W. (2018). MIRRORS: A MATLAB ®GUI for temperature measurement by multispectral imaging radiometry. Review of Scientific Instruments, 89(10), 104903. http://doi.org/10.1063/1.5041360
 
-### Prerequisites
+## Prerequisites
 
-MIRRORS requires Matlab and its image, signal and statistics toolboxes to run and was written and tested on versions R2014a (Windows 7) & R2015/17a (OS X 10.13). It will likely work on all versions after R2014a on both Windows and OS X, but has not been tested. 
+MIRRORS requires a multispectral imaging radiometry system that produces .TIFF files of any resolution, aspect ratio and bit depth but each .TIFF must include four monochromatic images of the laser heated spot to be analysed, each centered on the middle pixel of one quadrant of the full image. The software performs a spatial calibration before stacking the four quadrants and so the centering does not need to be perfect. Each image must be at a different, precisely known wavelength.  
 
-You will also need:
-
-1. A multispectral imaging radiometry system that produces .TIFF files of any resolution, aspect ratio and bit depth. Each .TIFF must include four monochromatic images of the laser heated spot to be analysed, each centered on the middle pixel of one quadrant of the full image. The software performs a spatial calibration before stacking the four quadrants and so the centering does not need to be perfect. Each image must be at a different, precisely known wavelength.  
-
-2. A thermal calibration .TIFF image produced using a calibrated source of known spectral radiance and as before, consisting of four equal quadrants each illuminated by a monochromatic image of the calibration source.
+The system needs a thermal calibration .TIFF image produced using a calibrated source of known spectral radiance and as before, consisting of four equal quadrants each illuminated by a monochromatic image of the calibration source.
 
 Details of these systems as well as calibration methods can be found in Campbell et al. 2008 and Lord & Wang (in prep).
 
-### Installing
+## Installation
+
+MIRRORS can be run either from the Matlab command line on Mac OS X or Windows 7, or as a standalone application on Mac OS X. A standalone executable for Windows 7 is in development. MIRRORS was written and tested on versions R2014a (Windows 7) & R2015a/17a/18b (OS X 10.13). It will likely work on all versions after R2014a on both Windows 7 and OS X, but has not been tested.
+
+### Instructions for users intending to run MIRRORS from the Matlab command line (Mac OS X and Windows 7)
+
+MIRRORS requires the Matlab image, signal and statistics toolboxes to be installed.
 
 Simply navigate to https://github.com/olivertlord/MIRRORS/releases/latest and download the latest source code (as either a .ZIP or .tar.gz file) and extract to your desired location. 
 
@@ -50,38 +52,47 @@ addpath(genpath('~/MIRRORS'));
 
 Where ```~/MIRRORS``` is the full path to your MIRRORS directory. Now, next time you start Matlab, MIRRORS will be on the Matlab PATH and you can type MIRRORS at the command prompt from any directory and the GUI should run.
 
-### Testing
+### Instructions for users intending to run MIRRORS from the standalone app (Mac OS X only)
 
-To check that MIRRORS is working correctly, a set of example data files are provided, along with screnshots of the MIRRORS GUI after processing and output files containing the epected results. Below are instructions on how to process these files and check that the output matches expectations. Note that it is important to complete testing BEFORE making any hardware specific edits to the code (see next section.
+The MIRRORS app requires the Matlab Component Runtime, which can be dowdloaded here: http://ssd.mathworks.com/supportfiles/downloads/R2018b/deployment_files/R2018b/installers/maci64/MCR_R2018b_maci64_installer.dmg.zip
 
-To test your insatallation:
+Once this is installed, simply download MIRRORS.app from https://github.com/olivertlord/MIRRORS/releases/latest and mve it to a location of your choosing. Double clicking on the APP should launch MIRRORS.
 
-1. Copy ```MIRRORS/example/tc_example.tiff``` to ```NIRRORS/calibration``` and rename it to ```tc.tiff```. 
+## Customising Mirrors for your system
 
-2. Run MIRRORS by typing ```MIRRORS``` at the Matlab command prompt.
+Once MIRRORS is installed, you will need to set various hardware specific parameters to fit your system. To do this:
 
-3. Once the GUI has opened, click the 'Post process' button. 
+1. Click the ```Update Calibration Image``` button and select your current thermal calibration image.
 
-4. Navigate to the folder ```/MIRRORS/example/data``` and click 'Open'. 
+2. Click the ```Update Hardware Parameters``` button. This will produce the following window:
 
-5. Click 'Select ROI' and then double click inside the white rectangle that appears in the summary plot window at the bottom right of the GUI. The 'Select ROI' button should go green.
+![alt text](https://raw.githubusercontent.com/olivertlord/MIRRORS/master/hardware_parameters_screenshot.png)
 
-6. Type '1' in the 'Start' box and '11' in the 'End' box. Both should go green.
+Change the values to match your system. The ```Filter Wavelengths``` and ```Spectral Radiance``` values are arranged graphically to mimic the quadrants of the CCD so be careful to correctly match the wavelength to its quadrant in the image.
 
-7. Check that the tickboxes and radiobuttons match those in ```/MIRRORS/example/data/test_1/test_1.png```.
+You will also need to change the following constants to values appropriate for your system:
 
-8. Click 'Process'. Once processing is complete, the GUI window should look like ```/MIRRORS/example/data/test_1/test_1.png```.
+* `pixel_width` - the size of the pixels of the CCD camera 
+* `system_mag` - the magnification of the system
+* `NA` - numerical aperture
 
-9. A new folder should appear in ```/MIRRORS/example/data``` of the form ```MIRRORS_output_xx_xxx_xxx_xx_xx_xx``` where the x's denote the date and time. Inside that folder should be 13 files, 11 of the form ```example_xxx_map.txt``` where xxx is 001 to 011, 1 called ```data_SUMMARY.txt``` and 1 called ```data_VIDEO.avi```.
+## Testing
 
-10. To check the output of your installation against the benchmark data provided in the software, type the following commands in the Matlab command line (this assumes you are in the folder ```MIRRORS```:
+To check that MIRRORS is working correctly, a set of example data files are provided, along with screnshots of the MIRRORS GUI after processing plus output files containing the epected results. The example data can be downloaded from https://github.com/olivertlord/MIRRORS/releases/latest. 
 
-```
-new = textread('example/data/MIRRORS_output_xx_xxx_xxx_xx_xx_xx/data_SUMMARY.txt');
-benchmark = textread('example/data/test_1/data_SUMMARY.txt');
-difference = new-benchmark
-```
-The resulting output should look like this:
+Before testing mirrors, whether you are running it from the Matlab command line or the standalone app, you must ensure that it is set up the way it was when the benchmarking output was created. To do this you need to do two things:
+
+1. Click the ```Update Calibration Image``` button and select ```tc_example.tiff``` within the ```MIRRORS/example``` folder.
+
+2. Click the ```Update Hardware Parameters``` button and change the values to those in the image below:
+
+![alt text](https://raw.githubusercontent.com/olivertlord/MIRRORS/master/hardware_parameters_screenshot.png)
+
+### Testing MIRRORS when running it from the Matlab command line (Mac OS X and Windows 7)
+
+If you are running MIRRORS from the Matlab command line, then first  Then simply click on the ```Benchmark``` button in the MIRRORS GUI. MIRRORS will prompt you to select the folder containing the example data. MIRRORS will then automatically fit the example data repeatedly, using different options, and compare each against the output files that contain the expected results (also stored in ```MIRRORS/example/```.
+
+After each of the 16 test runs are complete, you should see output at the command line that looks like this:
 
 ```
 difference =
@@ -99,47 +110,15 @@ difference =
          0    0.0040  206.0000         0         0         0         0         0
 ```
 
-The differences in column 2 and 3 simply reflect the fact that when downloading files from the internet, their modification date is set as the download time, rather than the time they were acquired. MIRRORS automatically resets these timestamps when you run the test routine so there is at least 1 second between each. This allows the data to be plotted as a function of time, but the times will not match those in the example output. This is not a problem with MIRRORS and can be ignored. 
+The differences in column 2 and 3 simply reflect the fact that when downloading files from the internet, their modification date is set as the download time, rather than the time they were acquired. MIRRORS automatically resets these timestamps when you run the benchmark routine so there is at least 1 second between each. This allows the data to be plotted as a function of time, but the times will not match those in the example output. This is not a problem with MIRRORS and can be ignored. 
 
-11. Repeat steps 7-10 for each of the 4 tests. If the resulting output looks like that in step 10 for every test, then the software is working correctly.
+### Testing MIRRORS when running the standalone app (Mac OS X only)
 
-### Hardware specific code edits
+If you are using the standalone MIRRORS app, you probably don't have access to Matlab but you can still check that MIRRORS is working.
 
-Before using MIRRORS, you will need to edit the code to match your hardware. Find the following lines in ```mapper.m```:
+First, download the example data from https://github.com/olivertlord/MIRRORS/releases/latest. Nect, click the ```Update Calibration Image``` button and select ```tc_example.tiff``` within the ```example``` folder. Then click on the ```Benchmark``` button in the MIRRORS GUI. 
 
-```
-%//////////////////////////////////////////////////////////////////////////
-% HARDWARE SPECIFIC - REQUIRES EDITING
-% Wavelengths in nm
-wa = 670.08; %top left
-wb = 851.32; %bottom left
-wc = 752.97; %top right
-wd = 578.61; %bottom right
-
-% Values of Spectral Radiance of calibration source at each wavelength in 
-sr_wa = 7.26917; 
-sr_wb = 12.0780; 
-sr_wc = 9.86540;
-sr_wd = 4.19100;
-
-% Width of CCD pixels in microns
-pixel_width = 9;
-
-% Magnification of temperature measurement system
-system_mag = 50;
-
-% Numerical aperture of system
-NA = .4;
-%//////////////////////////////////////////////////////////////////////////
-```
-
-You will need to change the values `wa`,`wb`,`wc`,`wd`, to match the wavelengths of the filters used in your system, being careful to correctly match the wavelength of the image to its quadrant in the image. You will also need to change the values of `sr_wa`,`sr_wb`,`sr_wc`,`sr_wd` to the spectral radiance of your calibration source at the relevant wavelength.
-
-You will also need to change the following constants to values appropriate for your system:
-
-* `pixel_width` - the size of the pixels of the CCD camera 
-* `system_mag` - the magnification of the system
-* `NA` - numerical aperture
+The tests will run, but you will not see the numerical output. Instead, you will find 16 new folders within the ```example``` folder with names of the form ```MIRRORS_output_xx_xxx_xxx_xx_xx_xx``` containing a ```data_SUMMARY.txt``` file. Looking at the first of these folders, compare the contents of ```data_SUMMARY.txt``` with ```example/data/test_1/data_SUMMARY.txt```. The contents should be identical, except for columns two and three. Repeat this for the second folder, comparing ```MIRRORS_output_xx_xxx_xxx_xx_xx_xx/data_SUMMARY.txt``` with ```example/data/test_2/data_SUMMARY.txt```, and so on for all 16 folders.
 
 ### Troubleshooting
 
