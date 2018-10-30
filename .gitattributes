@@ -1,3 +1,5 @@
 /archive export-ignore
+/example export-ignore
+example.zip export-ignore
 MIRRORS.app export-ignore
 hardware_parameters_screenshot.png
