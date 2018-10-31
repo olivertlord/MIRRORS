@@ -5,5 +5,7 @@ mccExcludedFiles.log
 readme.txt
 requiredMCRproducts.txt
 run_MIRRORS.sh
+MIRRORS.app
+MIRRORS.exe
 *.asv
 *.m~
