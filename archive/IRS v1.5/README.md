@@ -1,2 +1,0 @@
-# IRiS
-Imaging Radiometry Software
