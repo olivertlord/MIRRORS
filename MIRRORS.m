@@ -388,6 +388,8 @@ if isdeployed
     if ismac
         appRootSplit = strsplit(appRoot,'MIRRORS.app');
     elseif ispc
+        [~,pcroot] = system('path');
+        appRoot = char(regexpi(pcroot, 'Path=(.*?);', 'tokens', 'once'));
         appRootSplit = strsplit(appRoot,'MIRRORS.exe');
     end
 else
@@ -420,7 +422,8 @@ c1 = 1;
 
 % Creates list of .TIF files to be fitted
 for i=1:total
-    
+
+    char(strcat(upath,'/',(filenames(i))));
     % Reads in unknown file  
     raw=imread(char(strcat(upath,'/',(filenames(i)))));
     
@@ -771,6 +774,8 @@ if isdeployed
     if ismac
         appRootSplit = strsplit(appRoot,'MIRRORS.app');
     elseif ispc
+        [~,pcroot] = system('path');
+        appRoot = char(regexpi(pcroot, 'Path=(.*?);', 'tokens', 'once'));
         appRootSplit = strsplit(appRoot,'MIRRORS.exe');
     end
 else
@@ -793,10 +798,12 @@ function pushbutton5_Callback(~, ~, handles)
 
 % Determine path to app location
 if isdeployed
-    appPath = ctfroot;
+    appRoot = ctfroot;
     if ismac
         appRootSplit = strsplit(appRoot,'MIRRORS.app');
     elseif ispc
+        [~,pcroot] = system('path');
+        appRoot = char(regexpi(pcroot, 'Path=(.*?);', 'tokens', 'once'));
         appRootSplit = strsplit(appRoot,'MIRRORS.exe');
     end
 else
@@ -804,7 +811,7 @@ else
 end
 
 % Ask user to select folder containing example data    
-example_data = uigetdir(appRootSplit,'Select folder containing example data');
+example_data = uigetdir(appRootSplit{1},'Select folder containing example data');
     
 % Get new directory content
 dir_content = dir(strcat(example_data,'/example_0*'));
@@ -889,6 +896,8 @@ if isdeployed
     if ismac
         appRootSplit = strsplit(appRoot,'MIRRORS.app');
     elseif ispc
+        [~,pcroot] = system('path');
+        appRoot = char(regexpi(pcroot, 'Path=(.*?);', 'tokens', 'once'));
         appRootSplit = strsplit(appRoot,'MIRRORS.exe');
     end
 else
@@ -896,7 +905,7 @@ else
 end
 
 % Ask user to select folder containing example data    
-example_data = uigetdir(appRootSplit,'Select folder containing example data');
+example_data = uigetdir(appRootSplit{1},'Select folder containing example data');
 
 % Get current directory content
 dir_content = dir(example_data);

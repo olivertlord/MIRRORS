@@ -1,11 +1,12 @@
+archive/
 example/
 example.zip
 license.txt
 mccExcludedFiles.log
+MIRRORS.exe
 readme.txt
 requiredMCRproducts.txt
 run_MIRRORS.sh
 MIRRORS.app
-MIRRORS.exe
 *.asv
 *.m~
