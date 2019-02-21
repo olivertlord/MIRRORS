@@ -110,30 +110,19 @@ if get(handles.checkbox2,'Value') == 1
     savename = strcat('MIRRORS_output_',regexprep(datestr(clock),...
         ' |-|:','_'));
     mkdir(upath,savename);
-    
-    % Determine path to app location
-    if isdeployed
-        appRoot = ctfroot;
-        if ismac
-            appRootSplit = strsplit(appRoot,'MIRRORS.app');
-        elseif ispc
-            [~,pcroot] = system('path');
-            appRoot = char(regexpi(pcroot, 'Path=(.*?);', 'tokens', 'once'));
-            appRootSplit = strsplit(appRoot,'MIRRORS.exe');
-        end
-    else
-        appRootSplit = strsplit(pwd);
-    end
-      
-    copyfile(strcat(appRootSplit{1},'/hardware_parameters.mat'),...
-        strcat(upath,'/',savename,'/hardware_parameters.mat'))
-    copyfile(strcat(appRootSplit{1},'/calibration.mat'),strcat(upath,...
-        '/',savename,'/calibration.mat'))
 
     setappdata(0,'savename',savename);
     
     % Extract parent folder name
     expname = strsplit(upath,{'/','\'});
+    
+    load('calibration.mat');
+    load('hardware_parameters.mat');
+    
+    save(strcat(upath,'/',savename,'/','calibration.mat'),'cal','name');
+    save(strcat(upath,'/',savename,'/','hardware_parameters.mat'),...
+        'wa','wb','wc','wd','sr_wa','sr_wb','sr_wc','sr_wd',...
+        'pixel_width','system_mag','NA');
     
     % Open video file
     videofile = char(strcat(upath,'/',savename,'/',expname(end),'_VIDEO.avi'));
