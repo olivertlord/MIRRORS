@@ -809,7 +809,7 @@ if isdeployed
         appRootSplit = strsplit(appRoot,'MIRRORS.exe');
     end
 else
-    appRootSplit = pwd;
+    appRootSplit = strsplit(pwd);
 end
 
 % Ask user to select folder containing example data    
@@ -903,7 +903,7 @@ if isdeployed
         appRootSplit = strsplit(appRoot,'MIRRORS.exe');
     end
 else
-    appRootSplit = pwd;
+    appRootSplit = strsplit(pwd);
 end
 
 % Ask user to select folder containing example data    
