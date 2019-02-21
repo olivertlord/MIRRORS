@@ -110,6 +110,11 @@ if get(handles.checkbox2,'Value') == 1
     savename = strcat('MIRRORS_output_',regexprep(datestr(clock),...
         ' |-|:','_'));
     mkdir(upath,savename);
+    copyfile('hardware_parameters.mat',strcat(upath,'/',savename,...
+        '/hardware_parameters.mat'))
+    copyfile('calibration.mat',strcat(upath,'/',savename,...
+        '/calibration.mat'))
+
     setappdata(0,'savename',savename);
     
     % Extract parent folder name

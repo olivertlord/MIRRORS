@@ -2,7 +2,7 @@ function varargout = MIRRORS(varargin)
 %--------------------------------------------------------------------------
 % MIRRORS (MultIspectRal imaging RadiOmetRy Software)
 %--------------------------------------------------------------------------
-% Version 1.7
+% Version 1.7.1
 % Written and tested on Matlab R2014a (Windows 7) & R2017a (OS X 10.13)
 
 % Copyright 2018 Oliver Lord, Weiwei Wang
@@ -128,7 +128,7 @@ plots = [handles.axes2 handles.axes3 handles.axes4 handles.axes5...
     handles.axes6 handles.axes7];
 
 % VERSION NUMBER
-set(handles.text17,'String','1.7.0');
+set(handles.text17,'String','1.7.1');
 
 % Sets aspect ratio for all axes within the GUI to 1:1
 for i=1:6
@@ -783,7 +783,8 @@ else
 end
 
 % Ask user to select new Calibration Image   
-[cal_file,cal_path] = uigetfile(strcat(appRootSplit{1},'/*.tiff'),'Select new Calibration Image');
+[cal_file,cal_path] = uigetfile(strcat(appRootSplit{1},'/*.tiff'),...
+    'Select new Calibration Image');
 
 % Read in data and convert to double
 cal_image = imread(strcat(cal_path,cal_file));
@@ -791,6 +792,7 @@ cal_data = im2double(cal_image);
 
 % Save data to .MAT file
 calmat.cal = cal_data;
+calmat.name = cal_file;
 
 %--------------------------------------------------------------------------
 % --- Executes when BENCHMARK button is pushed
