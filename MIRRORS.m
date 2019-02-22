@@ -637,7 +637,7 @@ setappdata(0,'auto_flag','0');
 dir_content = getappdata(0,'dir_content');
 
 %Get list of positions in folder of files to be fitted
-listpos = getappdata(0,'listpos');
+listpos = getappdata(0,'listpos')
 
 % Determine start and end positions within file list;
 [start_file,~] = find(filenumber'==fi);
@@ -957,7 +957,7 @@ dir_content = dir(strcat(example_data,'/example_0*'));
 
 % Set directory content and listpos into appdata
 setappdata(0,'dir_content',dir_content)
-listpos = length(dir_content)-10:1:length(dir_content);
+listpos = length(dir_content)-4:1:length(dir_content);
 setappdata(0,'listpos',listpos)
 
 % Fix subframe position
@@ -965,10 +965,10 @@ setappdata(0,'subframe',[91 28 200 200])
 
 % Fix file range
 set(handles.edit1,'string','1')
-set(handles.edit2,'string','11')
+set(handles.edit2,'string','5')
 
 % Fix filenumber list and upath
-setappdata(0,'filenumber',[1 2 3 4 5 6 7 8 9 10 11]);
+setappdata(0,'filenumber',[1 2 3 4 5]);
 setappdata(0,'upath',example_data);
 
 % Set user options
@@ -978,6 +978,20 @@ set(handles.checkbox2,'Value',1)
 
 % Initialise counter
 t1 = 1;
+
+% Load current hardware_parameters
+load('calibration.mat');
+
+% Read in data and convert to double
+cal_image = imread(strcat(example_data,'/tc_example.tiff'));
+cal_data = im2double(cal_image);
+
+% Save data to .MAT file
+calmat.cal = cal_data;
+calmat.name = 'tc_example.tiff';
+
+% Write current calibration name to GUI
+set(handles.text20,'String',calmat.name);
 
 for m = 1:4
     for n = 5:8
