@@ -126,7 +126,7 @@ abcd = cat(3,a,b,c,d);
 cal_abcd = cat(3,cal_a,cal_b,cal_c,cal_d);
 
 % Determine which quadrant is the brightest
-[~,~,v] = ind2sub(size(abcd),find(abcd == max(abcd(:))));
+[~,~,v] = ind2sub(size(abcd),find(abcd == min(abcd(:))));
 
 % Produces smoothed brightest quadrant for contouring
 sb = conv2(abcd(:,:,v(1))./(cal_abcd(:,:,v(1))),ones(bsz,bsz),'same');
@@ -187,6 +187,8 @@ for m=bw:length(a)-bw
         end
     end
 end
+
+assignin('base','T',T)
 
 % Determine peak temperature based on user choice
 if get(handles.radiobutton1,'value') == 1   

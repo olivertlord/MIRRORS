@@ -244,7 +244,15 @@ axes(handles.axes5)
 cla
 
 if ~isnan(U_max)
-    imagesc(mu_pad,mu_pad,T,[(min(min(T(T>0)))) max(T(:))]);
+    % Forces Clim values to be different if they are the same to prevent
+    % error 
+    Clim_min=(min(min(T(T>0))));
+    Clim_max=max(T(:));
+    if Clim_min == Clim_max
+        Clim_max = Clim_max+1;
+    end
+    
+    imagesc(mu_pad,mu_pad,T,[Clim_min Clim_max]);
 
     % add colorbar and intensity contour
     originalSize = get(gca, 'Position');
@@ -273,7 +281,15 @@ axes(handles.axes6)
 cla
 
 if ~isnan(U_max)
-    imagesc(mu_pad,mu_pad,E_T,[(min(E_T(:))) (max(E_T(:)))]);
+    % Forces Clim values to be different if they are the same to prevent
+    % error 
+    Clim_min=(min(E_T(:)));
+    Clim_max=(max(E_T(:)));
+    if Clim_min == Clim_max
+        Clim_max = Clim_max+1;
+    end
+    
+    imagesc(mu_pad,mu_pad,E_T,[Clim_min Clim_max]);
 
     % add colorbar and intensity contour
     originalSize = get(gca, 'Position');

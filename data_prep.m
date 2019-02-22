@@ -1,5 +1,5 @@
-function [w,x,y,fi,fl,filenumber,upath,cal_a,cal_b,cal_c,...
-    cal_d,savename,writerObj,expname] = data_prep(handles)
+function [w,x,y,fi,fl,filenumber,upath,savename,writerObj,expname]...
+    = data_prep(handles)
 %--------------------------------------------------------------------------
 % Function DATA_PREP
 %--------------------------------------------------------------------------
@@ -76,31 +76,6 @@ upath = getappdata(0,'upath');
 % Clear all axes
 arrayfun(@cla,findall(0,'type','axes'))
 fclose('all');
-
-%--------------------------------------------------------------------------
-% Reads in calibration .MAT file
-load('calibration.mat');
-
-% Divides background subtracted image into four quadrants
-cal_a = cal(1:size(cal,1)/2,1:size(cal,2)/2,:);
-cal_b = cal(size(cal,1)/2+1:size(cal,1),1:size(cal,2)/2,:);
-cal_c = cal(1:size(cal,1)/2,size(cal,2)/2+1:size(cal,2),:);
-cal_d = cal(size(cal,1)/2+1:size(cal,1),size(cal,2)/2+1:size(cal,2),:);
-
-% Wavelengths of each quadrant at Bristol
-% a = top left (670 nm)
-% b = top right (750 nm)
-% c = bottom left (850 nm)
-% d = bottom right (580 nm)
-
-% Returns spatially correlated calibration subframes
-[bya,bxa,cya,cxa,dya,dxa] = correlate(cal_a,cal_b,cal_c,cal_d);
-
-% Shifts quadrants based on offsets and pads by 10 pixels
-cal_a=cal_a(y-w-4:y+w+4,x-w-4:x+w+4);
-cal_b=cal_b(y-w+bya-4:y+w+bya+4,x-w+bxa-4:x+w+bxa+4);
-cal_c=cal_c(y-w+cya-4:y+w+cya+4,x-w+cxa-4:x+w+cxa+4);
-cal_d=cal_d(y-w+dya-4:y+w+dya+4,x-w+dxa-4:x+w+dxa+4);
 
 %--------------------------------------------------------------------------
 % Create output directory if Save Output checkbox is ticked

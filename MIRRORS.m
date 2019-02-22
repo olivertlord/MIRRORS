@@ -130,6 +130,10 @@ plots = [handles.axes2 handles.axes3 handles.axes4 handles.axes5...
 % VERSION NUMBER
 set(handles.text17,'String','1.7.1');
 
+% Write current calibration file to GUI window
+load('calibration.mat');
+set(handles.text20,'String',name);
+
 % Sets aspect ratio for all axes within the GUI to 1:1
 for i=1:6
    axes(plots(i)); %#ok<LAXES>
@@ -251,6 +255,18 @@ else
             % Subtracts background
             raw = raw-background;
             
+            % Reads in calibration .MAT file
+            load('calibration.mat');
+            
+            % Subtract background
+            cal = cal-background;
+            
+            % Divides background subtracted image into four quadrants
+            cal_a = cal(1:size(cal,1)/2,1:size(cal,2)/2,:);
+            cal_b = cal(size(cal,1)/2+1:size(cal,1),1:size(cal,2)/2,:);
+            cal_c = cal(1:size(cal,1)/2,size(cal,2)/2+1:size(cal,2),:);
+            cal_d = cal(size(cal,1)/2+1:size(cal,1),size(cal,2)/2+1:size(cal,2),:);
+            
             % Calls DATA_PREP function on the first pass
             if c1 == 1
                 
@@ -260,8 +276,8 @@ else
                 w = 200;
                 setappdata(0,'subframe',[x-(w/2) y-(w/2) w w])
                 
-                [w,x,y,~,~,~,upath,cal_a,cal_b,cal_c,cal_d,savename,...
-                    writerObj,expname] = data_prep(handles);
+                [w,x,y,~,~,~,upath,savename,writerObj,expname]...
+                    = data_prep(handles);
             end
                       
             % Divides background subtracted image into four quadrants
@@ -281,13 +297,20 @@ else
             % dataset
             if c1 == 1
                 [bya,bxa,cya,cxa,dya,dxa] = correlate(a,b,c,d);
+                [bya,bxa,cya,cxa,dya,dxa] = correlate(cal_a,cal_b,cal_c,cal_d);
             end
             
             % Shifts quadrants based on offsets and pads by 4 pixels
             a = a(y-w-4:y+w+4,x-w-4:x+w+4);
             b = b(y-w+bya-4:y+w+bya+4,x-w+bxa-4:x+w+bxa+4);
             c = c(y-w+cya-4:y+w+cya+4,x-w+cxa-4:x+w+cxa+4);
-            d = d(y-w+dya-4:y+w+dya+4,x-w+dxa-4:x+w+dxa+4);         
+            d = d(y-w+dya-4:y+w+dya+4,x-w+dxa-4:x+w+dxa+4);   
+            
+            % Shifts quadrants based on offsets and pads by 4 pixels
+            cal_a = cal_a(y-w-4:y+w+4,x-w-4:x+w+4);
+            cal_b = cal_b(y-w+bya-4:y+w+bya+4,x-w+bxa-4:x+w+bxa+4);
+            cal_c = cal_c(y-w+cya-4:y+w+cya+4,x-w+cxa-4:x+w+cxa+4);
+            cal_d = cal_d(y-w+dya-4:y+w+dya+4,x-w+dxa-4:x+w+dxa+4);     
             
             % Calls mapper function to calculate temperature, error and
             % emissivity maps, and also returns maximum T and associated
@@ -607,8 +630,8 @@ setappdata(0,'auto_flag','0');
     
 % Calls DATA_PREP function which returns parameters for the sequential
 % fitting
-[w,x,y,fi,fl,filenumber,upath,cal_a,cal_b,cal_c,cal_d,savename,...
-    writerObj,expname] = data_prep(handles);
+[w,x,y,fi,fl,filenumber,upath,savename,writerObj,expname]...
+    = data_prep(handles);
 
 % Get list of .TIFF files from appdata
 dir_content = getappdata(0,'dir_content');
@@ -639,8 +662,8 @@ for i=start_file:end_file
         raw(end-9:end,1:10) raw(end-9:end,end-9:end)]));
     
     % Subtracts background
-    raw = raw-background;
-    
+    raw = raw-background;   
+  
     % Divides background subtracted image into four quadrants
     a = raw(1:size(raw,1)/2,1:size(raw,2)/2,:);
     b = raw(size(raw,1)/2+1:size(raw,1),1:size(raw,2)/2,:);
@@ -653,33 +676,40 @@ for i=start_file:end_file
     % c = bottom left (850 nm)
     % d = bottom right (580 nm)
     
+    % Reads in calibration .MAT file
+    load('calibration.mat');
+    
+    % Subtract background
+    cal = cal-background;
+
+    % Divides background subtracted image into four quadrants
+    cal_a = cal(1:size(cal,1)/2,1:size(cal,2)/2,:);
+    cal_b = cal(size(cal,1)/2+1:size(cal,1),1:size(cal,2)/2,:);
+    cal_c = cal(1:size(cal,1)/2,size(cal,2)/2+1:size(cal,2),:);
+    cal_d = cal(size(cal,1)/2+1:size(cal,1),size(cal,2)/2+1:size(cal,2),:);
+    
     % Returns spatial correlation parameters for first file in the dataset
-    % or if there is a gap of more than 1 between the last good file and
-    % the current file
+    % and the calibration file or if there is a gap of more than 1 between 
+    % the last good file and the current file. 
     if c1 == 1 || (c1 > 1 && filenumber(c1)-filenumber(c1-1) > 1)
         [bya,bxa,cya,cxa,dya,dxa] = correlate(a,b,c,d);
+        %[bya,bxa,cya,cxa,dya,dxa] = correlate(cal_a(,cal_b,cal_c,cal_d);
     end
-
-% Testing overlap catching routine
-%     crash_1 = [y-w-4 y-w+bya-4 y-w+cya-4 y-w+dya-4 x-w-4 x-w+bxa-4,...
-%         x-w+cxa-4 x-w+dxa-4];
-%     crash_2 = [y+w+4 y+w+bya+4 y+w+cya+4 y+w+dya+4];
-%     crash_3 = [x+w+4 x+w+bxa+4 x+w+cxa+4 x+w+dxa+4];
-%     
-%     overlap = abs(min([crash_1,255-crash_2,382-crash_3]))
-%     w
-%     if min(crash_1) < 0 || max(crash_2) > 255 || max(crash_3) > 382
-%         w = (w - (overlap+1))
-%         setappdata(0,'subframe',[x y w*2 w*2])
-%         [w,x,y,~,~,filenumber,upath,cal_a,cal_b,cal_c,...
-%             cal_d,savename,writerObj,expname] = data_prep(handles)
-%     end
     
     % Shifts quadrants based on offsets and pads by 4 pixels
     a = a(y-w-4:y+w+4,x-w-4:x+w+4);
     b = b(y-w+bya-4:y+w+bya+4,x-w+bxa-4:x+w+bxa+4);
     c = c(y-w+cya-4:y+w+cya+4,x-w+cxa-4:x+w+cxa+4);
     d = d(y-w+dya-4:y+w+dya+4,x-w+dxa-4:x+w+dxa+4);
+    
+    assignin('base','a',a)
+    assignin('base','d',d)
+    
+    % Shifts quadrants based on offsets and pads by 4 pixels
+    cal_a=cal_a(y-w-4:y+w+4,x-w-4:x+w+4);
+    cal_b=cal_b(y-w+bya-4:y+w+bya+4,x-w+bxa-4:x+w+bxa+4);
+    cal_c=cal_c(y-w+cya-4:y+w+cya+4,x-w+cxa-4:x+w+cxa+4);
+    cal_d=cal_d(y-w+dya-4:y+w+dya+4,x-w+dxa-4:x+w+dxa+4);
     
     % Calls mapper function to calculate temperature, error and emissivity
     % maps, and also returns maximum T and associated errors, intensities,
@@ -701,8 +731,7 @@ for i=start_file:end_file
         T_dif_metric(c1),T,E_T,epsilon,E_E,T_dif,upath,savename);...
         %#ok<AGROW>
     assignin('base', 'result', result);
-    
-    
+        
     % Calculates job progress
     progress = ceil(c1/length(listpos(start_file:end_file))*100);
     
@@ -792,7 +821,11 @@ cal_data = im2double(cal_image);
 
 % Save data to .MAT file
 calmat.cal = cal_data;
-calmat.name = cal_file;
+calmat.name = cal_file
+
+% Write current calibration name to GUI
+set(handles.text20,'String',calmat.name);
+
 
 %--------------------------------------------------------------------------
 % --- Executes when BENCHMARK button is pushed
