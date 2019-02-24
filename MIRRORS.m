@@ -128,7 +128,7 @@ plots = [handles.axes2 handles.axes3 handles.axes4 handles.axes5...
     handles.axes6 handles.axes7];
 
 % VERSION NUMBER
-set(handles.text17,'String','1.7.1');
+set(handles.text17,'String','1.7.4');
 
 % Write current calibration file to GUI window
 load('calibration.mat');
@@ -294,23 +294,37 @@ else
             % d = bottom right (580 nm)
             
             % Returns spatial correlation parameters for first file in the
-            % dataset
-            if c1 == 1
+            % dataset or if there is a gap of more than 1 between the last 
+            % good file and the current file.
+            if c1 == 1 || (c1 > 1 && filenumber(c1)-filenumber(c1-1) > 1)
                 [bya,bxa,cya,cxa,dya,dxa] = correlate(a,b,c,d);
-                [bya,bxa,cya,cxa,dya,dxa] = correlate(cal_a,cal_b,cal_c,cal_d);
             end
             
             % Shifts quadrants based on offsets and pads by 4 pixels
             a = a(y-w-4:y+w+4,x-w-4:x+w+4);
             b = b(y-w+bya-4:y+w+bya+4,x-w+bxa-4:x+w+bxa+4);
             c = c(y-w+cya-4:y+w+cya+4,x-w+cxa-4:x+w+cxa+4);
-            d = d(y-w+dya-4:y+w+dya+4,x-w+dxa-4:x+w+dxa+4);   
+            d = d(y-w+dya-4:y+w+dya+4,x-w+dxa-4:x+w+dxa+4);
+            
+            % Returns spatial correlation parameters for the calibration
+            % file but only on the first pass through the loop. Note that 
+            % with a sufficiently flat field, the offsets are likely to be
+            % zero and this procedure will have no effect.
+            if c1 == 1
+                [cal_bya,cal_bxa,cal_cya,cal_cxa,cal_dya,cal_dxa] = ...
+                    correlate(cal_a(y-w:y+w,x-w:x+w),cal_b...
+                    (y-w:y+w,x-w:x+w),cal_c(y-w:y+w,x-w:x+w),cal_d...
+                    (y-w:y+w,x-w:x+w));
+            end
             
             % Shifts quadrants based on offsets and pads by 4 pixels
-            cal_a = cal_a(y-w-4:y+w+4,x-w-4:x+w+4);
-            cal_b = cal_b(y-w+bya-4:y+w+bya+4,x-w+bxa-4:x+w+bxa+4);
-            cal_c = cal_c(y-w+cya-4:y+w+cya+4,x-w+cxa-4:x+w+cxa+4);
-            cal_d = cal_d(y-w+dya-4:y+w+dya+4,x-w+dxa-4:x+w+dxa+4);     
+            cal_a=cal_a(y-w-4:y+w+4,x-w-4:x+w+4);
+            cal_b=cal_b(y-w+cal_bya-4:y+w+cal_bya+4,x-w+cal_bxa-4:...
+                x+w+cal_bxa+4);
+            cal_c=cal_c(y-w+cal_cya-4:y+w+cal_cya+4,x-w+cal_cxa-4:...
+                x+w+cal_cxa+4);
+            cal_d=cal_d(y-w+cal_dya-4:y+w+cal_dya+4,x-w+cal_dxa-4:...
+                x+w+cal_dxa+4);
             
             % Calls mapper function to calculate temperature, error and
             % emissivity maps, and also returns maximum T and associated
@@ -657,7 +671,7 @@ for i=start_file:end_file
     raw_image = imread(filepath);
     raw = im2double(raw_image);
     
-    % Determines background intensity using image corners
+    % Determines background intensity using image corners of unknown file
     background = mean(mean([raw(1:10,1:10) raw(1:10,end-9:end)...
         raw(end-9:end,1:10) raw(end-9:end,end-9:end)]));
     
@@ -679,7 +693,11 @@ for i=start_file:end_file
     % Reads in calibration .MAT file
     load('calibration.mat');
     
-    % Subtract background
+    % Subtract background. Note that this is the background determined from
+    % the current unknown, applied retrospectively to the calibration file.
+    % This is technically unreasonable, but determining a true background
+    % for the calibration file, which may consist of images that completely
+    % fill the frame, by looking at the corners or edges is risky.
     cal = cal-background;
 
     % Divides background subtracted image into four quadrants
@@ -689,11 +707,10 @@ for i=start_file:end_file
     cal_d = cal(size(cal,1)/2+1:size(cal,1),size(cal,2)/2+1:size(cal,2),:);
     
     % Returns spatial correlation parameters for first file in the dataset
-    % and the calibration file or if there is a gap of more than 1 between 
-    % the last good file and the current file. 
+    % or if there is a gap of more than 1 between the last good file and 
+    % the current file. 
     if c1 == 1 || (c1 > 1 && filenumber(c1)-filenumber(c1-1) > 1)
         [bya,bxa,cya,cxa,dya,dxa] = correlate(a,b,c,d);
-        %[bya,bxa,cya,cxa,dya,dxa] = correlate(cal_a(,cal_b,cal_c,cal_d);
     end
     
     % Shifts quadrants based on offsets and pads by 4 pixels
@@ -702,14 +719,21 @@ for i=start_file:end_file
     c = c(y-w+cya-4:y+w+cya+4,x-w+cxa-4:x+w+cxa+4);
     d = d(y-w+dya-4:y+w+dya+4,x-w+dxa-4:x+w+dxa+4);
     
-    assignin('base','a',a)
-    assignin('base','d',d)
+    % Returns spatial correlation parameters for the calibration file but
+    % only on the first pass through the loop. Note that with a
+    % sufficiently flat field, the offsets are likely to be zero and this
+    % procedure will have no effect.
+    if c1 == 1
+       [cal_bya,cal_bxa,cal_cya,cal_cxa,cal_dya,cal_dxa] = correlate(...
+           cal_a(y-w:y+w,x-w:x+w),cal_b(y-w:y+w,x-w:x+w),...
+           cal_c(y-w:y+w,x-w:x+w),cal_d(y-w:y+w,x-w:x+w));
+    end
     
     % Shifts quadrants based on offsets and pads by 4 pixels
     cal_a=cal_a(y-w-4:y+w+4,x-w-4:x+w+4);
-    cal_b=cal_b(y-w+bya-4:y+w+bya+4,x-w+bxa-4:x+w+bxa+4);
-    cal_c=cal_c(y-w+cya-4:y+w+cya+4,x-w+cxa-4:x+w+cxa+4);
-    cal_d=cal_d(y-w+dya-4:y+w+dya+4,x-w+dxa-4:x+w+dxa+4);
+    cal_b=cal_b(y-w+cal_bya-4:y+w+cal_bya+4,x-w+cal_bxa-4:x+w+cal_bxa+4);
+    cal_c=cal_c(y-w+cal_cya-4:y+w+cal_cya+4,x-w+cal_cxa-4:x+w+cal_cxa+4);
+    cal_d=cal_d(y-w+cal_dya-4:y+w+cal_dya+4,x-w+cal_dxa-4:x+w+cal_dxa+4);
     
     % Calls mapper function to calculate temperature, error and emissivity
     % maps, and also returns maximum T and associated errors, intensities,
@@ -979,8 +1003,8 @@ set(handles.checkbox2,'Value',1)
 % Initialise counter
 t1 = 1;
 
-% Load current hardware_parameters
-load('calibration.mat');
+% Load current calibration file
+calmat = matfile('calibration.mat','Writable',true);
 
 % Read in data and convert to double
 cal_image = imread(strcat(example_data,'/tc_example.tiff'));
