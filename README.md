@@ -16,11 +16,11 @@ MIRRORS requires a multispectral imaging radiometry system that produces .TIFF f
 
 The system needs a thermal calibration .TIFF image produced using a calibrated source of known spectral radiance and as before, consisting of four equal quadrants each illuminated by a monochromatic image of the calibration source.
 
-Details of the MIR system as well as calibration methods can be found in Campbell et al. (2008) and Lord & Wang (in prep).
+Details of the MIR system as well as calibration methods can be found in Campbell et al. (2008) and Lord & Wang (2018).
 
 ## Installation
 
-MIRRORS can be run either from the Matlab command line or as a standalone application on on Mac OS X or Windows 7. MIRRORS was written and tested on versions R2014a (Windows 7) & R2015a/17a/18b (OS X 10.13). It will likely work on all versions after R2014a on both Windows 7 and OS X, but has not been explicity tested.
+MIRRORS can be run either from the Matlab command line or as a standalone application on Mac OS X or Windows 7. MIRRORS was written and tested on versions R2014a (Windows 7) & R2015a/17a/18b (OS X 10.13). It will likely work on all versions after R2014a on both Windows 7 and OS X, but has not been explicity tested.
 
 ### Instructions for users intending to run MIRRORS from the Matlab command line
 
@@ -28,7 +28,7 @@ MIRRORS requires the Matlab image, signal and statistics toolboxes to be install
 
 Simply navigate to https://github.com/olivertlord/MIRRORS/releases/latest and download the latest source code (as either a .ZIP or .tar.gz file) and extract to your desired location. 
 
-To run MIRRORS, simply open Matlab, navigate to the MIRRORS directory and then type
+To run MIRRORS, open Matlab, navigate to the MIRRORS directory and then type
 
 ```
 MIRRORS
@@ -53,7 +53,7 @@ Where ```~/MIRRORS``` is the full path to your MIRRORS directory. Now, next time
 
 ### Instructions for users intending to run MIRRORS from the standalone app
 
-The MIRRORS standalone application requires the Matlab Component Runtime, which can be dowdloaded free. If you are running MIRRORS on Mac OS X, then you will need [MCR version 9.5 ofr Mac](http://ssd.mathworks.com/supportfiles/downloads/R2018b/deployment_files/R2018b/installers/maci64/MCR_R2018b_maci64_installer.dmg.zip). If you are running MIRRORS on Windows 7, then you will need [MCR version 8.3 for Windows (32-bit)] (https://uk.mathworks.com/supportfiles/downloads/R2014a/deployment_files/R2014a/installers/win32/MCR_R2014a_win32_installer.exe)
+The MIRRORS standalone application requires the Matlab Component Runtime, which can be dowdloaded for free. If you are running MIRRORS on Mac OS X, then you will need [MCR version 9.5 ofr Mac](http://ssd.mathworks.com/supportfiles/downloads/R2018b/deployment_files/R2018b/installers/maci64/MCR_R2018b_maci64_installer.dmg.zip). If you are running MIRRORS on Windows 7, then you will need [MCR version 8.3 for Windows (32-bit)] (https://uk.mathworks.com/supportfiles/downloads/R2014a/deployment_files/R2014a/installers/win32/MCR_R2014a_win32_installer.exe)
 
 Once this is installed, simply download MIRRORS.app (Mac Os X) or MIRRORS.exe (Windows 7) from https://github.com/olivertlord/MIRRORS/releases/latest and move it to a location of your choosing. Double clicking on the APP should launch MIRRORS.
 
@@ -99,15 +99,8 @@ difference =
          0    0.0016         0         0         0         0         0         0
          0    0.0016         0         0         0         0         0         0
          0    0.0040  206.0000         0         0         0         0         0
-         0    0.0040  206.0000         0         0         0         0         0
-         0    0.0040  206.0000         0         0         0         0         0
-         0    0.0040  206.0000         0         0         0         0         0
-         0    0.0040  206.0000         0         0         0         0         0
-         0    0.0040  206.0000         0         0         0         0         0
-         0    0.0040  206.0000         0         0         0         0         0
 ```
-
-The differences in column 2 and 3 simply reflect the fact that when downloading files from the internet, their modification date is set as the download time, rather than the time they were acquired. MIRRORS automatically resets these timestamps when you run the benchmark routine so there is at least 1 second between each. This allows the data to be plotted as a function of time, but the times will not match those in the example output. This is not a problem with MIRRORS and can be ignored. 
+Any differences in column 2 and 3 simply reflect the fact that when downloading files from the internet, their modification date is set as the download time, rather than the time they were acquired. MIRRORS automatically resets these timestamps when you run the benchmark routine so there is at least 1 second between each. This allows the data to be plotted as a function of time, but the times will not match those in the example output. This is not a problem with MIRRORS and can be ignored. 
 
 ### Testing MIRRORS when running the standalone app
 
