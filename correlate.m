@@ -38,17 +38,17 @@ function [bya,bxa,cya,cxa,dya,dxa] = correlate(a,b,c,d)
 cc = xcorr2(b,a);
 [~, imax] = max(abs(cc(:)));
 [ypeak, xpeak] = ind2sub(size(cc),imax(1));
-bya = (ypeak-size(a,1))
-bxa = (xpeak-size(a,2))
+bya = (ypeak-size(a,1));
+bxa = (xpeak-size(a,2));
 
 cc = xcorr2(c,a);
 [~, imax] = max(abs(cc(:)));
 [ypeak, xpeak] = ind2sub(size(cc),imax(1));
-cya = (ypeak-size(a,1))
-cxa = (xpeak-size(a,2))
+cya = (ypeak-size(a,1));
+cxa = (xpeak-size(a,2));
 
 cc = xcorr2(d,a);
 [~, imax] = max(abs(cc(:)));
 [ypeak, xpeak] = ind2sub(size(cc),imax(1));
-dya = (ypeak-size(a,1))
-dxa = (xpeak-size(a,2))
+dya = (ypeak-size(a,1));
+dxa = (xpeak-size(a,2));

@@ -86,6 +86,8 @@ function [] = data_plot(handles,nw,T_max,E_T_max,E_E_max,U_max,m_max,...
 % Close all open files
 fclose('all');
 
+persistent Clim_dif_min Clim_dif_max
+
 %--------------------------------------------------------------------------
 % Pixel to micron conversion
 mu_pad = linspace(-((length(sb)/2)*.18),((length(sb)/2)*.18),...
@@ -318,7 +320,24 @@ axes(handles.axes7)
 cla
 
 if ~isnan(U_max)
-    imagesc(mu_pad,mu_pad,T_dif,[min(Clim_min) max(Clim_max)]);
+    % Set Colour Limits for difference plot such that it is only
+    % extended but never reduced
+    
+    if i == 1
+        Clim_dif_min = 0;
+        Clim_dif_max = 0.001;
+    else
+        if min(T_dif(:)) < Clim_dif_min
+            Clim_dif_min = min(T_dif(:));
+        end
+        max(T_dif(:))
+        Clim_max
+        if max(T_dif(:)) > Clim_dif_max
+            Clim_dif_max = max(T_dif(:))
+        end
+    end
+    
+    imagesc(mu_pad,mu_pad,T_dif,[Clim_dif_min Clim_dif_max]);
 
     % add colorbar and intensity contour
     originalSize = get(gca, 'Position');

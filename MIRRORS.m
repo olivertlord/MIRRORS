@@ -293,6 +293,9 @@ else
             % c = bottom left (850 nm)
             % d = bottom right (580 nm)
             
+            % Extracts filenumber from filename
+            filenumber(c1) = extract_filenumber(dir_content(end).name);
+            
             % Returns spatial correlation parameters for first file in the
             % dataset or if there is a gap of more than 1 between the last 
             % good file and the current file.
@@ -342,26 +345,15 @@ else
             % Create concatenated summary output array and save to
             % workspace and save current map data to .txt file if Save
             % OUtput checkbox is ticked
-            
             [result(c1,:),timevector] = data_output(handles,dir_content(end),...
                 1,c1,T_max(c1),E_T_max(c1),C_max(c1),E_E_max(c1),...
                 T_dif_metric(c1),T,E_T,epsilon,E_E,T_dif,upath,...
                 savename); %#ok<AGROW>
             assignin('base', 'result', result);
             
-            % Extracts filenumber from filename
-            filenumber(c1) = extract_filenumber(dir_content(end).name);
-            
             % Calculates job progress
-            progress = 'N/A';
-            
-            % Set Colour Limits for difference plot such that it is only
-            % extended if but never reduced
-            [Clim_min(c1), Clim_max(c1)] = deal(min(T_dif(:)),...
-                max(T_dif(:))); %#ok<AGROW>
-            [Clim_min(isnan(Clim_min)), Clim_max(isnan(Clim_max))]...
-                = deal(0,0.001); %#ok<AGROW>
-            
+            progress = 'N/A';            
+         
             % Calls data_plot function
             data_plot(handles,nw,T_max,E_T_max,E_E_max,U_max,m_max,C_max,c1,...
                 filenumber,raw,timevector,result(:,3),T_dif_metric,T,...
@@ -491,7 +483,6 @@ for i=1:total
     % Assigns each file in sequence to filenumber array if the weakest of
     % the four hotspots is stronger than double the background if user has
     % chosen to fit saturated images
-    
     if saturate == 1 
         if min(max([d(:) a(:) c(:) b(:)])) > 2*background
             filenumber(c1) = extract_filenumber(cell2mat(filenames(i)));...
@@ -651,7 +642,7 @@ setappdata(0,'auto_flag','0');
 dir_content = getappdata(0,'dir_content');
 
 %Get list of positions in folder of files to be fitted
-listpos = getappdata(0,'listpos')
+listpos = getappdata(0,'listpos');
 
 % Determine start and end positions within file list;
 [start_file,~] = find(filenumber'==fi);
@@ -659,6 +650,9 @@ listpos = getappdata(0,'listpos')
 
 % Initialise c1
 c1 = 1;
+
+% Reads in calibration .MAT file
+load('calibration.mat');
 
 % Calculates temperature, error and difference maps and associated output
 % for each file and plots and stores the results.
@@ -689,9 +683,6 @@ for i=start_file:end_file
     % b = top right (750 nm)
     % c = bottom left (850 nm)
     % d = bottom right (580 nm)
-    
-    % Reads in calibration .MAT file
-    load('calibration.mat');
     
     % Subtract background. Note that this is the background determined from
     % the current unknown, applied retrospectively to the calibration file.
@@ -807,7 +798,6 @@ set(handles.text12,'String',strcat(num2str(round(slider_val)),{' '},'%'));
 %--------------------------------------------------------------------------
 % --- Executes on button press in Fit saturated images chackbox.
 function checkbox1_Callback(~, ~, handles) %#ok<DEFNU>
-pushbutton2_Callback([], [], handles)
 
 %--------------------------------------------------------------------------
 % --- Executes when user clicks on the Update Hardware Parameters button
