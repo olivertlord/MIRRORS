@@ -1,6 +1,6 @@
 function [] = data_plot(handles,nw,T_max,E_T_max,E_E_max,U_max,m_max,...
     C_max,i,filenumber,raw,timevector,elapsedSec,T_dif_metric,T,dx,dy,...
-    progress,T_dif,E_T,sb,bsz,epsilon,c1,plot_update)
+    progress,T_dif,E_T,Clim_min,Clim_max,sb,bsz,epsilon,c1)
 %--------------------------------------------------------------------------
 % Function DATA_PLOT
 %--------------------------------------------------------------------------
@@ -129,7 +129,7 @@ axis equal
 %--------------------------------------------------------------------------
 % Only update remaining plots on first pass pushbutton2_Callback processing
 % loop and every time when called form elsewhere
-if plot_update == 1
+if c1 == 1
 
 %--------------------------------------------------------------------------
 % TOP LEFT PLOT: normalised intensity vs normalised wavelength of hottest
@@ -323,7 +323,7 @@ if ~isnan(U_max)
     % Set Colour Limits for difference plot such that it is only
     % extended but never reduced
     
-    if c1 == 1
+    if i == 1
         Clim_dif_min = 0;
         Clim_dif_max = 0.001;
     else
@@ -332,7 +332,7 @@ if ~isnan(U_max)
         end
 
         if max(T_dif(:)) > Clim_dif_max
-            Clim_dif_max = max(T_dif(:));
+            Clim_dif_max = max(T_dif(:))
         end
     end
     

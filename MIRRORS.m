@@ -2,7 +2,7 @@ function varargout = MIRRORS(varargin)
 %--------------------------------------------------------------------------
 % MIRRORS (MultIspectRal imaging RadiOmetRy Software)
 %--------------------------------------------------------------------------
-% Version 1.7.4
+% Version 1.7.6
 % Written and tested on Matlab R2014a (Windows 7) & R2017a (OS X 10.13)
 
 % Copyright 2018 Oliver Lord, Weiwei Wang
@@ -128,7 +128,7 @@ plots = [handles.axes2 handles.axes3 handles.axes4 handles.axes5...
     handles.axes6 handles.axes7];
 
 % VERSION NUMBER
-set(handles.text17,'String','1.7.4');
+set(handles.text17,'String','1.7.6');
 
 % Write current calibration file to GUI window
 load('calibration.mat');
@@ -357,7 +357,7 @@ else
             % Calls data_plot function
             data_plot(handles,nw,T_max,E_T_max,E_E_max,U_max,m_max,C_max,c1,...
                 filenumber,raw,timevector,result(:,3),T_dif_metric,T,...
-                dx,dy,progress,T_dif,E_T,Clim_min,Clim_max,sb,bsz,epsilon,1);
+                dx,dy,progress,T_dif,E_T,sb,bsz,epsilon,c1,1);
             
             if get(handles.checkbox2,'Value') == 1
                 % Writes current GUI frame to movie
@@ -491,7 +491,7 @@ for i=1:total
             if ~isnan(filenumber)
                 data_plot(handles,[0 1],[NaN NaN],[NaN NaN],[NaN NaN],NaN,...
                     NaN,NaN,c1,filenumber,raw,0,[0 1],NaN,[1 2],1,1,[0 1],0,...
-                    [0 1],[1 2],0,1,0,[0,1;0,1],[NaN,NaN])
+                    [0 1],[1 2],0,1,0,[NaN,NaN])
             end
             
             c1 = c1+1;
@@ -509,7 +509,8 @@ for i=1:total
             if ~isnan(filenumber)
                 data_plot(handles,[0 1],[NaN NaN],[NaN NaN],[NaN NaN],NaN,...
                     NaN,NaN,c1,filenumber,raw,0,[0 1],NaN,[1 2],1,1,[0 1],0,...
-                    [0 1],[1 2],0,1,0,[0,1;0,1],[NaN,NaN])
+                    [0 1],[1 2],0,1,0,0)
+                    
             end
             
             c1 = c1+1;
@@ -651,9 +652,6 @@ listpos = getappdata(0,'listpos');
 % Initialise c1
 c1 = 1;
 
-% Reads in calibration .MAT file
-load('calibration.mat');
-
 % Calculates temperature, error and difference maps and associated output
 % for each file and plots and stores the results.
 for i=start_file:end_file
@@ -683,6 +681,9 @@ for i=start_file:end_file
     % b = top right (750 nm)
     % c = bottom left (850 nm)
     % d = bottom right (580 nm)
+    
+    % Reads in calibration .MAT file
+    load('calibration.mat');
     
     % Subtract background. Note that this is the background determined from
     % the current unknown, applied retrospectively to the calibration file.
@@ -749,18 +750,11 @@ for i=start_file:end_file
         
     % Calculates job progress
     progress = ceil(c1/length(listpos(start_file:end_file))*100);
-    
-    % Set Colour Limits for difference plot such that it is only extended
-    % but never reduced
-    [Clim_min(c1), Clim_max(c1)] = deal(min(T_dif(:)), max(T_dif(:)));...
-        %#ok<AGROW>
-    [Clim_min(isnan(Clim_min)), Clim_max(isnan(Clim_max))]...
-        = deal(0,0.001); %#ok<AGROW>
 
     % Calls data_plot function
     data_plot(handles,nw,T_max,E_T_max,E_E_max,U_max,m_max,C_max,i,...
         filenumber,raw,timevector,result(:,3),T_dif_metric,T,dx,dy,...
-        progress,T_dif,E_T,Clim_min,Clim_max,sb,bsz,epsilon,1);
+        progress,T_dif,E_T,sb,bsz,epsilon,c1,1);
     
     if get(handles.checkbox2,'Value') == 1
         % Writes current GUI frame to movie
