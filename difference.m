@@ -1,8 +1,8 @@
-function [T_dif,T_dif_metric] = difference(T, sb, bsz, c1, background)
+function [T_dif,T_dif_metric] = difference(T, sb_a, bsz, c1, background)
 %--------------------------------------------------------------------------
 % Function DIFFERENCE
 %--------------------------------------------------------------------------
-% Version 1.6
+% Version 1.7.7
 % Written and tested on Matlab R2014a (Windows 7) & R2017a (OS X 10.13)
 
 % Copyright 2018 Oliver Lord, Weiwei Wang
@@ -48,7 +48,7 @@ function [T_dif,T_dif_metric] = difference(T, sb, bsz, c1, background)
 %--------------------------------------------------------------------------
 % If intensity of image is less than 4*background, do not compute T_dif or
 % T_dif_metric but still set T0_field to current T map
-if (c1 == 1) || (max(sb(:)) < background*4)
+if (c1 == 1) || (max(sb_a(:)) < background*4)
     setappdata(0,'T0_field',(T - min(T(:)))/(max(T(:)) - min(T(:))));
     T_dif = NaN(length(T));
     T_dif_metric = NaN;
@@ -59,19 +59,15 @@ if (c1 == 1) || (max(sb(:)) < background*4)
 % melting behavior of tin up to 105 GPa. Physical Review B, 95(5), 054102.
 % http://doi.org/10.1103/PhysRevB.95.054102 (See Supplementary Information)
 else
-    % Calculate start pixel
-    sp = (bsz-1)/2+1;
-    
     % Get previous normalised temperature map
     T0_field = getappdata(0,'T0_field');
     
     % Compute current normalised temperature map
     T1_field = (T - min(T(:)))/(max(T(:)) - min(T(:)));
-    assignin('base','T',T)
-    assignin('base','sb',sb(sp:end-sp,sp:end-sp))
-    % Compute current normalised intensity map
-    I1_field = (sb(sp:end-sp,sp:end-sp) - min(sb(:)))/(max(sb(:)) - min(sb(:)));
     
+    % Compute current normalised intensity map
+    I1_field = (sb_a - min(sb_a(:)))/(max(sb_a(:)) - min(sb_a(:)));
+
     % Compute intensity weighted difference map
     T_dif = abs(T1_field-T0_field).*I1_field;
     
@@ -82,4 +78,3 @@ else
     setappdata(0,'T0_field',T0_field);
     %sets intial T field to current T map
 end
-%initial T field = 0 on first pass

@@ -1,5 +1,6 @@
 function [result,timevector] = data_output(handles,dir_content,i,c1,T_max,...
-    E_T_max,C_max,E_E_max,T_dif_metric,T,E_T,epsilon,E_E,T_dif,upath,savename)
+    E_T_max,C_max,E_E_max,T_dif_metric,T,E_T,epsilon,E_E,T_dif,mu,sb,...
+    upath,savename)
 %--------------------------------------------------------------------------
 % Function DATA_OUTPUT
 %--------------------------------------------------------------------------
@@ -88,9 +89,10 @@ result = [acq,timestamp,elapsedSec,T_max,E_T_max,C_max,E_E_max,...
 if get(handles.checkbox2,'Value') == 1
     % Generates data table containing all three maps
     [x1,y1] = meshgrid(1:length(T),1:length(T));
+    [mux,muy] = meshgrid(mu,mu);
     
     % Concatenate output array
-    xyz = real([x1(:) y1(:) T(:) E_T(:) epsilon(:) E_E(:) T_dif(:)]);...
+    xyz = real([x1(:) y1(:) mux(:) muy(:) sb(:) T(:) E_T(:) epsilon(:) E_E(:) T_dif(:)]);...
 
     % Creates unique file name for map data and saves it
     map=char(strcat(upath,'/',savename,'/',regexprep(dir_content(i)...

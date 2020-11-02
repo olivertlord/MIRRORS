@@ -1,4 +1,4 @@
-function [w,x,y,fi,fl,filenumber,upath,savename,writerObj,expname]...
+function [w,x,y,fi,fl,filenumber,savename,writerObj,expname]...
     = data_prep(handles)
 %--------------------------------------------------------------------------
 % Function DATA_PREP
@@ -37,7 +37,7 @@ function [w,x,y,fi,fl,filenumber,upath,savename,writerObj,expname]...
 %            filenumber = list of filenumbers extrcated from filenames in
 %            working directory
 
-%            upath = path to working directory
+%            lastpath.lastpath = path to working directory
 
 %            cal_a,calb,cal_c,cal_d = spatially correlated thermal
 %            calibration subframes
@@ -64,18 +64,19 @@ y = round(subframe(2))+w;
 fi = eval(get(handles.edit1,'string'));
 fl = eval(get(handles.edit2,'string'));
 
-
 %--------------------------------------------------------------------------
 % Gets list of positions of good data in the folder, filenumbers of those
 % data and the path to the folder
 filenumber = getappdata(0,'filenumber');
-upath = getappdata(0,'upath');
-
 
 %--------------------------------------------------------------------------
 % Clear all axes
 arrayfun(@cla,findall(0,'type','axes'))
 fclose('all');
+
+%--------------------------------------------------------------------------
+% Load previous file path from .MAT file
+lastpath = matfile('lastpath.mat','Writable',true);
 
 %--------------------------------------------------------------------------
 % Create output directory if Save Output checkbox is ticked
@@ -84,23 +85,23 @@ if get(handles.checkbox2,'Value') == 1
     % Create output folder
     savename = strcat('MIRRORS_output_',regexprep(datestr(clock),...
         ' |-|:','_'));
-    mkdir(upath,savename);
+    mkdir(lastpath.lastpath,savename);
 
     setappdata(0,'savename',savename);
     
     % Extract parent folder name
-    expname = strsplit(upath,{'/','\'});
+    expname = strsplit(lastpath.lastpath,{'/','\'});
     
     load('calibration.mat');
     load('hardware_parameters.mat');
     
-    save(strcat(upath,'/',savename,'/','calibration.mat'),'cal','name');
-    save(strcat(upath,'/',savename,'/','hardware_parameters.mat'),...
+    save(strcat(lastpath.lastpath,'/',savename,'/','calibration.mat'),'cal','name');
+    save(strcat(lastpath.lastpath,'/',savename,'/','hardware_parameters.mat'),...
         'wa','wb','wc','wd','sr_wa','sr_wb','sr_wc','sr_wd',...
         'pixel_width','system_mag','NA');
     
     % Open video file
-    videofile = char(strcat(upath,'/',savename,'/',expname(end),'_VIDEO.avi'));
+    videofile = char(strcat(lastpath.lastpath,'/',savename,'/',expname(end),'_VIDEO.avi'));
     
     % Sets up video recording of ouput screen
     writerObj = VideoWriter(videofile);

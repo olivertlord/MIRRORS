@@ -1,5 +1,5 @@
 function [T,E_T,E_E,epsilon,T_max,E_T_max,E_E_max,U_max,m_max,C_max,pr,...
-    pc,sb,bsz,nw] = mapper(cal_a,cal_b,cal_c,cal_d,d,a,c,b,handles,filepath)
+    pc,sb_a,bsz,nw] = mapper(cal_a,cal_b,cal_c,cal_d,d,a,c,b,handles,filepath)
 %--------------------------------------------------------------------------
 % Function MAPPER
 %--------------------------------------------------------------------------
@@ -241,6 +241,20 @@ elseif get(handles.radiobutton4,'Value') == 1
     % and pc so that peak position / cross sections can be plotted
     [~, p] = max(sb_a(:));
     [pr, pc] = ind2sub(size(sb_a),p);
+        
+elseif get(handles.radiobutton9,'Value') == 1
+    
+    % Determine the centre pixel
+    [pr, pc] = deal(size(sb_a,1)/2);
+
+    % To force 'centre pixel' to other location, manually change pr and pc
+    %pr = 37;
+    %pc = 31;
+    p = sub2ind(size(sb_a),pr,pc);
+    if isnan(T(pr,pc))
+        E_T(E_T==0)=NaN;
+        [~, p] = min(E_T(:));
+    end
 
 end
 

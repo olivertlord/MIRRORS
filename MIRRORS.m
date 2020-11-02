@@ -2,7 +2,7 @@ function varargout = MIRRORS(varargin)
 %--------------------------------------------------------------------------
 % MIRRORS (MultIspectRal imaging RadiOmetRy Software)
 %--------------------------------------------------------------------------
-% Version 1.7.6
+% Version 1.7.7
 % Written and tested on Matlab R2014a (Windows 7) & R2017a (OS X 10.13)
 
 % Copyright 2018 Oliver Lord, Weiwei Wang
@@ -128,10 +128,10 @@ plots = [handles.axes2 handles.axes3 handles.axes4 handles.axes5...
     handles.axes6 handles.axes7];
 
 % VERSION NUMBER
-set(handles.text17,'String','1.7.6');
+set(handles.text17,'String','1.7.7');
 
 % Write current calibration file to GUI window
-load('calibration.mat');
+load('calibration.mat','name');
 set(handles.text20,'String',name);
 
 % Sets aspect ratio for all axes within the GUI to 1:1
@@ -218,31 +218,35 @@ else
     % Default intensity cutoff to 25% and disable
     set(handles.slider1,'Value',0.25);
     set(handles.text12,'String','25 %');
-    set(handles.slider1,'Enable','off');
     
+    % Load previous file path from .MAT file
+    lastpath = matfile('lastpath.mat','Writable',true);
+
     % Ask user to point to folder containing .TIF files to be processed
-    upath = uigetdir('/Users/oliverlord/Dropbox/Work/EXPERIMENTS/');
-    setappdata(0,'upath',upath);
- 
+    lastpath.lastpath = uigetdir(lastpath.lastpath,'Select folder containing images to be processed');
+
     % Collect list of current .TIFF files
-    dir_content = dir(strcat(upath,'/*.tiff'));
+    dir_content = dir(strcat(lastpath.lastpath,'/*.tiff'));
     initial_list = {dir_content.name};
     
     % Initialise counter c1
     c1 = 1;
+    
+    % Prealocate filenumber variable
+    filenumber = zeros(1, length(initial_list));
 
     while getappdata(0,'auto_flag') == 1
         
         % Collects new list of filenames
         pause(0.1);
-        dir_content = dir(strcat(upath,'/*.tiff'));
+        dir_content = dir(strcat(lastpath.lastpath,'/*.tiff'));
         new_list = {dir_content.name};
         
         % Executes if a new file appears in the target folder
         if length(new_list) > length(initial_list)
             
             % Determines path to unknown file
-            filepath = char(strcat(upath,'/',(dir_content(end).name)));
+            filepath = char(strcat(lastpath.lastpath,'/',(dir_content(end).name)));
             
             % Reads in unknown file and convert to double precision
             raw_image = imread(filepath);
@@ -256,7 +260,7 @@ else
             raw = raw-background;
             
             % Reads in calibration .MAT file
-            load('calibration.mat');
+            load('calibration.mat','cal');
             
             % Subtract background
             cal = cal-background;
@@ -276,7 +280,7 @@ else
                 w = 200;
                 setappdata(0,'subframe',[x-(w/2) y-(w/2) w w])
                 
-                [w,x,y,~,~,~,upath,savename,writerObj,expname]...
+                [w,x,y,~,~,~,savename,writerObj,expname]...
                     = data_prep(handles);
             end
                       
@@ -329,17 +333,20 @@ else
             cal_d=cal_d(y-w+cal_dya-4:y+w+cal_dya+4,x-w+cal_dxa-4:...
                 x+w+cal_dxa+4);
             
+            % Pixel to micron conversion
+            mu = linspace((-w*.18),(w*.18),w*2);
+            
             % Calls mapper function to calculate temperature, error and
             % emissivity maps, and also returns maximum T and associated
             % errors, intensities, wien slope and intercept and map indices
             % and smoothed b quadrant for plotting countours later
             [T,E_T,E_E,epsilon,T_max(c1),E_T_max(c1),E_E_max(c1),U_max,...
-                m_max,C_max(c1),dx,dy,sb,bsz,nw] = mapper(cal_a,cal_b,cal_c,...
+                m_max,C_max(c1),dx,dy,sb_a,bsz,nw] = mapper(cal_a,cal_b,cal_c,...
                 cal_d,d,a,c,b,handles,filepath); %#ok<AGROW>
             
             % Calls difference function to calculate the difference map and
             % associated metric.
-            [T_dif,T_dif_metric(c1)] = difference(T, sb, bsz, c1,...
+            [T_dif,T_dif_metric(c1)] = difference(T, sb_a, bsz, c1,...
                 background); %#ok<AGROW>
             
             % Create concatenated summary output array and save to
@@ -347,17 +354,17 @@ else
             % OUtput checkbox is ticked
             [result(c1,:),timevector] = data_output(handles,dir_content(end),...
                 1,c1,T_max(c1),E_T_max(c1),C_max(c1),E_E_max(c1),...
-                T_dif_metric(c1),T,E_T,epsilon,E_E,T_dif,upath,...
+                T_dif_metric(c1),T,E_T,epsilon,E_E,T_dif,mu,sb_a,lastpath.lastpath,...
                 savename); %#ok<AGROW>
             assignin('base', 'result', result);
             
             % Calculates job progress
             progress = 'N/A';            
-         
+            
             % Calls data_plot function
             data_plot(handles,nw,T_max,E_T_max,E_E_max,U_max,m_max,C_max,c1,...
                 filenumber,raw,timevector,result(:,3),T_dif_metric,T,...
-                dx,dy,progress,T_dif,E_T,sb,bsz,epsilon,c1,1);
+                dx,dy,progress,T_dif,mu,E_T,sb_a,bsz,epsilon,c1,1);
             
             if get(handles.checkbox2,'Value') == 1
                 % Writes current GUI frame to movie
@@ -378,7 +385,7 @@ else
         close(writerObj);
 
         % Saves summary data to text file
-        summary_file = char(strcat(upath,'/',savename,'/',expname(end),...
+        summary_file = char(strcat(lastpath.lastpath,'/',savename,'/',expname(end),...
             '_SUMMARY.txt'));
         save (summary_file,'result','-ASCII','-double');
     end
@@ -387,7 +394,7 @@ end
 
 %--------------------------------------------------------------------------
 % --- Executes on press of POST PROCESS button
-function pushbutton2_Callback(~, ~, handles)
+function pushbutton2_Callback(~, ~, handles) %#ok<DEFNU>
 
 % Clear all axes within GUI
 arrayfun(@cla,findall(0,'type','axes'))
@@ -412,32 +419,38 @@ set(handles.slider1,'Enable','on');
 set(handles.checkbox2,'Enable','on');
 
 % Determine path to app location
-if isdeployed
-    appRoot = ctfroot;
-    if ismac
-        appRootSplit = strsplit(appRoot,'MIRRORS.app');
-    elseif ispc
-        [~,pcroot] = system('path');
-        appRoot = char(regexpi(pcroot, 'Path=(.*?);', 'tokens', 'once'));
-        appRootSplit = strsplit(appRoot,'MIRRORS.exe');
-    end
-else
-    appRootSplit = strsplit(pwd,'xxxx');
-end
+% if isdeployed
+%     appRoot = ctfroot;
+%     if ismac
+%         appRootSplit = strsplit(appRoot,'MIRRORS.app');
+%     elseif ispc
+%         [~,pcroot] = system('path');
+%         appRoot = char(regexpi(pcroot, 'Path=(.*?);', 'tokens', 'once'));
+%         appRootSplit = strsplit(appRoot,'MIRRORS.exe');
+%     end
+% else
+%     appRootSplit = strsplit(pwd,'xxxx');
+% end
+
+% Load previous file path from .MAT file
+lastpath = matfile('lastpath.mat','Writable',true);
 
 % Ask user to point to folder containing .TIF files to be processed
-upath = uigetdir(appRootSplit{1},'Select folder containing images to be processed');
+lastpath.lastpath = uigetdir(lastpath.lastpath,'Select folder containing images to be processed');
 
 % Create array containing file metadata on all .TIF files in folder that
 % have a trailing number
-dir_content = dir(strcat(upath,'/*.tiff'));
+dir_content = dir(strcat(lastpath.lastpath,'/*.tiff'));
+dir_content = dir_content(~[dir_content.isdir]);
+[~,idx] = sort([dir_content.datenum]);
+dir_content = dir_content(idx);
 setappdata(0,'dir_content',dir_content);
 
 % Determine number of .TIF files in folder
 total=size(dir_content,1);
 
 % Set string of text5 to current folder path
-set(handles.text5,'string',upath);
+set(handles.text5,'string',lastpath.lastpath);
 
 % List filenames of .TIF files in folder
 filenames = {dir_content.name};
@@ -452,9 +465,9 @@ c1 = 1;
 % Creates list of .TIF files to be fitted
 for i=1:total
 
-    char(strcat(upath,'/',(filenames(i))));
+    char(strcat(lastpath.lastpath,'/',(filenames(i))));
     % Reads in unknown file  
-    raw=imread(char(strcat(upath,'/',(filenames(i)))));
+    raw=imread(char(strcat(lastpath.lastpath,'/',(filenames(i)))));
     
     % Determines background intensity
     background = mean(mean([raw(1:10,1:10) raw(1:10,end-9:end)...
@@ -477,7 +490,7 @@ for i=1:total
     
     % Automaticlly determines the bit depth of the .TIFF files being used
     % and sets the saturation limit to 99% of that value
-    image_info = imfinfo(char(strcat(upath,'/',(filenames(i)))));
+    image_info = imfinfo(char(strcat(lastpath.lastpath,'/',(filenames(i)))));
     saturation_limit = 2^image_info.BitDepth*.95;
     
     % Assigns each file in sequence to filenumber array if the weakest of
@@ -487,10 +500,10 @@ for i=1:total
         if min(max([d(:) a(:) c(:) b(:)])) > 2*background
             filenumber(c1) = extract_filenumber(cell2mat(filenames(i)));...
                 %#ok<AGROW>
-            listpos(c1)=i;
+            listpos(c1)=i; %#ok<AGROW>
             if ~isnan(filenumber)
                 data_plot(handles,[0 1],[NaN NaN],[NaN NaN],[NaN NaN],NaN,...
-                    NaN,NaN,c1,filenumber,raw,0,[0 1],NaN,[1 2],1,1,[0 1],0,...
+                    NaN,NaN,c1,filenumber,raw,0,[0 1],NaN,[1 2],1,1,[0 1],0,[-1,1],...
                     [0 1],[1 2],0,1,0,[NaN,NaN])
             end
             
@@ -505,10 +518,10 @@ for i=1:total
                 (max(max([d(:) a(:) c(:) b(:)])) < saturation_limit)
             filenumber(c1) = extract_filenumber(cell2mat(filenames(i)))...
                 ; %#ok<AGROW>  
-            listpos(c1)=i;
+            listpos(c1)=i; %#ok<AGROW>
             if ~isnan(filenumber)
                 data_plot(handles,[0 1],[NaN NaN],[NaN NaN],[NaN NaN],NaN,...
-                    NaN,NaN,c1,filenumber,raw,0,[0 1],NaN,[1 2],1,1,[0 1],0,...
+                    NaN,NaN,c1,filenumber,raw,0,[0 1],NaN,[1 2],1,1,[0 1],0,[-1,1],...
                     [0 1],[1 2],0,1,0,0)
                     
             end
@@ -531,8 +544,6 @@ filenumber = filenumber(~isnan(filenumber));
 setappdata(0,'filenumber',filenumber)
 setappdata(0,'listpos',listpos)
 setappdata(0,'dir_content',dir_content)
-setappdata(0,'upath',upath)
-
 
 %--------------------------------------------------------------------------
 % --- Executes on press of SELECT ROI button
@@ -556,7 +567,7 @@ delete(hfindrect)
 % and size (constrined to a square, and a region with a 20 pixel hold off
 % from the edge of the frame to allow space for misalignment and padding
 % pixel binning).
-ROI = imrect(handles.axes1, [91 28 200 200]);
+ROI = imrect(handles.axes1, [91 28 200 200]); %#ok<IMRECT>
 fcn = makeConstrainToRectFcn('imrect',[20 344],[20 235]);
 setPositionConstraintFcn(ROI,fcn);
 setFixedAspectRatioMode(ROI,'True');
@@ -631,12 +642,15 @@ control_colors(flag, handles)
 % --- Executes when user presses PROCESS button
 function pushbutton4_Callback(~, ~, handles) 
 
+% Load previous file path from .MAT file
+lastpath = matfile('lastpath.mat','Writable',true);
+
 % Reset auto_flag to 0
 setappdata(0,'auto_flag','0');
-    
+
 % Calls DATA_PREP function which returns parameters for the sequential
 % fitting
-[w,x,y,fi,fl,filenumber,upath,savename,writerObj,expname]...
+[w,x,y,fi,fl,filenumber,savename,writerObj,expname]...
     = data_prep(handles);
 
 % Get list of .TIFF files from appdata
@@ -652,12 +666,15 @@ listpos = getappdata(0,'listpos');
 % Initialise c1
 c1 = 1;
 
+% Pixel to micron conversion
+mu = linspace((-w*.18),(w*.18),w*2);
+
 % Calculates temperature, error and difference maps and associated output
 % for each file and plots and stores the results.
 for i=start_file:end_file
-    
+
     % Determines path to unknown file
-    filepath = char(strcat(upath,'/',(dir_content(listpos(i)).name)));
+    filepath = char(strcat(lastpath.lastpath,'/',(dir_content(listpos(i)).name)));
     
     % Reads in unknown file and convert to double precision
     raw_image = imread(filepath);
@@ -683,7 +700,7 @@ for i=start_file:end_file
     % d = bottom right (580 nm)
     
     % Reads in calibration .MAT file
-    load('calibration.mat');
+    load('calibration.mat','cal');
     
     % Subtract background. Note that this is the background determined from
     % the current unknown, applied retrospectively to the calibration file.
@@ -732,20 +749,20 @@ for i=start_file:end_file
     % wien slope and intercept and map indices and smoothed b quadrant for
     % plotting countours later
     [T,E_T,E_E,epsilon,T_max(c1),E_T_max(c1),E_E_max(c1),U_max,m_max,...
-        C_max(c1),dx,dy,sb,bsz,nw] = mapper(cal_a,cal_b,cal_c,cal_d,d,a,c,b,...
+        C_max(c1),dx,dy,sb_a,bsz,nw] = mapper(cal_a,cal_b,cal_c,cal_d,d,a,c,b,...
         handles,filepath); %#ok<AGROW>
-    
+
     % Calls difference function to calculate the difference map and
     % associated metric.
-    [T_dif,T_dif_metric(c1)] = difference(T, sb, bsz, c1, background);...
+    [T_dif,T_dif_metric(c1)] = difference(T, sb_a, bsz, c1, background);...
         %#ok<AGROW>
     
     % Create concatenated summary output array and save to workspace and
     % save current map data to .txt file if Save Output checkbox ticked
     [result(c1,:),timevector] = data_output(handles,dir_content(listpos(i)),...
         1,c1,T_max(c1),E_T_max(c1),C_max(c1),E_E_max(c1),...
-        T_dif_metric(c1),T,E_T,epsilon,E_E,T_dif,upath,savename);...
-        %#ok<AGROW>
+        T_dif_metric(c1),T,E_T,epsilon,E_E,T_dif,mu,sb_a,lastpath.lastpath,savename);
+        
     assignin('base', 'result', result);
         
     % Calculates job progress
@@ -754,7 +771,7 @@ for i=start_file:end_file
     % Calls data_plot function
     data_plot(handles,nw,T_max,E_T_max,E_E_max,U_max,m_max,C_max,i,...
         filenumber,raw,timevector,result(:,3),T_dif_metric,T,dx,dy,...
-        progress,T_dif,E_T,sb,bsz,epsilon,c1,1);
+        progress,T_dif,mu,E_T,sb_a,bsz,epsilon,c1,1);
     
     if get(handles.checkbox2,'Value') == 1
         % Writes current GUI frame to movie
@@ -774,7 +791,7 @@ if get(handles.checkbox2,'Value') == 1
     close(writerObj);
     
     % Saves summary data to text file
-    summary_file = char(strcat(upath,'/',savename,'/',expname(end),...
+    summary_file = char(strcat(lastpath.lastpath,'/',savename,'/',expname(end),...
         '_SUMMARY.txt'));
     save (summary_file,'result','-ASCII','-double');
 end
@@ -791,7 +808,7 @@ set(handles.text12,'String',strcat(num2str(round(slider_val)),{' '},'%'));
 
 %--------------------------------------------------------------------------
 % --- Executes on button press in Fit saturated images chackbox.
-function checkbox1_Callback(~, ~, handles) %#ok<DEFNU>
+function checkbox1_Callback(~, ~, ~) %#ok<DEFNU>
 
 %--------------------------------------------------------------------------
 % --- Executes when user clicks on the Update Hardware Parameters button
@@ -806,30 +823,26 @@ function pushbutton8_Callback(~, ~, handles) %#ok<DEFNU>
 calmat = matfile('calibration.mat','Writable',true);
 
 % Determine path to app location
-if isdeployed
-    appRoot = ctfroot;
-    if ismac
-        appRootSplit = strsplit(appRoot,'MIRRORS.app');
-    elseif ispc
-        [~,pcroot] = system('path');
-        appRoot = char(regexpi(pcroot, 'Path=(.*?);', 'tokens', 'once'));
-        appRootSplit = strsplit(appRoot,'MIRRORS.exe');
-    end
-else
-    appRootSplit = strsplit(pwd,'xxxx');
-end
+% if isdeployed
+%     appRoot = ctfroot;
+%     if ismac
+%         appRootSplit = strsplit(appRoot,'MIRRORS.app');
+%     elseif ispc
+%         [~,pcroot] = system('path');
+%         appRoot = char(regexpi(pcroot, 'Path=(.*?);', 'tokens', 'once'));
+%         appRootSplit = strsplit(appRoot,'MIRRORS.exe');
+%     end
+% else
+%     appRootSplit = strsplit(pwd,'xxxx');
+% end
 
 % Ask user to select new Calibration Image   
-[cal_file,cal_path] = uigetfile(strcat(appRootSplit{1},'/*.tiff'),...
+[calmat.name,calmat.path] = uigetfile(strcat(calmat.path,'/*.tiff'),...
     'Select new Calibration Image');
 
 % Read in data and convert to double
-cal_image = imread(strcat(cal_path,cal_file));
-cal_data = im2double(cal_image);
-
-% Save data to .MAT file
-calmat.cal = cal_data;
-calmat.name = cal_file
+cal_image = imread(strcat(calmat.path,calmat.name));
+calmat.cal = im2double(cal_image);
 
 % Write current calibration name to GUI
 set(handles.text20,'String',calmat.name);
@@ -837,7 +850,7 @@ set(handles.text20,'String',calmat.name);
 
 %--------------------------------------------------------------------------
 % --- Executes when BENCHMARK button is pushed
-function pushbutton5_Callback(~, ~, handles)
+function pushbutton5_Callback(~, ~, handles) %#ok<DEFNU>
 
 % Determine path to app location
 if isdeployed
@@ -853,26 +866,29 @@ else
     appRootSplit = strsplit(pwd);
 end
 
+% Load previous file path from .MAT file
+lastpath = matfile('lastpath.mat','Writable',true);
+
 % Ask user to select folder containing example data    
-example_data = uigetdir(appRootSplit{1},'Select folder containing example data');
-    
+lastpath.lastpath = uigetdir(appRootSplit{1},'Select folder containing example data');
+
 % Get new directory content
-dir_content = dir(strcat(example_data,'/example_0*'));
+dir_content = dir(strcat(lastpath.lastpath,'/example_0*'));
     
 % Update timestamps by reading and re-writing a single byte IF they are
 % equal
 if strcmp(dir_content(1).date,dir_content(2).date) == 1
     for i = 1:length(dir_content)
         current = dir_content(i).name;
-        pause(1)
-        fid = fopen(strcat(example_data,'/',current),'r+');
+        pause(1.1)
+        fid = fopen(strcat(lastpath.lastpath,'/',current),'r+');
         byte = fread(fid, 1);
         fseek(fid, 0, 'bof');
         fwrite(fid, byte);
         fclose(fid);
     end
     % Update directory content
-    dir_content = dir(strcat(example_data,'/example_0*'));
+    dir_content = dir(strcat(lastpath.lastpath,'/example_0*'));
 end
 
 % Set directory content and listpos into appdata
@@ -885,11 +901,10 @@ setappdata(0,'subframe',[91 28 200 200])
 
 % Fix file range
 set(handles.edit1,'string','1')
-set(handles.edit2,'string','11')
+set(handles.edit2,'string','5')
 
-% Fix filenumber list and upath
+% Fix filenumber list
 setappdata(0,'filenumber',[1 2 3 4 5 6 7 8 9 10 11]);
-setappdata(0,'upath',example_data);
 
 % Set user options
 set(handles.slider1,'Value',0.25)
@@ -917,10 +932,11 @@ for m = 1:4
         % Get folder name of output directory
         savename = getappdata(0,'savename');
 
-        new = textread(strcat(example_data,'/',savename,...
-            '/example_SUMMARY.txt'));
-        benchmark = textread(strcat(example_data,'/test_',num2str(t1),...
-            '/example_SUMMARY.txt'));
+        new = textread(strcat(lastpath.lastpath,'/',savename,...
+            '/example_SUMMARY.txt'))
+        benchmark = textread(strcat(lastpath.lastpath,'/test_',num2str(t1),...
+            '/example_SUMMARY.txt'))
+       
         difference = new-benchmark
 
         % Increment counter
@@ -931,24 +947,10 @@ end
 
 %--------------------------------------------------------------------------
 % --- Executes when Update Test Data button is pushed
-function pushbutton9_Callback(~, ~, handles)
-
-% Determine path to app location
-if isdeployed
-    appRoot = ctfroot;
-    if ismac
-        appRootSplit = strsplit(appRoot,'MIRRORS.app');
-    elseif ispc
-        [~,pcroot] = system('path');
-        appRoot = char(regexpi(pcroot, 'Path=(.*?);', 'tokens', 'once'));
-        appRootSplit = strsplit(appRoot,'MIRRORS.exe');
-    end
-else
-    appRootSplit = strsplit(pwd);
-end
+function pushbutton9_Callback(~, ~, handles) %#ok<DEFNU>
 
 % Ask user to select folder containing example data    
-example_data = uigetdir(appRootSplit{1},'Select folder containing example data');
+example_data = uigetdir('Select folder containing example data');
 
 % Get current directory content
 dir_content = dir(example_data);
@@ -965,7 +967,7 @@ dir_content = dir(strcat(example_data,'/example_0*'));
 
 % Set directory content and listpos into appdata
 setappdata(0,'dir_content',dir_content)
-listpos = length(dir_content)-4:1:length(dir_content);
+listpos = 1:1:length(dir_content)
 setappdata(0,'listpos',listpos)
 
 % Fix subframe position
@@ -975,9 +977,9 @@ setappdata(0,'subframe',[91 28 200 200])
 set(handles.edit1,'string','1')
 set(handles.edit2,'string','5')
 
-% Fix filenumber list and upath
+% Fix filenumber list and lastpath.lastpath
 setappdata(0,'filenumber',[1 2 3 4 5]);
-setappdata(0,'upath',example_data);
+setappdata(0,'example_data',example_data);
 
 % Set user options
 set(handles.slider1,'Value',0.25)
@@ -992,11 +994,7 @@ calmat = matfile('calibration.mat','Writable',true);
 
 % Read in data and convert to double
 cal_image = imread(strcat(example_data,'/tc_example.tiff'));
-cal_data = im2double(cal_image);
-
-% Save data to .MAT file
-calmat.cal = cal_data;
-calmat.name = 'tc_example.tiff';
+calmat.cal = im2double(cal_image);
 
 % Write current calibration name to GUI
 set(handles.text20,'String',calmat.name);

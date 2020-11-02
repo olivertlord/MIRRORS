@@ -1,6 +1,6 @@
 function [] = data_plot(handles,nw,T_max,E_T_max,E_E_max,U_max,m_max,...
     C_max,i,filenumber,raw,timevector,elapsedSec,T_dif_metric,T,dx,dy,...
-    progress,T_dif,E_T,sb,bsz,epsilon,c1,plot_update)
+    progress,T_dif,mu,E_T,sb_a,bsz,epsilon,c1,plot_update)
 %--------------------------------------------------------------------------
 % Function DATA_PLOT
 %--------------------------------------------------------------------------
@@ -61,7 +61,7 @@ function [] = data_plot(handles,nw,T_max,E_T_max,E_E_max,U_max,m_max,...
 
 %           dx,dy = co-ordinates of peak pixel
 
-%           micorns = array containing distances in mu_pad from the
+%           micorns = array containing distances in mu from the
 %           subframe center for each pixel
 
 %           progress = percentage progress through current processing job
@@ -70,10 +70,10 @@ function [] = data_plot(handles,nw,T_max,E_T_max,E_E_max,U_max,m_max,...
 
 %           E_T = computed temperature error map
 
-%           Clim_min,Clim_max = minimu_padm and maximu_padm colour limits for
+%           Clim_min,Clim_max = minimum and maximum colour limits for
 %           differnece map
 
-%           sb = smoothed form of subframe b for contouring
+%           sb_a = smoothed form of subframe b for contouring
 
 %           c1 = flag; only plot output data if == 1. Speeds up plotting
 %           during initial data checking when user presses the post
@@ -88,14 +88,7 @@ fclose('all');
 
 persistent Clim_dif_min Clim_dif_max
 
-%--------------------------------------------------------------------------
-% Pixel to micron conversion
-mu_pad = linspace(-((length(sb)/2)*.18),((length(sb)/2)*.18),...
-    (((length(sb)/2)*2)));
-
-mu = linspace(-(((length(sb)-bsz)/2)*.18),(((length(sb)-bsz)/2)*.18),...
-    ((((length(sb)-bsz)/2)*2)));
-
+%-------------------------------------------------------------------------
 % Get colour map chosen by user
 contents = cellstr(get(handles.popupmenu1,'String'));
 colour_scheme = contents{get(handles.popupmenu1,'Value')};
@@ -120,7 +113,7 @@ delete(hfindrect)
 
 % Plot rectangle on summary plot except when this function is called from
 % pushbutton2_Callback
-if length(sb) > 2
+if length(sb_a) > 2
     rectangle('Position',getappdata(0,'subframe'),'EdgeColor','w',...
         'LineWidth',2);
 end
@@ -155,7 +148,6 @@ yline = polyval([m_max,C_max(end)],xline);
 plot(xline,yline,'-r')
 hold off
 pbaspect([1 1 1])
-
 
 %--------------------------------------------------------------------------
 %TOP MIDDLE PLOT: Peak Temperature History
@@ -194,8 +186,6 @@ if get(handles.radiobutton5,'Value') == 1
 % Temperature cross Sections
 elseif get(handles.radiobutton6,'Value') == 1
     cla
-    length(T)
-    length(mu)
     % centre lines on middle of hotspot
     plot(mu,T(dx,(1:length(T))),'r',mu,T(1:length(T),dy),'g');
 
@@ -254,7 +244,7 @@ if ~isnan(U_max)
         Clim_max = Clim_max+1;
     end
     
-    imagesc(mu_pad,mu_pad,T,[Clim_min Clim_max]);
+    imagesc(mu,mu,T,[Clim_min Clim_max]);
 
     % add colorbar and intensity contour
     originalSize = get(gca, 'Position');
@@ -262,7 +252,8 @@ if ~isnan(U_max)
     colorbar('location','NorthOutside');
     set(gca, 'Position', originalSize);
     hold on
-    contour(mu_pad,mu_pad,sb,10,'k');
+    
+    contour(mu,mu,sb_a,10,'k');
     plot(mu(dy),mu(dx),'ws','LineWidth',2,'MarkerSize',10,...
         'MarkerEdgeColor','w','MarkerFaceColor','w')
     xlim([min(mu) max(mu)])
@@ -275,7 +266,6 @@ xlabel('Distance (microns)', 'FontSize', 16);
 ylabel('Distance (microns)', 'FontSize', 16);
 title('TEMPERATURE MAP','FontSize',18); 
 pbaspect([1 1 1])
-
 
 %--------------------------------------------------------------------------
 %BOTTOM MIDDLE PLOT: error map
@@ -291,7 +281,7 @@ if ~isnan(U_max)
         Clim_max = Clim_max+1;
     end
     
-    imagesc(mu_pad,mu_pad,E_T,[Clim_min Clim_max]);
+    imagesc(mu,mu,E_T,[Clim_min Clim_max]);
 
     % add colorbar and intensity contour
     originalSize = get(gca, 'Position');
@@ -299,7 +289,7 @@ if ~isnan(U_max)
     colorbar('location','NorthOutside');
     set(gca, 'Position', originalSize);
     hold on
-    contour(mu_pad,mu_pad,sb,10,'k');
+    contour(mu,mu,sb_a,10,'k');
     plot(mu(dy),mu(dx),'ws','LineWidth',2,'MarkerSize',10,...
         'MarkerEdgeColor','w','MarkerFaceColor','w')
     xlim([min(mu) max(mu)])
@@ -336,7 +326,7 @@ if ~isnan(U_max)
         end
     end
     
-    imagesc(mu_pad,mu_pad,T_dif,[Clim_dif_min Clim_dif_max]);
+    imagesc(mu,mu,T_dif,[Clim_dif_min Clim_dif_max]);
 
     % add colorbar and intensity contour
     originalSize = get(gca, 'Position');
@@ -344,7 +334,7 @@ if ~isnan(U_max)
     colorbar('location','NorthOutside');
     set(gca, 'Position', originalSize);
     hold on
-    contour(mu_pad,mu_pad,sb,10,'k');
+    contour(mu,mu,sb_a,10,'k');
     plot(mu(dy),mu(dx),'ws','LineWidth',2,'MarkerSize',10,...
         'MarkerEdgeColor','w','MarkerFaceColor','w')
     xlim([min(mu) max(mu)])
