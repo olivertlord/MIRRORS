@@ -1,4 +1,4 @@
-# MIRRORS (MultIspectRal imaging RadiOmetRy Software) Version 1.7.0
+# MIRRORS (MultIspectRal imaging RadiOmetRy Software) Version 1.7.7
 
 [![DOI](https://zenodo.org/badge/100439021.svg)](https://zenodo.org/badge/latestdoi/100439021)
 
