@@ -1,5 +1,4 @@
-function [w,x,y,fi,fl,filenumber,savename,writerObj,expname]...
-    = data_prep(handles)
+function [w,x,y,savename] = data_prep(handles)
 %--------------------------------------------------------------------------
 % Function DATA_PREP
 %--------------------------------------------------------------------------
@@ -44,9 +43,6 @@ function [w,x,y,fi,fl,filenumber,savename,writerObj,expname]...
 
 %            savename = unique folder name for output
 
-%            writerObj = videofile object opened for recording GUI output
-%            as movie frames
-
 %            expname = the name of the folder containing the users data;
 %            the program assumes this is the name of the experiment and
 %            uses it to construct filenames for output.
@@ -60,23 +56,13 @@ x = round(subframe(1))+w;
 y = round(subframe(2))+w;
 
 %--------------------------------------------------------------------------
-% Get user inputted first and last files to be analysed    
-fi = eval(get(handles.edit1,'string'));
-fl = eval(get(handles.edit2,'string'));
-
-%--------------------------------------------------------------------------
-% Gets list of positions of good data in the folder, filenumbers of those
-% data and the path to the folder
-filenumber = getappdata(0,'filenumber');
-
-%--------------------------------------------------------------------------
 % Clear all axes
 arrayfun(@cla,findall(0,'type','axes'))
 fclose('all');
 
 %--------------------------------------------------------------------------
 % Load previous file path from .MAT file
-lastpath = matfile('lastpath.mat','Writable',true);
+unkmat = matfile('unkmat.mat','Writable',true);
 
 %--------------------------------------------------------------------------
 % Create output directory if Save Output checkbox is ticked
@@ -85,28 +71,17 @@ if get(handles.checkbox2,'Value') == 1
     % Create output folder
     savename = strcat('MIRRORS_output_',regexprep(datestr(clock),...
         ' |-|:','_'));
-    mkdir(lastpath.lastpath,savename);
+    mkdir(unkmat.path,savename);
 
     setappdata(0,'savename',savename);
-    
-    % Extract parent folder name
-    expname = strsplit(lastpath.lastpath,{'/','\'});
     
     load('calibration.mat');
     load('hardware_parameters.mat');
     
-    save(strcat(lastpath.lastpath,'/',savename,'/','calibration.mat'),'cal','name');
-    save(strcat(lastpath.lastpath,'/',savename,'/','hardware_parameters.mat'),...
+    save(strcat(unkmat.path,'/',savename,'/','calibration.mat'),'cal','name');
+    save(strcat(unkmat.path,'/',savename,'/','hardware_parameters.mat'),...
         'wa','wb','wc','wd','sr_wa','sr_wb','sr_wc','sr_wd',...
         'pixel_width','system_mag','NA');
-    
-    % Open video file
-    videofile = char(strcat(lastpath.lastpath,'/',savename,'/',expname(end),'_VIDEO.avi'));
-    
-    % Sets up video recording of ouput screen
-    writerObj = VideoWriter(videofile);
-    writerObj.FrameRate = 2;
-    open(writerObj);
 else
-    [savename,expname,writerObj] = deal([]);
+    savename = [];
 end

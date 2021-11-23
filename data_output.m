@@ -1,6 +1,5 @@
-function [result,timevector] = data_output(handles,dir_content,i,c1,T_max,...
-    E_T_max,C_max,E_E_max,T_dif_metric,T,E_T,epsilon,E_E,T_dif,mu,sb,...
-    upath,savename)
+function [timevector,elapsedSec] = data_output(handles,filename,c1,T_max,...
+    E_T_max,C_max,E_E_max,T_dif_metric,T,E_T,epsilon,E_E,T_dif,mu,sb,savename)
 %--------------------------------------------------------------------------
 % Function DATA_OUTPUT
 %--------------------------------------------------------------------------
@@ -31,8 +30,6 @@ function [result,timevector] = data_output(handles,dir_content,i,c1,T_max,...
 %   INPUTS: dir_content = structured array contaning metadata on every
 %           .TIFF file in the current directory
 
-%           i = the current position within filenumber
-
 %           c1 = flag used to save initial timestamp into appdata iff == 1
 
 %           T_max,E_max = peak temperature and associated error
@@ -55,11 +52,13 @@ function [result,timevector] = data_output(handles,dir_content,i,c1,T_max,...
 
 
 %--------------------------------------------------------------------------
-% Determine and store filenumber of each acquisiton in dataset
-acq = extract_filenumber(dir_content(i).name);
+
+% Load previous file path from .MAT file
+unkmat = matfile('unkmat.mat','Writable',true);
 
 %Get timestamp
-timestamp = datenum(dir_content(i).date);
+dir_content = dir(strcat(unkmat.path,'/',filename));
+timestamp = datenum(dir_content.date);
 
 % Vectorise timestamp
 timevector = datevec(timestamp);
@@ -78,27 +77,53 @@ end
 % Convert to elapsed seconds
 elapsedSec = round(timeSec-timeSec_0);
 
-
 %--------------------------------------------------------------------------
-% Concatenate output array
-result = [acq,timestamp,elapsedSec,T_max,E_T_max,C_max,E_E_max,...
-    T_dif_metric];
-
-
-%--------------------------------------------------------------------------
-if get(handles.checkbox2,'Value') == 1
+if get(handles.checkbox2,'Value') == 1        
+    
+    % On first pass
+    if c1 == 1
+        
+        % Open summary file
+        fid = fopen(char(strcat(unkmat.path,'/',savename,'/',...
+            'SUMMARY.txt')),'w');
+        
+        % Write header to file
+        fprintf(fid,'%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n','filename',...
+            'timestamp','elapsed time (s)','T (K)','error (K)',...
+            'emissivity','error','difference');
+        
+        % Write header to workspace
+        fprintf('%20s\t%15s\t%20s\t%10s\t%10s\t%10s\t%10s\t%10s\n','filename',...
+            'timestamp','elapsed time (s)','T (K)','error (K)',...
+            'emissivity','error','difference');
+    end
+    
+    % re-open summary file
+    fid = fopen(char(strcat(unkmat.path,'/',savename,'/',...
+        'SUMMARY.txt')),'a');
+    
+    % Write summary data to file
+    fprintf(fid,'\n%s\t%14d\t%5.0f\t%5.0f\t%5.0f\t%5.2f\t%5.2f\t%5.2f\n',filename,...
+        timestamp,elapsedSec,T_max,E_T_max,C_max,E_E_max,T_dif_metric);
+    
+    % Write summary data to workspace
+    fprintf('%20s\t%15d\t%20.0f\t%10.0f\t%10.0f\t%10.2f\t%10.2f\t%10.2f\n',filename,...
+        timestamp,elapsedSec,T_max,E_T_max,C_max,E_E_max,T_dif_metric);
+    
     % Generates data table containing all three maps
     [x1,y1] = meshgrid(1:length(T),1:length(T));
     [mux,muy] = meshgrid(mu,mu);
     
     % Concatenate output array
-    xyz = real([x1(:) y1(:) mux(:) muy(:) sb(:) T(:) E_T(:) epsilon(:) E_E(:) T_dif(:)]);...
+    xyz = real([x1(:) y1(:) mux(:) muy(:) sb(:) T(:) E_T(:) epsilon(:)...
+        E_E(:) T_dif(:)]);
 
-    % Creates unique file name for map data and saves it
-    map=char(strcat(upath,'/',savename,'/',regexprep(dir_content(i)...
-        .name,'\.[^\.]*$', ''),'_map.txt'));
-    save(map,'xyz','-ASCII');
+    % Creates file name for map data and saves it
+    map_file=char(strcat(unkmat.path,'/',savename,'/',regexprep(filename,...
+        '\.[^\.]*$', ''),'_map.txt'));
+    save(map_file,'xyz','-ASCII');
+    
 end
-
+    
 end
 

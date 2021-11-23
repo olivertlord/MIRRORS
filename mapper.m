@@ -1,5 +1,5 @@
 function [T,E_T,E_E,epsilon,T_max,E_T_max,E_E_max,U_max,m_max,C_max,pr,...
-    pc,sb_a,bsz,nw] = mapper(cal_a,cal_b,cal_c,cal_d,d,a,c,b,handles,filepath)
+    pc,sb_a,nw] = mapper(cal_a,cal_b,cal_c,cal_d,d,a,c,b,handles,filepath)
 %--------------------------------------------------------------------------
 % Function MAPPER
 %--------------------------------------------------------------------------
@@ -187,8 +187,6 @@ for m=bw:length(a)-bw
         end
     end
 end
-
-assignin('base','T',T)
 
 % Determine peak temperature based on user choice
 if get(handles.radiobutton1,'value') == 1   

@@ -1,4 +1,4 @@
-function [T_dif,T_dif_metric] = difference(T, sb_a, bsz, c1, background)
+function [T_dif,T_dif_metric] = difference(T, sb_a, c1, background)
 %--------------------------------------------------------------------------
 % Function DIFFERENCE
 %--------------------------------------------------------------------------

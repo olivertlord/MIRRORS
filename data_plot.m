@@ -1,6 +1,6 @@
 function [] = data_plot(handles,nw,T_max,E_T_max,E_E_max,U_max,m_max,...
-    C_max,i,filenumber,raw,timevector,elapsedSec,T_dif_metric,T,dx,dy,...
-    progress,T_dif,mu,E_T,sb_a,bsz,epsilon,c1,plot_update)
+    C_max,i,filename,raw,timevector,elapsedSec,T_dif_metric,T,dx,dy,...
+    progress,T_dif,mu,E_T,sb_a,epsilon,plot_update)
 %--------------------------------------------------------------------------
 % Function DATA_PLOT
 %--------------------------------------------------------------------------
@@ -75,7 +75,7 @@ function [] = data_plot(handles,nw,T_max,E_T_max,E_E_max,U_max,m_max,...
 
 %           sb_a = smoothed form of subframe b for contouring
 
-%           c1 = flag; only plot output data if == 1. Speeds up plotting
+%           i = flag; only plot output data if == 1. Speeds up plotting
 %           during initial data checking when user presses the post
 %           processing button
 
@@ -101,7 +101,7 @@ imagesc(raw)
 % Set axes labels and plot title
 xlabel('X: pixels', 'FontSize', 16);
 ylabel('Y: pixels', 'FontSize', 16);
-title((strcat({'DATASET: '},(num2str(filenumber(i))))),'FontSize',18);
+title(filename,'FontSize',18,'Interpreter','none');
 
 % Deletes interactive ROI if one already exists
 hfindROI = findobj(handles.axes1,'Type','hggroup');    
@@ -313,7 +313,7 @@ if ~isnan(U_max)
     % Set Colour Limits for difference plot such that it is only
     % extended but never reduced
     
-    if c1 == 1
+    if i == 1
         Clim_dif_min = 0;
         Clim_dif_max = 0.001;
     else

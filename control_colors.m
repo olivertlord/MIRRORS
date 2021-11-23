@@ -33,11 +33,11 @@ setappdata(0,'flag',flag);
 
 % Creates array of figure handles
 h = [handles.pushbutton1 handles.pushbutton2 handles.pushbutton3...
-    handles.edit1 handles.edit2 handles.pushbutton4];
+    handles.pushbutton4];
 
 % Set background colour of graphical element in array h to red or green
 % depending on flag value
-for i = 1:6
+for i = 1:4
     if flag{i} == 0
         set(h(i),'BackgroundColor',[.8 .8 0.8]);
     else
@@ -47,20 +47,12 @@ end
 
 % Set enabled state of graphical element in array h to red or green
 % depending on flag value
-for i = 7:12
+for i = 5:8
     if flag{i} == 0
-        set(h(i-6),'Enable','off')
+        set(h(i-4),'Enable','off')
     else
-        set(h(i-6),'Enable','on')
+        set(h(i-4),'Enable','on')
     end
-end
-
-% Turn PROCESS button green and enabled if pushbutton2, pushbutton3 and
-% edit1 and edit2 are also green, i.e. if the user has completed all tasks
-% necessary to run the post-processing routine
-if (flag{2} == 1) && (flag{3} == 1) && (flag{4} == 1) && (flag{5} == 1)
-    set(h(6),'Backgroundcolor',[0 .8 0]);
-    set(h(6),'Enable','on');
 end
 
 end
