@@ -53,7 +53,11 @@ Where ```~/MIRRORS``` is the full path to your MIRRORS directory. Now, next time
 
 ### Instructions for users intending to run MIRRORS from the standalone app
 
-The MIRRORS standalone application requires the Matlab Component Runtime, which can be dowdloaded for free. If you are running MIRRORS on Mac OS X, then you will need [MCR version 9.5 ofr Mac](http://ssd.mathworks.com/supportfiles/downloads/R2018b/deployment_files/R2018b/installers/maci64/MCR_R2018b_maci64_installer.dmg.zip). If you are running MIRRORS on Windows 7, then you will need [MCR version 8.3 for Windows (32-bit)](https://uk.mathworks.com/supportfiles/downloads/R2014a/deployment_files/R2014a/installers/win32/MCR_R2014a_win32_installer.exe)
+The MIRRORS standalone application requires the Matlab Component Runtime, which can be dowdloaded for free. You will need a specific MCR for your operating system:
+
+* Mac OS X (64 bit):                [MCR version 9.5 for Mac](http://ssd.mathworks.com/supportfiles/downloads/R2018b/deployment_files/R2018b/installers/maci64/MCR_R2018b_maci64_installer.dmg.zip) 
+* Windows 7 (32 bit):               [MCR version 8.3 for Windows (32-bit)](https://uk.mathworks.com/supportfiles/downloads/R2014a/deployment_files/R2014a/installers/win32/MCR_R2014a_win32_installer.exe)
+* Windows 10 (64 bit):              [MCR version 8.3 for Windows (64-bit)](https://uk.mathworks.com/supportfiles/downloads/R2014a/deployment_files/R2014a/installers/win64/MCR_R2014a_win64_installer.exe)
 
 Once this is installed, simply download MIRRORS.app (Mac Os X) or MIRRORS.exe (Windows 7) from https://github.com/olivertlord/MIRRORS/releases/latest and move it to a location of your choosing. Double clicking on the APP should launch MIRRORS.
 
