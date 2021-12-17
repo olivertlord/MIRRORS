@@ -20,7 +20,7 @@ Details of the MIR system as well as calibration methods can be found in Campbel
 
 ## Installation
 
-MIRRORS can be run either from the Matlab command line or as a standalone application on Mac OS X or Windows 7. MIRRORS was written and tested on versions R2014a (Windows 7) & R2015a/17a/18b (OS X 10.13). It will likely work on all versions after R2014a on both Windows 7 and OS X, but has not been explicity tested.
+MIRRORS can be run either from the Matlab command line or as a standalone application on Mac OS X or Windows 7. MIRRORS was written and tested on versions R2014a (Windows 7) & R2018b (OS X 10.13). It will likely work on all versions after R2014a on both Windows 7 and all versions after R2018b on OS X, but has not been explicity tested.
 
 ### Instructions for users intending to run MIRRORS from the Matlab command line
 
@@ -55,7 +55,7 @@ Where ```~/MIRRORS``` is the full path to your MIRRORS directory. Now, next time
 
 The MIRRORS standalone application requires the Matlab Component Runtime, which can be dowdloaded for free. You will need a specific MCR for your operating system:
 
-* Mac OS X (64 bit):                [MCR version 9.5 for Mac](http://ssd.mathworks.com/supportfiles/downloads/R2018b/deployment_files/R2018b/installers/maci64/MCR_R2018b_maci64_installer.dmg.zip) 
+* Mac OS X (64 bit):                [MCR version 9.5 for Mac (64-bit)](http://ssd.mathworks.com/supportfiles/downloads/R2018b/deployment_files/R2018b/installers/maci64/MCR_R2018b_maci64_installer.dmg.zip) 
 * Windows 7 (32 bit):               [MCR version 8.3 for Windows (32-bit)](https://uk.mathworks.com/supportfiles/downloads/R2014a/deployment_files/R2014a/installers/win32/MCR_R2014a_win32_installer.exe)
 * Windows 10 (64 bit):              [MCR version 8.3 for Windows (64-bit)](https://uk.mathworks.com/supportfiles/downloads/R2014a/deployment_files/R2014a/installers/win64/MCR_R2014a_win64_installer.exe)
 
