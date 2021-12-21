@@ -2,7 +2,7 @@ function varargout = MIRRORS(varargin)
 %--------------------------------------------------------------------------
 % MIRRORS (MultIspectRal imaging RadiOmetRy Software)
 %--------------------------------------------------------------------------
-% Version 1.7.7
+% Version 1.7.9
 % Written and tested on Matlab R2014a (Windows 7) & R2017a (OS X 10.13)
 
 % Copyright 2018 Oliver Lord, Weiwei Wang
@@ -56,7 +56,7 @@ function varargout = MIRRORS(varargin)
 
 % Edit the above text to modify the response to help MIRRORS
 
-% Last Modified by GUIDE v2.5 24-Oct-2018 18:15:22
+% Last Modified by GUIDE v2.5 20-Dec-2021 12:42:11
 
 
 %--------------------------------------------------------------------------
@@ -80,7 +80,7 @@ end
 % End initialization code - DO NOT EDIT
 
 % --- Executes during object creation, after setting all properties.
-function edit1_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
+function edit1_CreateFcn(hObject, ~, ~) 
 
 if ispc && isequal(get(hObject,'BackgroundColor'),...
         get(0,'defaultUicontrolBackgroundColor'))
@@ -88,7 +88,7 @@ if ispc && isequal(get(hObject,'BackgroundColor'),...
 end
 
 % --- Executes during object creation, after setting all properties.
-function edit2_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
+function edit2_CreateFcn(hObject, ~, ~) 
 
 if ispc && isequal(get(hObject,'BackgroundColor'),...
         get(0,'defaultUicontrolBackgroundColor'))
@@ -96,7 +96,7 @@ if ispc && isequal(get(hObject,'BackgroundColor'),...
 end
 
 % --- Executes during object creation, after setting all properties.
-function slider1_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
+function slider1_CreateFcn(hObject, ~, ~) 
 
 if isequal(get(hObject,'BackgroundColor'), get(0,...
         'defaultUicontrolBackgroundColor'))
@@ -104,7 +104,7 @@ if isequal(get(hObject,'BackgroundColor'), get(0,...
 end
 
 % --- Executes during object creation, after setting all properties.
-function popupmenu1_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
+function popupmenu1_CreateFcn(hObject, ~, ~) 
 
 if ispc && isequal(get(hObject,'BackgroundColor'),...
         get(0,'defaultUicontrolBackgroundColor'))
@@ -123,12 +123,15 @@ handles.output = hObject;
 % Update handles structure
 guidata(hObject, handles);
 
+% Make Update Test Data button invisible
+set(handles.pushbutton9,'visible','off')
+
 % Creates array of handles to axes within the GUI
 plots = [handles.axes2 handles.axes3 handles.axes4 handles.axes5...
     handles.axes6 handles.axes7];
 
 % VERSION NUMBER
-set(handles.text17,'String','1.7.7');
+set(handles.text17,'String','1.7.9');
 
 % Write current calibration file to GUI window
 load('calibration.mat','name');
@@ -150,10 +153,6 @@ control_colors({0 0 0 0 1 1 0 0},handles);
 warning('off','MATLAB:colon:nonIntegerIndex');
 warning('off','MATLAB:plot:IgnoreImaginaryXYPart');
 
-% Make Update Test Data button invisible
-set(handles.pushbutton9,'visible','off')
-
-
 %--------------------------------------------------------------------------
 % --- Outputs from this function are returned to the command line.
 function varargout = MIRRORS_OutputFcn(~, ~, handles)
@@ -166,14 +165,14 @@ varargout{1} = handles.output;
 % UNUSED CALLBACK FUNCTIONS
 
 % --- Executes on button press in checkbox2.
-function checkbox2_Callback(~, ~, handles) %#ok<DEFNU,INUSD>
+function checkbox2_Callback(~, ~, handles) %#ok<INUSD>
 
 % --- Executes on selection change in popupmenu1.
-function popupmenu1_Callback(~, ~, handles) %#ok<DEFNU,INUSD>
+function popupmenu1_Callback(~, ~, handles) %#ok<INUSD>
 
 %--------------------------------------------------------------------------
 % --- Executes when user presses LIVE button
-function pushbutton1_Callback(~, ~, handles) %#ok<DEFNU>
+function pushbutton1_Callback(~, ~, handles) 
 
 if get(handles.pushbutton1,'BackgroundColor') == [0 .8 0]
     
@@ -222,7 +221,7 @@ end
 unkmat.path = test_dir;
 
 % Collect list of current .TIFF files
-dir_content = dir(strcat(unkmat.path,'/*.tiff'));
+dir_content = dir(strcat(unkmat.path,'/*.tif*'));
 initial_list = {dir_content.name};
 
 % Initialise counter c1
@@ -232,7 +231,7 @@ while get(handles.pushbutton1,'BackgroundColor') == [0 .8 0]
     
     % Collects new list of filenames
     pause(0.1);
-    dir_content = dir(strcat(unkmat.path,'/*.tiff'));
+    dir_content = dir(strcat(unkmat.path,'/*.tif*'));
     new_list = {dir_content.name};
     
     % Executes if a new file appears in the target folder
@@ -379,7 +378,7 @@ end
 
 %--------------------------------------------------------------------------
 % --- Executes on press of POST PROCESS button
-function pushbutton2_Callback(~, ~, handles) %#ok<DEFNU>
+function pushbutton2_Callback(~, ~, handles) 
 
 % Clear all axes within GUI
 arrayfun(@cla,findall(0,'type','axes'))
@@ -417,7 +416,7 @@ set(handles.checkbox2,'Enable','on');
 unkmat = matfile('unkmat.mat','Writable',true);
 
 % Promts user to select unknown file(s)
-[unkmat.names,test_dir] = uigetfile(strcat(unkmat.path,'/*.tiff'),...
+[unkmat.names,test_dir] = uigetfile(strcat(unkmat.path,'/*.tif*'),...
     'Select Image(s)','Multiselect','on');
 
 % Test for valid directory, else return
@@ -430,7 +429,7 @@ end
 unkmat.path = test_dir;
 
 % Determine number of .TIF files in folder
-if isa(unkmat.names, 'cell');
+if isa(unkmat.names, 'cell')
     num_files = size(unkmat.names,2);
 else
     num_files = 1;
@@ -450,7 +449,7 @@ listpos = zeros(size(unkmat.names));
 for i=1:num_files
     
     % Extract filename from cell array
-    if isa(unkmat.names, 'cell');
+    if isa(unkmat.names, 'cell')
         filename = unkmat.names(1,i);
         filename = filename{1};
     else
@@ -518,7 +517,7 @@ setappdata(0,'listpos',listpos);
 
 %--------------------------------------------------------------------------
 % --- Executes on press of SELECT ROI button
-function pushbutton3_Callback(~, ~, handles) %#ok<DEFNU>
+function pushbutton3_Callback(~, ~, handles) 
 
 % Update button states
 flag = {0 1 0 0 1 1 1 0};
@@ -532,13 +531,35 @@ delete(hfindROI)
 hfindrect = findobj(handles.axes1,'Type','rectangle');
 delete(hfindrect)
 
+% Load current hardware_parameters
+calmat = matfile('calibration.mat','Writable',true);
+
+% Determine the size, position and limits of the ROI based on the size of
+% the calibration file
+[y,x] = size(calmat.cal);
+
+% Determine centre of upper left quadrant
+xc = floor(x/4);
+yc = floor(y/4);
+
+% Determine width of largest possible square domain that can be fitted into
+% a quadrant with a ~10% border width
+max_w = floor((min(xc,yc)*2)*.8);
+
+% Determine the border width
+bw = floor(((min(xc,yc)*2)-max_w)/2);
+
+% Determine the X and Y co-ordinates of the top left corner of the ROI
+x_tl = floor(xc-(max_w/2));
+y_tl = floor(yc-(max_w/2));
+
 % Creates resizeable ROI rectangle and waits until user double clicks
 % inside it, and then reads out position pixel position of top left corner
 % and size (constrined to a square, and a region with a 20 pixel hold off
 % from the edge of the frame to allow space for misalignment and padding
 % pixel binning).
-ROI = imrect(handles.axes1, [91 28 200 200]);
-fcn = makeConstrainToRectFcn('imrect',[20 344],[20 235]);
+ROI = imrect(handles.axes1, [x_tl y_tl max_w max_w]);
+fcn = makeConstrainToRectFcn('imrect',[bw floor(xc*2)-bw],[bw floor(yc*2)-bw]);
 setPositionConstraintFcn(ROI,fcn);
 setFixedAspectRatioMode(ROI,'True');
 subframe = wait(ROI);
@@ -561,7 +582,7 @@ unkmat = matfile('unkmat.mat','Writable',true);
 % fitting
 [w,x,y,savename] = data_prep(handles);
 
-%Get list of positions in folder of files to be fitted
+% Get list of positions in folder of files to be fitted
 listpos = getappdata(0,'listpos');
 
 % Initialise c1
@@ -575,7 +596,7 @@ open(writerObj)
 
 % Calculates temperature, error and difference maps and associated output
 % for each file and plots and stores the results.
-if isa(unkmat.names, 'cell');
+if isa(unkmat.names, 'cell')
     num_files = size(unkmat.names,2);
 else
     num_files = 1;
@@ -586,7 +607,7 @@ for i=1:num_files
     if listpos(i) == 1
         
         % Extract filename from cell array
-        if isa(unkmat.names, 'cell');
+        if isa(unkmat.names, 'cell')
             filename = unkmat.names(1,i);
             filename = filename{1};
         else
@@ -715,7 +736,7 @@ end
 
 %--------------------------------------------------------------------------
 % --- Executes on slider movement.
-function slider1_Callback(~, ~, handles) %#ok<DEFNU>
+function slider1_Callback(~, ~, handles) 
 
 % Get current slider value
 slider_val = get(handles.slider1,'Value')*100;
@@ -725,16 +746,16 @@ set(handles.text12,'String',strcat(num2str(round(slider_val)),{' '},'%'));
 
 %--------------------------------------------------------------------------
 % --- Executes on button press in Fit saturated images chackbox.
-function checkbox1_Callback(~, ~, ~) %#ok<DEFNU>
+function checkbox1_Callback(~, ~, ~) 
 
 %--------------------------------------------------------------------------
 % --- Executes when user clicks on the Update Hardware Parameters button
-function pushbutton6_Callback(~, ~, ~) %#ok<DEFNU>
+function pushbutton6_Callback(~, ~, ~) 
 hardware_parameters
 
 %--------------------------------------------------------------------------
 % --- Executes when user clisks on the Update Calibration Image button
-function pushbutton8_Callback(~, ~, handles) %#ok<DEFNU>
+function pushbutton8_Callback(~, ~, handles) 
 
 % Load current hardware_parameters
 calmat = matfile('calibration.mat','Writable',true);
@@ -754,7 +775,7 @@ calmat = matfile('calibration.mat','Writable',true);
 % end
 
 % Promts user to select calibration file
-[calmat.name,test_dir] = uigetfile(strcat(calmat.path,'/*.tiff'),...
+[calmat.name,test_dir] = uigetfile(strcat(calmat.path,'/*.tif*'),...
     'Select new Calibration Image');
 if isequal(test_dir,0)
     return
@@ -768,135 +789,88 @@ calmat.cal = im2double(cal_image);
 % Write current calibration name to GUI
 set(handles.text20,'String',calmat.name);
 
-
 %--------------------------------------------------------------------------
-% --- Executes when BENCHMARK button is pushed
-function pushbutton5_Callback(~, ~, handles) %#ok<DEFNU>
-
-% Determine path to app location
-if isdeployed
-    appRoot = ctfroot;
-    if ismac
-        appRootSplit = strsplit(appRoot,'MIRRORS.app');
-    elseif ispc
-        [~,pcroot] = system('path');
-        appRoot = char(regexpi(pcroot, 'Path=(.*?);', 'tokens', 'once'));
-        appRootSplit = strsplit(appRoot,'MIRRORS.exe');
-    end
-else
-    appRootSplit = strsplit(pwd);
-end
+% --- Executes when RUN TEST button is pushed
+function pushbutton5_Callback(~, ~, handles) 
 
 % Load previous file path from .MAT file
 unkmat = matfile('unkmat.mat','Writable',true);
 
 % Ask user to select folder containing example data    
-unkmat.path = uigetdir(appRootSplit{1},'Select folder containing example data');
+unkmat.path = uigetdir(unkmat.path,'Select folder containing example data');
 
-% Get new directory content
-dir_content = dir(strcat(unkmat.path,'/example_0*'));
-    
-% Update timestamps by reading and re-writing a single byte IF they are
-% equal
-if strcmp(dir_content(1).date,dir_content(2).date) == 1
-    for i = 1:length(dir_content)
-        current = dir_content(i).name;
-        pause(1.1)
-        fid = fopen(strcat(unkmat.path,'/',current),'r+');
-        byte = fread(fid, 1);
-        fseek(fid, 0, 'bof');
-        fwrite(fid, byte);
-        fclose(fid);
-    end
-    % Update directory content
-    dir_content = dir(strcat(unkmat.path,'/example_0*'));
+% Delete existing test data
+if exist(strcat(unkmat.path,'/','test_data'), 'file')==2
+  delete(strcat(unkmat.path,'/','test_data'));
+end
+if exist(strcat(unkmat.path,'/','result'), 'file')==2
+  delete(strcat(unkmat.path,'/','result'));
 end
 
-% Set directory content and listpos into appdata
-setappdata(0,'dir_content',dir_content)
-listpos = length(dir_content)-10:1:length(dir_content);
-setappdata(0,'listpos',listpos)
+% Run test_fit function
+test_fit(unkmat.path,'test_data',handles)
 
-% Fix subframe position
-setappdata(0,'subframe',[91 28 200 200])
+% Determine difference
+benchmark = readmatrix(strcat(unkmat.path,'/','benchmark_data'));
+test_result = readmatrix(strcat(unkmat.path,'/','test_data'));
+difference = benchmark - test_result;
 
-% Fix file range
-set(handles.edit1,'string','1')
-set(handles.edit2,'string','5')
-
-% Set user options
-set(handles.slider1,'Value',0.25)
-set(handles.checkbox1,'Value',1)
-set(handles.checkbox2,'Value',1)
-
-% --- TEST LOOP -----------------------------------------------------------
-% Tests every peak temperature option against every optional plot option in
-% turn with cutoff at 25% and fit saturated images on.
-
-% Initialise counter
-t1 = 1;
-
-for m = 1:4
-    for n = 5:8
-        % Set peak temperature radiobutton
-        set(handles.(['radiobutton' num2str(m)]),'Value',1)
-        
-        % Set optional plot radiobutton
-        set(handles.(['radiobutton' num2str(n)]),'Value',1)
-
-        % Run PROCESS button
-        pushbutton4_Callback([], [], handles)
-
-        % Get folder name of output directory
-        savename = getappdata(0,'savename');
-
-        new = textread(strcat(unkmat.path,'/',savename,...
-            '/example_SUMMARY.txt'))
-        benchmark = textread(strcat(unkmat.path,'/test_',num2str(t1),...
-            '/example_SUMMARY.txt'))
-       
-        difference = new-benchmark;
-
-        % Increment counter
-        t1 = t1 + 1;
-    end
-end
-
+% Save result to file
+assignin("base","difference",difference)
+fid = fopen(strcat(unkmat.path,'/','result'),'a+');
+fprintf(fid,[repmat('%10.5f\t', 1, size(difference,2)) '\n'], difference');
+fclose(fid);
 
 %--------------------------------------------------------------------------
 % --- Executes when Update Test Data button is pushed
-function pushbutton9_Callback(~, ~, handles) %#ok<DEFNU>
+function pushbutton9_Callback(~, ~, handles) 
 
 % Ask user to select folder containing example data    
-example_data = uigetdir('Select folder containing example data');
+example_source = './example';
 
-% Get current directory content
-dir_content = dir(example_data);
+% Delete existing benchmark data
+if exist(strcat(example_source,'/','benchmark_data'), 'file')==2
+  delete(strcat(example_source,'/','benchmark_data'));
+end
 
-% Remove existing folders
-for i = 1:length(dir_content) 
-    if dir_content(i).isdir == 1 & dir_content(i).name ~= '.' %#ok<AND2>
-       rmdir(strcat(example_data,'/',dir_content(i).name),'s');
+% Run test_fit function
+test_fit(example_source,'benchmark_data',handles)
+
+%--------------------------------------------------------------------------
+% --- Executes fitting of example data
+function test_fit(example_source, output_name, handles)
+
+% First remove any old folders
+full_list = dir(example_source);
+for i = 1:length(full_list)
+    if full_list(i).isdir == 1 & full_list(i).name ~= '.' %#ok<AND2>
+        rmdir(strcat(example_source,'/',full_list(i).name),'s');
     end
 end
 
-% Update directory content
-dir_content = dir(strcat(example_data,'/example_0*'));
+% Load .MAT file for storing list of unknown data to be fitted
+unkmat = matfile('unkmat.mat','Writable',true);
 
-% Set directory content and listpos into appdata
-setappdata(0,'dir_content',dir_content)
-listpos = 1:1:length(dir_content)
-setappdata(0,'listpos',listpos)
+% Update .MAT file with path to unknown files
+unkmat.path = example_source;
+
+% Extract list of items in target directory
+test_list = dir(strcat(example_source,'/example_0*'));
+
+% Update .MAT file with list of files for fitting
+for i = 1:length(test_list)
+    if i == 1
+        unkmat.names = {test_list(i).name};
+    else
+        unkmat.names(:,i) = {test_list(i).name};
+    end
+end
+
+% Save directory content and listpos into appdata
+setappdata(0,'listpos',ones(size(test_list)))
 
 % Fix subframe position
 setappdata(0,'subframe',[91 28 200 200])
-
-% Fix file range
-set(handles.edit1,'string','1')
-set(handles.edit2,'string','5')
-
-% Fix filenumber list and unkmat.path
-setappdata(0,'example_data',example_data);
 
 % Set user options
 set(handles.slider1,'Value',0.25)
@@ -910,14 +884,26 @@ t1 = 1;
 calmat = matfile('calibration.mat','Writable',true);
 
 % Read in data and convert to double
-cal_image = imread(strcat(example_data,'/tc_example.tiff'));
+cal_image = imread(strcat(example_source,'/tc_example.tiff'));
 calmat.cal = im2double(cal_image);
+calmat.name = 'tc_example.tiff';
 
 % Write current calibration name to GUI
 set(handles.text20,'String',calmat.name);
 
-for m = 1:4
-    for n = 5:8
+% Update timestamps by reading and re-writing a single byte IF they are
+% equal
+for i = 1:length(test_list)
+    pause(2)
+    fid = fopen(strcat(unkmat.path,'/',test_list(i).name),'r+');
+    byte = fread(fid, 1);
+    fseek(fid, 0, 'bof');
+    fwrite(fid, byte);
+    fclose(fid);
+end
+
+for m = 1:5
+    for n = 6:9
         
         % Set peak temperature radiobutton
         set(handles.(['radiobutton' num2str(m)]),'Value',1)
@@ -928,18 +914,20 @@ for m = 1:4
         % Run PROCESS button
         pushbutton4_Callback([], [], handles)
 
-        % Get folder name of output directory
-        savename = getappdata(0,'savename');
-        
-        % Change output folder name to test_1
-        movefile(strcat(example_data,'/',savename),...
-            strcat(example_data,'/','test_',num2str(t1)))
+        % Get current directory content
+        full_list = dir(example_source);
 
-        % Get last frame of GUI window
-        frame = getappdata(0,'frame');
-        imwrite(frame.cdata,strcat(example_data,'/test_',num2str(t1),...
-            '/test_',num2str(t1),'.png'))
-        
+        % Remove existing folders and concatenate SUMMARY data into benchmark
+        for i = 1:length(full_list) 
+            if full_list(i).isdir == 1 & full_list(i).name ~= '.' %#ok<AND2>
+                fid = fopen(strcat(example_source,'/',output_name),'a+');
+                st = readmatrix(strcat(example_source,'/',full_list(i).name,'/SUMMARY.txt'),delimitedTextImportOptions);
+                fprintf(fid,'%s\n',st{2:4});
+                fclose(fid);
+                rmdir(strcat(example_source,'/',full_list(i).name),'s');
+            end
+        end
+
         % Increment counter
         t1 = t1 + 1;
     end

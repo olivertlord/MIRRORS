@@ -7,7 +7,7 @@ function [] = data_plot(handles,nw,T_max,E_T_max,E_E_max,U_max,m_max,...
 % Version 1.6
 % Written and tested on Matlab R2014a (Windows 7) & R2017a (OS X 10.13)
 
-% Copyright 2018 Oliver Lord, Weiwei Wang
+% Copyright 2014 Oliver Lord, Weiwei Wang
 % email: oliver.lord@bristol.ac.uk
  
 % This file is part of MIRRORS.
@@ -99,9 +99,9 @@ axes(handles.axes1)
 cla
 imagesc(raw)
 % Set axes labels and plot title
-xlabel('X: pixels', 'FontSize', 16);
-ylabel('Y: pixels', 'FontSize', 16);
-title(filename,'FontSize',18,'Interpreter','none');
+xlabel('X: pixels', 'FontSize', 14);
+ylabel('Y: pixels', 'FontSize', 14);
+title(filename,'FontSize',14,'Interpreter','none');
 
 % Deletes interactive ROI if one already exists
 hfindROI = findobj(handles.axes1,'Type','hggroup');    
@@ -135,10 +135,10 @@ plot(nw(:,2),U_max,'bO','LineWidth',1,'MarkerEdgeColor','b',...
     'MarkerSize',10);
 
 % Set axes labels and plot title
-xlabel('Normalised wavelength', 'FontSize', 16);
-ylabel('Normalised intensity', 'FontSize', 16);
+xlabel('Normalised wavelength', 'FontSize', 14);
+ylabel('Normalised intensity', 'FontSize', 14);
 title((strcat({'Peak temperature: '},(num2str(round(T_max(end)))),...
-    ' +/- ',(num2str(round(E_T_max(end)))))),'FontSize',18);
+    ' +/- ',(num2str(round(E_T_max(end)))))),'FontSize',14);
 xlim([min(nw(:,2))-0.02*max(nw(:,2)) max(nw(:,2))+0.02*max(nw(:,2))])
 
 % Overlay linear fit to data
@@ -159,10 +159,10 @@ errorbar(elapsedSec,T_max,E_T_max,'--bO','LineWidth',1,'MarkerEdgeColor'...
     ,'b','MarkerFaceColor','b','MarkerSize',10);
 
 % Set axes labels and plot title
-xlabel('Elapsed Time (s)', 'FontSize', 16);
-ylabel('Temperature (K)', 'FontSize', 16);
+xlabel('Elapsed Time (s)', 'FontSize', 14);
+ylabel('Temperature (K)', 'FontSize', 14);
 title(strcat(datestr(timevector),{'  '},num2str(progress),'%'),...
-    'FontSize',18);
+    'FontSize',14);
 xlim([min(elapsedSec) max(elapsedSec)+1])
 pbaspect([1 1 1])
 
@@ -173,30 +173,30 @@ axes(handles.axes4)
 cla
 
 % Difference Metric
-if get(handles.radiobutton5,'Value') == 1    
+if get(handles.radiobutton6,'Value') == 1    
     plot(elapsedSec,T_dif_metric,'--bO','LineWidth',1,'MarkerEdgeColor',...
         'b','MarkerFaceColor','b','MarkerSize',10);
     
     % Set axes labels and plot title
-    xlabel('Elapsed Time (s)', 'FontSize', 16);
-    ylabel('Image difference metric', 'FontSize', 16);
-    title('Image difference metric','FontSize',18);
+    xlabel('Elapsed Time (s)', 'FontSize', 14);
+    ylabel('Image difference metric', 'FontSize', 14);
+    title('Image difference metric','FontSize',14);
     xlim([min(elapsedSec) max(elapsedSec)+1])
     
 % Temperature cross Sections
-elseif get(handles.radiobutton6,'Value') == 1
+elseif get(handles.radiobutton7,'Value') == 1
     cla
     % centre lines on middle of hotspot
     plot(mu,T(dx,(1:length(T))),'r',mu,T(1:length(T),dy),'g');
 
     % Set axes labels and plot title
-    xlabel('Distance (microns)', 'FontSize', 16);
-    ylabel('Temperature (K)', 'FontSize', 16);
-    title('Temperature Cross Sections','FontSize',18);
+    xlabel('Distance (microns)', 'FontSize', 14);
+    ylabel('Temperature (K)', 'FontSize', 14);
+    title('Temperature Cross Sections','FontSize',14);
     legend('horizontal','vertical','location','northeast');
     
 % Emissivity vs Temperature Cross-sections
-elseif get(handles.radiobutton7,'Value') == 1
+elseif get(handles.radiobutton8,'Value') == 1
     
     % centre lines on middle of hotspot
     plot(epsilon(1:length(T),dy),T(1:length(T),dy),...
@@ -207,23 +207,23 @@ elseif get(handles.radiobutton7,'Value') == 1
     hold off
     
     % Set axes labels and plot title
-    ylabel('Temperature (K)', 'FontSize', 16);
-    xlabel('Emissivity (nm^5/Jm)', 'FontSize', 16);
-    title('Emissivity vs Temperature','FontSize',18);
+    ylabel('Temperature (K)', 'FontSize', 14);
+    xlabel('Emissivity (nm^5/Jm)', 'FontSize', 14);
+    title('Emissivity vs Temperature','FontSize',14);
     legend('horizontal','vertical','location','northeast');
     xlim('auto');
 
 % Emissivity vs Temperature at the peak
-elseif get(handles.radiobutton8,'Value') == 1
+elseif get(handles.radiobutton9,'Value') == 1
     cla
 
     errorbar(real(C_max),T_max,E_E_max,'--bO','LineWidth',1,...
         'MarkerEdgeColor','b','MarkerFaceColor','b','MarkerSize',10);
 
     % Set axes labels and plot title
-    xlabel('Emissivity (nm^5/Jm)', 'FontSize', 16);
-    ylabel('Temperature (K)', 'FontSize', 16);
-    title('Emissivity vs. Temperature at peak','Fontsize',18);
+    xlabel('Emissivity (nm^5/Jm)', 'FontSize', 14);
+    ylabel('Temperature (K)', 'FontSize', 14);
+    title('Emissivity vs. Peak temperature','Fontsize',14);
     xlim('auto');
 
 end
@@ -262,9 +262,9 @@ if ~isnan(U_max)
 end
 
 % Set axes labels and plot title
-xlabel('Distance (microns)', 'FontSize', 16);
-ylabel('Distance (microns)', 'FontSize', 16);
-title('TEMPERATURE MAP','FontSize',18); 
+xlabel('Distance (microns)', 'FontSize', 14);
+ylabel('Distance (microns)', 'FontSize', 14);
+title('TEMPERATURE MAP','FontSize',14); 
 pbaspect([1 1 1])
 
 %--------------------------------------------------------------------------
@@ -298,9 +298,9 @@ if ~isnan(U_max)
 end
 
 % Set axes labels and plot title
-xlabel('Distance (microns)', 'FontSize', 16);
-ylabel('Distance (microns)', 'FontSize', 16);
-title('ERROR MAP','FontSize',18);
+xlabel('Distance (microns)', 'FontSize', 14);
+ylabel('Distance (microns)', 'FontSize', 14);
+title('ERROR MAP','FontSize',14);
 pbaspect([1 1 1])
 
 
@@ -343,9 +343,9 @@ if ~isnan(U_max)
 end
 
 % Set axes labels and plot title
-xlabel('Distance (microns)', 'FontSize', 16);
-ylabel('Distance (microns)', 'FontSize', 16);
-title('DIFFERENCE MAP','FontSize',18);
+xlabel('Distance (microns)', 'FontSize', 14);
+ylabel('Distance (microns)', 'FontSize', 14);
+title('DIFFERENCE MAP','FontSize',14);
 pbaspect([1 1 1])
 
 end

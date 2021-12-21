@@ -1,5 +1,4 @@
 archive/
-binaries/
-example/
+testing/
 *.asv
 *.m~

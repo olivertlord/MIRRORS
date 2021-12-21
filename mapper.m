@@ -240,7 +240,7 @@ elseif get(handles.radiobutton4,'Value') == 1
     [~, p] = max(sb_a(:));
     [pr, pc] = ind2sub(size(sb_a),p);
         
-elseif get(handles.radiobutton9,'Value') == 1
+elseif get(handles.radiobutton5,'Value') == 1
     
     % Determine the centre pixel
     [pr, pc] = deal(size(sb_a,1)/2);
