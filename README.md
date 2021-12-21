@@ -89,11 +89,7 @@ Once MIRRORS is installed, you will need to set various hardware specific parame
 
 1. Click the ```Update Calibration Image``` button and select your current thermal calibration image.
 
-2. Click the ```Update Hardware Parameters``` button. This will produce the following window:
-
-![alt text](https://raw.githubusercontent.com/olivertlord/MIRRORS/master/hardware_parameters_screenshot.png)
-
-Change the values to match your system. The `Filter Wavelengths` and `Spectral Radiance` values are arranged graphically to mimic the quadrants of the your CCD.
+2. Click the ```Update Hardware Parameters``` button. This will open a separate window, listing various hardware specific constants. Change the values to match your system. The `Filter Wavelengths` and `Spectral Radiance` values are arranged graphically to mimic the quadrants of the your CCD.
 
 You will also need to change the parameters `pixel_width` (the size of the pixels of the CCD camera), `system_mag` (the magnification of the system) and `NA` (numerical aperture) to match your system.
 
