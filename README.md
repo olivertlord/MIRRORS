@@ -3,13 +3,21 @@ v1.7.9
 
 [![DOI](https://zenodo.org/badge/100439021.svg)](https://zenodo.org/badge/latestdoi/100439021)
 
-MIRRORS is a Graphical User Interface (GUI) created using the Matlab© GUIDE© program. The software is designed to process .TIFF images produced by a four colour multispectral imaging radiometry system for temperature measurement of samples heated in a diamond anvil cell, like the one developed by Campbell (2008) and which has been copied at the School of Earth Sciences at the University of Bristol, UK (Lord et al. 2014).
+MIRRORS is a Graphical User Interface (GUI) created using the Matlab© GUIDE© program. The software is designed to process .TIFF images produced by a four colour multispectral imaging radiometry system for temperature measurement of samples heated in a diamond anvil cell, like the one developed by [Campbell (2008)](http://doi.org/10.1063/1.2827513)[^1] and which has been copied at the School of Earth Sciences at the University of Bristol, UK [(Lord et al. 2014)](http://doi.org/10.1016/j.epsl.2014.09.046)[^2].
 
-The GUI can work in live mode (during an experiment) or in post-processing mode, and performs both spatial and thermal calibrations on the data before producing maps of temperature, temperature error and image difference, i.e. the change in shape of the temperature field, based on the work presented in the Supplementary Information of Briggs et al. (2017). The software also provides the user with an example Wien fit, peak temperature as a function of elapsed time, an image difference metric (also as a function of elapsed time), orthoganol temperature cross-sections centered on the peak pixel and finally emissivity as a function of temperature, as described in Fischer & Campbell (2010). 
+The GUI can work in live mode (during an experiment) or in post-processing mode, and performs both spatial and thermal calibrations on the data before producing maps of temperature, temperature error and image difference, i.e. the change in shape of the temperature field, based on the work presented in the Supplementary Information of [Briggs et al. (2017)](http://doi.org/10.1103/PhysRevB.95.054102)[^3]. The software also provides the user with an example Wien fit, peak temperature as a function of elapsed time, an image difference metric (also as a function of elapsed time), orthoganol temperature cross-sections centered on the peak pixel and finally emissivity as a function of temperature, as described in [Fischer & Campbell (2010)](http://doi.org/10.2138/am.2010.3463)[^4]. 
 
-MIRRORS is described in detail in the following publication:
+MIRRORS is described in detail in [Lord & Wang (2018)](http://doi.org/10.1063/1.5041360)[^5].
 
-Lord, O. T., & Wang, W. (2018). MIRRORS: A MATLAB ®GUI for temperature measurement by multispectral imaging radiometry. Review of Scientific Instruments, 89(10), 104903. http://doi.org/10.1063/1.5041360
+[^3]:[Briggs, R., Daisenberger, D., Lord, O. T., Salamat, A., Bailey, E., Walter, M. J., & McMillan, P. F. (2017). High-pressure melting behavior of tin up to 105 GPa. Physical Review B, 95(5), 054102.](http://doi.org/10.1103/PhysRevB.95.054102)
+
+[^1]:[Campbell, A. J. (2008). Measurement of temperature distributions across laser heated samples by multispectral imaging radiometry. Review of Scientific Instruments, 79(1), 015108.](http://doi.org/10.1063/1.2827513)
+
+[^4]:[Fischer, R. A., & Campbell, A. J. (2010). High-pressure melting of wustite. American Mineralogist, 95(10), 1473–1477.](http://doi.org/10.2138/am.2010.3463)
+
+[^2]:[Lord, O. T., Wood, I. G., Dobson, D. P., Vočadlo, L., Wang, W., Thomson, A. R., et al. (2014). The melting curve of Ni to 1 Mbar. Earth and Planetary Science Letters, 408, 226–236.](http://doi.org/10.1016/j.epsl.2014.09.046)
+
+[^5]:[Lord, O. T., & Wang, W. (2018). MIRRORS: A MATLAB ®GUI for temperature measurement by multispectral imaging radiometry. Review of Scientific Instruments, 89(10), 104903](http://doi.org/10.1063/1.5041360)
 
 ## Required hardware
 
@@ -99,9 +107,9 @@ Should the testing procedure fail, or if you detect any bugs during use, then pl
 
 ## Authors
 
-* **Oliver Lord, School of Earth Science, Univeristy of Bristol** - (https://github.com/olivertlord, https://seis.bristol.ac.uk/~glotl/index.html)
+* [**Oliver Lord, School of Earth Science, Univeristy of Bristol**](https://seis.bristol.ac.uk/~glotl/index.html)
 
-* **Weiwei Wang, Innovative Technology and Science Ltd** - (http://www.innotecuk.com/)
+* [**Weiwei Wang, Innovative Technology and Science Ltd**](http://www.innotecuk.com/)
 
 ## License
 
@@ -111,14 +119,4 @@ This project is licensed under the GNU General Public Licence Version 3 - see th
 
 * Mike Walter, Director, Gephysical Laboratory, Carnegie Institution of Washington for help and advice on all things radiometic.
 * The students and post-doctoral researchers at the DAC lab, School of Earth Sciences, University of Bristol, who tested the software, detected numerous bugs and suggested improvements.
-* I (Oliver Lord) would like to acknowledge support from the Royal Society in the form of a University Research Fellowship (UF150057) and the Natural Environment Research Council (NERC) in the form of an Post-doctoral Research Fellowship (NE/J018945/1).
-
-## References
-
-* Briggs, R., Daisenberger, D., Lord, O. T., Salamat, A., Bailey, E., Walter, M. J., & McMillan, P. F. (2017). High-pressure melting behavior of tin up to 105 GPa. Physical Review B, 95(5), 054102. http://doi.org/10.1103/PhysRevB.95.054102
-
-* Campbell, A. J. (2008). Measurement of temperature distributions across laser heated samples by multispectral imaging radiometry. Review of Scientific Instruments, 79(1), 015108. http://doi.org/10.1063/1.2827513
-
-* Fischer, R. A., & Campbell, A. J. (2010). High-pressure melting of wustite. American Mineralogist, 95(10), 1473–1477. http://doi.org/10.2138/am.2010.3463
-
-* Lord, O. T., Wood, I. G., Dobson, D. P., Vočadlo, L., Wang, W., Thomson, A. R., et al. (2014). The melting curve of Ni to 1 Mbar. Earth and Planetary Science Letters, 408, 226–236. http://doi.org/moving 10.1016/j.epsl.2014.09.046
+* Oliver Lord would like to acknowledge support from the Royal Society in the form of a University Research Fellowship (UF150057) and the Natural Environment Research Council (NERC) in the form of an Post-doctoral Research Fellowship (NE/J018945/1).
