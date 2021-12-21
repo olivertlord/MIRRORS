@@ -21,29 +21,23 @@ Details of the MIR system as well as calibration methods can be found in Campbel
 
 ## System compatibility
 
-* [from v1.7.9](https://github.com/olivertlord/MIRRORS/tree/v1.7.9) From this version onward, MIRRORS has been tested on MATLAB R2021b on Mac OS X 11.5.2 Big Sur and Windows 10 (both 64-bit operating systems) and the associated binaries have been produced from this version of MATLAB. This version may not work correctly if run from the command line of an earlier version of MATLAB
-* 
-* [v1.7.0](https://github.com/olivertlord/MIRRORS/tree/v1.7.0) to [v1.7.8](https://github.com/olivertlord/MIRRORS/tree/v1.7.8) These versions were written and tested on MATLAB R2014a (32-bit Windows 7) & R2018b (64-bit OS X 10.13 High Sierra) and the associated binaries have been produced from these versions of MATLAB. It will likely work on all versions after R2014a on Windows 7 and all versions after R2018b on OS X, but has not been explicity tested.
+MIRRORS can be run from the MATLAB command line or as a standalone application on any machine running Mac OS X (64-bit) or Windows (32-bit or 64-bit).
 
-Prior to v.
+* [from v1.7.9](https://github.com/olivertlord/MIRRORS/tree/v1.7.9): From this version onward, MIRRORS has been tested on MATLAB R2021b on Mac OS X 11.5.2 Big Sur and Windows 10 (both 64-bit operating systems) and the associated binaries have been produced from this version of MATLAB. This version may not work correctly if run from the command line of an earlier version of MATLAB
 
+* [v1.7.0](https://github.com/olivertlord/MIRRORS/tree/v1.7.0) to [v1.7.8](https://github.com/olivertlord/MIRRORS/tree/v1.7.8): These versions were written and tested on MATLAB R2014a (32-bit Windows 7) & R2018b (64-bit OS X 10.13 High Sierra) and the associated binaries have been produced from these versions of MATLAB. It will likely work on all versions after R2014a on Windows 7 and all versions after R2018b on OS X, but has not been explicity tested.
 
+* [v1.6.16](https://github.com/olivertlord/MIRRORS/tree/1.6.16) and earlier: standalone binaries were not available, but otherwise compatibility is as for [v1.7.0](https://github.com/olivertlord/MIRRORS/tree/v1.7.0).
 
-MIRRORS can be run either from the Matlab command line or as a standalone application on Mac OS X or Windows 10. MIRRORS was written and tested on versions R2014a (Windows 7) & R2018b (OS X 10.13). It will likely work on all versions after R2014a on both Windows 7 and all versions after R2018b on OS X, but has not been explicity tested.
+## Running MIRRORS from the Matlab command line
 
-### Instructions for users intending to run MIRRORS from the Matlab command line
+MIRRORS requires the Image Processing Toolbox, Signal Processing Toolbox and the Statistics and Machine Learning Toolbox to be installed.
 
-MIRRORS requires the Matlab image, signal and statistics toolboxes to be installed.
+Download the [source code](https://github.com/olivertlord/MIRRORS/releases/latest) as a .ZIP or .tar.gz file, and extract to your desired location. 
 
-Simply navigate to https://github.com/olivertlord/MIRRORS/releases/latest and download the latest source code (as either a .ZIP or .tar.gz file) and extract to your desired location. 
+To run MIRRORS, open Matlab, navigate to the MIRRORS directory and then type `MIRRORS`
 
-To run MIRRORS, open Matlab, navigate to the MIRRORS directory and then type
-
-```
-MIRRORS
-```
-
-To add the MIRRORS directory to the Matlab PATH, at the Matlab command prompt type:
+It is convenient to add the MIRRORS directory to the Matlab PATH. To do so, at the Matlab command prompt type:
 
 ```
 location = userpath
@@ -52,23 +46,42 @@ cd(location)
 edit startup.m
 ```
 
-At this point, if you are prompted to create ```startup.m```, then do so. In the new .m file that opens in the Editor, add the following line and resave:
+If you are prompted to create `startup.m`, then do so. In the new .m file that opens in the Editor, add `addpath(genpath('~/MIRRORS'));` (where `~/MIRRORS` is the full path to your MIRRORS directory). Now, next time you start Matlab, MIRRORS will be on the Matlab PATH and you can run MIRRORS from any locations
+
+## Running MIRRORS from a standalone app
+
+The MIRRORS standalone application requires the Matlab Component Runtime to be installed on your local machine, which can be dowdloaded for free. The version of the MCR you require depends on your operating system and the version of MATLAB that was used to create the standalone app you are using. For [the current release](https://github.com/olivertlord/MIRRORS/releases/latest):
+
+* `Mac OS X (64-bit):`	[MCR version 9.11 for Mac (64-bit)](https://ssd.mathworks.com/supportfiles/downloads/R2021b/Release/1/deployment_files/installer/complete/maci64/MATLAB_Runtime_R2021b_Update_1_maci64.dmg.zip)
+
+* `Windows (64-bit) :`	[MCR version 9.11 for Windows (64-bit)](https://ssd.mathworks.com/supportfiles/downloads/R2021b/Release/1/deployment_files/installer/complete/win64/MATLAB_Runtime_R2021b_Update_1_win64.zip)
+
+For versions [v1.7.0](https://github.com/olivertlord/MIRRORS/tree/v1.7.0) to [v1.7.8](https://github.com/olivertlord/MIRRORS/tree/v1.7.8) you will need:
+
+* `Mac OS X (64-bit):`	[MCR version 9.5 for Mac (64-bit)](http://ssd.mathworks.com/supportfiles/downloads/R2018b/deployment_files/R2018b/installers/maci64/MCR_R2018b_maci64_installer.dmg.zip) 
+
+* `Windows (32-bit) :`	[MCR version 8.3 for Windows (32-bit)](https://uk.mathworks.com/supportfiles/downloads/R2014a/deployment_files/R2014a/installers/win32/MCR_R2014a_win32_installer.exe)
+
+* `Windows (64-bit) :`	[MCR version 8.3 for Windows (64-bit)](https://uk.mathworks.com/supportfiles/downloads/R2014a/deployment_files/R2014a/installers/win64/MCR_R2014a_win64_installer.exe)
+
+Once the correct MCR is installed, simply download and extract MIRRORS.app.zip (Mac Os X) or download MIRRORS.exe (Windows) from [your chosen release](https://github.com/olivertlord/MIRRORS/releases/), move it to a location of your choosing and double click to launch MIRRORS.
+
+## Testing your installation
+
+To check your installation is working, a set of example data files are provided along with a text file containing expected numerical output. The example data can be [downloaded as a .zip archive](https://github.com/olivertlord/MIRRORS/releases/latest).
+
+Run MIRRORS (from the Matlab command line or the standalone app) and click on the `run test` button. MIRRORS will ask you to point it to the folder containing the example data. MIRRORS will then perform 20 calculations on the three data files within using a variety of options. If successful, two new text files, `test_data` and `results` will appear. Inspect `results` in a text editor. It should look something like this:
 
 ```
-addpath(genpath('~/MIRRORS'));
+       NaN	  -0.60000	   0.00000	   0.00000	   0.00000	   0.00000	   0.00000	       NaN	
+       NaN	  -0.60000	   0.00000	   0.00000	   0.00000	   0.00000	   0.00000	   0.00000	
+       NaN	  -0.60000	   0.00000	   0.00000	   0.00000	   0.00000	   0.00000	   0.00000	
+       NaN	  -0.60000	   0.00000	   0.00000	   0.00000	   0.00000	   0.00000	       NaN	
+       NaN	  -0.60000	   0.00000	   0.00000	   0.00000	   0.00000	   0.00000	   0.00000	
+       NaN	  -0.60000	   0.00000	   0.00000	   0.00000	   0.00000	   0.00000	   0.00000
 ```
 
-Where ```~/MIRRORS``` is the full path to your MIRRORS directory. Now, next time you start Matlab, MIRRORS will be on the Matlab PATH and you can type MIRRORS at the command prompt from any directory and the GUI should run.
-
-### Instructions for users intending to run MIRRORS from the standalone app
-
-The MIRRORS standalone application requires the Matlab Component Runtime, which can be dowdloaded for free. You will need a specific MCR for your operating system:
-
-* Mac OS X (64 bit):                [MCR version 9.5 for Mac (64-bit)](http://ssd.mathworks.com/supportfiles/downloads/R2018b/deployment_files/R2018b/installers/maci64/MCR_R2018b_maci64_installer.dmg.zip) 
-* Windows 7 (32 bit):               [MCR version 8.3 for Windows (32-bit)](https://uk.mathworks.com/supportfiles/downloads/R2014a/deployment_files/R2014a/installers/win32/MCR_R2014a_win32_installer.exe)
-* Windows 10 (64 bit):              [MCR version 8.3 for Windows (64-bit)](https://uk.mathworks.com/supportfiles/downloads/R2014a/deployment_files/R2014a/installers/win64/MCR_R2014a_win64_installer.exe)
-
-Once this is installed, simply download MIRRORS.app (Mac Os X) or MIRRORS.exe (Windows 7) from https://github.com/olivertlord/MIRRORS/releases/latest and move it to a location of your choosing. Double clicking on the APP should launch MIRRORS.
+Columns 4 - 8 should contain only zeros or NaN. Finite numbers in other columns can be ignored.
 
 ## Customising Mirrors for your system
 
@@ -80,48 +93,11 @@ Once MIRRORS is installed, you will need to set various hardware specific parame
 
 ![alt text](https://raw.githubusercontent.com/olivertlord/MIRRORS/master/hardware_parameters_screenshot.png)
 
-Change the values to match your system. The ```Filter Wavelengths``` and ```Spectral Radiance``` values are arranged graphically to mimic the quadrants of the CCD so be careful to correctly match the wavelength to its quadrant in the image.
+Change the values to match your system. The `Filter Wavelengths` and `Spectral Radiance` values are arranged graphically to mimic the quadrants of the your CCD.
 
-You will also need to change the following constants to values appropriate for your system:
+You will also need to change the parameters `pixel_width` (the size of the pixels of the CCD camera), `system_mag` (the magnification of the system) and `NA` (numerical aperture) to match your system.
 
-* `pixel_width` - the size of the pixels of the CCD camera 
-* `system_mag` - the magnification of the system
-* `NA` - numerical aperture
-
-## Testing
-
-To check that MIRRORS is working correctly, a set of example data files are provided, along with screnshots of the MIRRORS GUI after processing plus output files containing the expected results. The example data can be downloaded as a .zip archive from https://github.com/olivertlord/MIRRORS/releases/latest. 
-
-Before testing mirrors, whether you are running it from the Matlab command line or the standalone app, you must ensure that it is set up the way it was when the benchmarking output was created. To do this you need to do two things:
-
-1. Click the ```Update Calibration Image``` button and select ```tc_example.tiff``` within the ```MIRRORS/example``` folder.
-
-2. Click the ```Update Hardware Parameters``` button and change the values to those in the image above.
-
-### Testing MIRRORS when running it from the Matlab command line
-
-If you are running MIRRORS from the Matlab command line, then click on the ```Benchmark``` button in the MIRRORS GUI. MIRRORS will prompt you to select the folder containing the example data. MIRRORS will then automatically fit the example data repeatedly, using different options, and compare each against the output files that contain the expected results (also stored in ```MIRRORS/example/```.
-
-After each of the 16 test runs are complete, you should see output at the command line that looks like this:
-
-```
-difference =
-
-         0    0.0016         0         0         0         0         0       NaN
-         0    0.0016         0         0         0         0         0         0
-         0    0.0016         0         0         0         0         0         0
-         0    0.0016         0         0         0         0         0         0
-         0    0.0040  206.0000         0         0         0         0         0
-```
-Any differences in column 2 and 3 simply reflect the fact that when downloading files from the internet, their modification date is set as the download time, rather than the time they were acquired. MIRRORS automatically resets these timestamps when you run the benchmark routine so there is at least 1 second between each. This allows the data to be plotted as a function of time, but the times will not match those in the example output. This is not a problem with MIRRORS and can be ignored. 
-
-### Testing MIRRORS when running the standalone app
-
-If you are using the standalone MIRRORS app, you probably don't have access to Matlab but you can still check that MIRRORS is working, using the same procedure as described above
-
-The tests will run, but you will not see the numerical output. Instead, you will find 16 new folders within the ```example``` folder with names of the form ```MIRRORS_output_xx_xxx_xxx_xx_xx_xx``` containing a ```data_SUMMARY.txt``` file. Looking at the first of these folders, compare the contents of ```data_SUMMARY.txt``` with ```example/data/test_1/data_SUMMARY.txt```. The contents should be identical, except for columns two and three. Repeat this for the second folder, comparing ```MIRRORS_output_xx_xxx_xxx_xx_xx_xx/data_SUMMARY.txt``` with ```example/data/test_2/data_SUMMARY.txt```, and so on for all 16 folders.
-
-### Troubleshooting
+## Troubleshooting
 
 Should the testing procedure fail, or if you detect any bugs during use, then please contact me (Oliver Lord) at <oliver.lord@bristol.ac.uk>. Suggestions for new features are also welcome.
 
