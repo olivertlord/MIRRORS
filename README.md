@@ -21,7 +21,11 @@ Details of the MIR system as well as calibration methods can be found in Campbel
 
 ## System compatibility
 
-### v1.7.9 -
+* [from v1.7.9](https://github.com/olivertlord/MIRRORS/tree/v1.7.9) From this version onward, MIRRORS has been tested on MATLAB R2021b on Mac OS X 11.5.2 Big Sur and Windows 10 (both 64-bit operating systems) and the associated binaries have been produced from this version of MATLAB. This version may not work correctly if run from the command line of an earlier version of MATLAB
+* 
+* [v1.7.0](https://github.com/olivertlord/MIRRORS/tree/v1.7.0) to [v1.7.8](https://github.com/olivertlord/MIRRORS/tree/v1.7.8) These versions were written and tested on MATLAB R2014a (32-bit Windows 7) & R2018b (64-bit OS X 10.13 High Sierra) and the associated binaries have been produced from these versions of MATLAB. It will likely work on all versions after R2014a on Windows 7 and all versions after R2018b on OS X, but has not been explicity tested.
+
+Prior to v.
 
 
 
