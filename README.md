@@ -3,26 +3,29 @@ v1.7.9
 
 [![DOI](https://zenodo.org/badge/100439021.svg)](https://zenodo.org/badge/latestdoi/100439021)
 
-MIRRORS is a Graphical User Interface (GUI) created using the Matlab© GUIDE© program. The software is designed to process .TIFF images from a four colour multispectral imaging radiometry system like the one developed by Campbell (2008)[^1] for temperature measurement of samples laser heated in a diamond anvil cell and which has been copied at the School of Earth Sciences at the University of Bristol, UK (Lord et al. 2014).
+MIRRORS is a Graphical User Interface (GUI) created using the Matlab© GUIDE© program. The software is designed to process .TIFF images produced by a four colour multispectral imaging radiometry system for temperature measurement of samples heated in a diamond anvil cell, like the one developed by Campbell (2008) and which has been copied at the School of Earth Sciences at the University of Bristol, UK (Lord et al. 2014).
 
-
-The GUI can work in either a live mode (during an experiment) or in a post-processing mode, and performs both spatial and thermal calibrations on the data before producing maps of temperature, temperature error and image difference (i.e. the change in shape of the temperature field, based on the work presented in the Supplementary Information of Briggs et al. 2017). The software also provides the user with an example Wien fit, peak temperature as a function of elapsed time, an image difference metric (also as a function of elapsed time), orthoganol temperature cross-sections centered on the peak pixel and finally emissivity as a function of temperature (as described in Fischer & Campbell (2010). 
+The GUI can work in live mode (during an experiment) or in post-processing mode, and performs both spatial and thermal calibrations on the data before producing maps of temperature, temperature error and image difference, i.e. the change in shape of the temperature field, based on the work presented in the Supplementary Information of Briggs et al. (2017). The software also provides the user with an example Wien fit, peak temperature as a function of elapsed time, an image difference metric (also as a function of elapsed time), orthoganol temperature cross-sections centered on the peak pixel and finally emissivity as a function of temperature, as described in Fischer & Campbell (2010). 
 
 MIRRORS is described in detail in the following publication:
 
 Lord, O. T., & Wang, W. (2018). MIRRORS: A MATLAB ®GUI for temperature measurement by multispectral imaging radiometry. Review of Scientific Instruments, 89(10), 104903. http://doi.org/10.1063/1.5041360
 
-## Prerequisites
+## Required hardware
 
-MIRRORS requires a multispectral imaging radiometry system that produces .TIFF files of any resolution, aspect ratio and bit depth but each .TIFF must include four monochromatic images of the laser heated spot to be analysed, each centered on the middle pixel of one quadrant of the full image. The software performs a spatial calibration before stacking the four quadrants and so the centering does not need to be perfect. Each image must be at a different, precisely known wavelength.  
+MIRRORS requires a multispectral imaging radiometry system that produces .TIFF files of any resolution, aspect ratio and bit depth, but each .TIFF must include four monochromatic images of the laser heated spot to be analysed, each approximately centered on the centre pixel of one quadrant of the full image. The software performs a spatial calibration before stacking the four quadrants and so the centering does not need to be perfect. Each image must be at a different, precisely known wavelength.  
 
 The system needs a thermal calibration .TIFF image produced using a calibrated source of known spectral radiance and as before, consisting of four equal quadrants each illuminated by a monochromatic image of the calibration source.
 
 Details of the MIR system as well as calibration methods can be found in Campbell et al. (2008) and Lord & Wang (2018).
 
-## Installation
+## System compatibility
 
-MIRRORS can be run either from the Matlab command line or as a standalone application on Mac OS X or Windows 7. MIRRORS was written and tested on versions R2014a (Windows 7) & R2018b (OS X 10.13). It will likely work on all versions after R2014a on both Windows 7 and all versions after R2018b on OS X, but has not been explicity tested.
+### v1.7.9 -
+
+
+
+MIRRORS can be run either from the Matlab command line or as a standalone application on Mac OS X or Windows 10. MIRRORS was written and tested on versions R2014a (Windows 7) & R2018b (OS X 10.13). It will likely work on all versions after R2014a on both Windows 7 and all versions after R2018b on OS X, but has not been explicity tested.
 
 ### Instructions for users intending to run MIRRORS from the Matlab command line
 
