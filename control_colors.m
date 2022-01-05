@@ -1,4 +1,4 @@
-function [] = control_colors(flag,handles)
+function [] = control_colors(flag,h)
 %--------------------------------------------------------------------------
 % Function CONTROL_COLORS
 %--------------------------------------------------------------------------
@@ -28,30 +28,27 @@ function [] = control_colors(flag,handles)
 %   edit2 and pusbutton4 in that order. The next 6 elements control the
 %   enabled state in the same order. 0 = red or 'off', 1 = green or 'on'.
 
-% Store current flag values
-setappdata(0,'flag',flag);
-
 % Creates array of figure handles
-h = [handles.pushbutton1 handles.pushbutton2 handles.pushbutton3...
-    handles.pushbutton4];
+buttons = [h.pushbutton1 h.pushbutton2 h.pushbutton3 h.pushbutton4...
+    h.pushbutton5 h.pushbutton6 h.pushbutton7 h.pushbutton8];
 
 % Set background colour of graphical element in array h to red or green
 % depending on flag value
-for i = 1:4
+for i = 1:8
     if flag{i} == 0
-        set(h(i),'BackgroundColor',[.8 .8 0.8]);
+        set(buttons(i),'BackgroundColor',[.8 .8 0.8]); % grey
     else
-        set(h(i),'BackgroundColor',[0 .8 0]);
+        set(buttons(i),'BackgroundColor',[0 .8 0]); % green
     end
 end
 
 % Set enabled state of graphical element in array h to red or green
 % depending on flag value
-for i = 5:8
+for i = 9:16
     if flag{i} == 0
-        set(h(i-4),'Enable','off')
+        set(buttons(i-8),'Enable','off')
     else
-        set(h(i-4),'Enable','on')
+        set(buttons(i-8),'Enable','on')
     end
 end
 

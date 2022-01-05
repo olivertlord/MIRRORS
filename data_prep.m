@@ -62,7 +62,7 @@ fclose('all');
 
 %--------------------------------------------------------------------------
 % Load previous file path from .MAT file
-unkmat = matfile('unkmat.mat','Writable',true);
+unkmat = matfile('unknown.mat','Writable',true);
 
 %--------------------------------------------------------------------------
 % Create output directory if Save Output checkbox is ticked

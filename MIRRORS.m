@@ -56,7 +56,7 @@ function varargout = MIRRORS(varargin)
 
 % Edit the above text to modify the response to help MIRRORS
 
-% Last Modified by GUIDE v2.5 20-Dec-2021 12:42:11
+% Last Modified by GUIDE v2.5 05-Jan-2022 14:30:26
 
 
 %--------------------------------------------------------------------------
@@ -124,7 +124,7 @@ handles.output = hObject;
 guidata(hObject, handles);
 
 % Make Update Test Data button invisible
-set(handles.pushbutton9,'visible','off')
+set(handles.pushbutton7,'visible','off')
 
 % Creates array of handles to axes within the GUI
 plots = [handles.axes2 handles.axes3 handles.axes4 handles.axes5...
@@ -147,7 +147,8 @@ end
 movegui(gcf,'center');
 
 % Initialise button colors and enabled state
-control_colors({0 0 0 0 1 1 0 0},handles);
+flag = {0 0 0 0 0 0 0 0 1 1 0 0 1 1 1 1};
+control_colors(flag, handles);
 
 % Suppress non integer index and complex number warnings
 warning('off','MATLAB:colon:nonIntegerIndex');
@@ -184,7 +185,8 @@ if get(handles.pushbutton1,'BackgroundColor') == [0 .8 0]
     end
     
     % Update button states and exit live mode
-    control_colors({0 0 0 0 1 1 0 0}, handles)
+    flag = {0 0 0 0 0 0 0 0 1 1 0 0 1 1 1 1};
+    control_colors(flag, handles);
     return
 end
 % Clear all axes within GUI
@@ -195,7 +197,8 @@ fclose('all');
 set(handles.checkbox2,'Value',1,'Enable','off');
 
 % Update button states
-control_colors({1 0 0 0 1 1 0 0}, handles)
+flag = {1 0 0 0 0 0 0 0 1 1 0 0 1 1 1 1};
+control_colors(flag, handles);
 
 % Deletes ROI if one already exists
 hfindROI = findobj(handles.axes1,'Type','hggroup');
@@ -206,7 +209,7 @@ set(handles.slider1,'Value',0.25);
 set(handles.text12,'String','25 %');
 
 % Load previous file path from .MAT file
-unkmat = matfile('unkmat.mat','Writable',true);
+unkmat = matfile('unknown.mat','Writable',true);
 
 % Ask user to point to folder containing .TIF files to be processed
 test_dir = uigetdir(unkmat.path,'Select Image(s)');
@@ -215,7 +218,8 @@ test_dir = uigetdir(unkmat.path,'Select Image(s)');
 if isequal(test_dir,0)
     
     % Update button states
-    control_colors({0 0 0 0 1 1 0 0}, handles)
+    flag = {0 0 0 0 0 0 0 0 1 1 0 0 1 1 1 1};
+    control_colors(flag, handles);
     return
 end
 unkmat.path = test_dir;
@@ -385,7 +389,7 @@ arrayfun(@cla,findall(0,'type','axes'))
 fclose('all');
 
 % Update button states
-flag = {0 1 0 0 1 1 0 0};
+flag = {0 1 0 0 0 0 0 0 1 1 0 0 1 1 1 1};
 control_colors(flag, handles);
 
 % Deletes ROI if one already exists
@@ -398,22 +402,8 @@ set(handles.text12,'String','25 %');
 set(handles.slider1,'Enable','on');
 set(handles.checkbox2,'Enable','on');
 
-% Determine path to app location
-% if isdeployed
-%     appRoot = ctfroot;
-%     if ismac
-%         appRootSplit = strsplit(appRoot,'MIRRORS.app');
-%     elseif ispc
-%         [~,pcroot] = system('path');
-%         appRoot = char(regexpi(pcroot, 'Path=(.*?);', 'tokens', 'once'));
-%         appRootSplit = strsplit(appRoot,'MIRRORS.exe');
-%     end
-% else
-%     appRootSplit = strsplit(pwd,'xxxx');
-% end
-
 % Load previous file path from .MAT file
-unkmat = matfile('unkmat.mat','Writable',true);
+unkmat = matfile('unknown.mat','Writable',true);
 
 % Promts user to select unknown file(s)
 [unkmat.names,test_dir] = uigetfile(strcat(unkmat.path,'/*.tif*'),...
@@ -423,7 +413,8 @@ unkmat = matfile('unkmat.mat','Writable',true);
 if isequal(test_dir,0)
     
     % Update button states
-    control_colors({0 0 0 0 1 1 0 0}, handles);
+    flag = {0 0 0 0 0 0 0 0 1 1 0 0 1 1 1 1};
+    control_colors(flag, handles);
     return
 end
 unkmat.path = test_dir;
@@ -458,6 +449,11 @@ for i=1:num_files
        
     % Reads in unknown file  
     raw=imread(char(strcat(unkmat.path,'/',(filename))));
+
+    % Save example data to unknown.mat file
+    if i == 1
+        unkmat.unk = raw;
+    end
     
     % Determines background intensity
     background = mean(mean([raw(1:10,1:10) raw(1:10,end-9:end)...
@@ -509,7 +505,7 @@ for i=1:num_files
 end
 
 % Update button states
-flag = {0 1 0 0 1 1 1 0};
+flag = {0 1 0 0 0 0 0 0 1 1 1 0 1 1 1 1};
 control_colors(flag, handles);
 
 % Make data available between functions within GUI
@@ -520,7 +516,7 @@ setappdata(0,'listpos',listpos);
 function pushbutton3_Callback(~, ~, handles) 
 
 % Update button states
-flag = {0 1 0 0 1 1 1 0};
+flag = {0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0};
 control_colors(flag, handles);
 
 % Deletes interactive ROI if one already exists
@@ -532,11 +528,11 @@ hfindrect = findobj(handles.axes1,'Type','rectangle');
 delete(hfindrect)
 
 % Load current hardware_parameters
-calmat = matfile('calibration.mat','Writable',true);
+unkmat = matfile('unknown.mat','Writable',true);
 
 % Determine the size, position and limits of the ROI based on the size of
 % the calibration file
-[y,x] = size(calmat.cal);
+[y,x] = size(unkmat.unk);
 
 % Determine centre of upper left quadrant
 xc = floor(x/4);
@@ -553,6 +549,12 @@ bw = floor(((min(xc,yc)*2)-max_w)/2);
 x_tl = floor(xc-(max_w/2));
 y_tl = floor(yc-(max_w/2));
 
+% Add tooltip
+tooltip = text(handles.axes1,x/2,y/2,...
+    'Resize, reposition and DOUBLE CLICK when ready','FontSize', 8,...
+    'HorizontalAlignment','Center','VerticalAlignment', 'middle',...
+    'Color', 'w');
+
 % Creates resizeable ROI rectangle and waits until user double clicks
 % inside it, and then reads out position pixel position of top left corner
 % and size (constrined to a square, and a region with a 20 pixel hold off
@@ -564,19 +566,22 @@ setPositionConstraintFcn(ROI,fcn);
 setFixedAspectRatioMode(ROI,'True');
 subframe = wait(ROI);
 
+% Remove tooltip
+delete(tooltip)
+
 % Make ROI position avaialble to other functions
 setappdata(0,'subframe',subframe);
 
 % Update button states
-flag = {0 1 1 1 1 1 1 1};
-control_colors(flag, handles)
+flag = {0 1 1 1 0 0 0 0 1 1 1 1 1 1 1 1};
+control_colors(flag, handles);
 
 %--------------------------------------------------------------------------
 % --- Executes when user presses PROCESS button
 function pushbutton4_Callback(~, ~, handles) 
 
 % Load previous file path from .MAT file
-unkmat = matfile('unkmat.mat','Writable',true);
+unkmat = matfile('unknown.mat','Writable',true);
 
 % Calls DATA_PREP function which returns parameters for the sequential
 % fitting
@@ -749,30 +754,11 @@ set(handles.text12,'String',strcat(num2str(round(slider_val)),{' '},'%'));
 function checkbox1_Callback(~, ~, ~) 
 
 %--------------------------------------------------------------------------
-% --- Executes when user clicks on the Update Hardware Parameters button
-function pushbutton6_Callback(~, ~, ~) 
-hardware_parameters
-
-%--------------------------------------------------------------------------
 % --- Executes when user clisks on the Update Calibration Image button
-function pushbutton8_Callback(~, ~, handles) 
+function pushbutton5_Callback(~, ~, handles) 
 
 % Load current hardware_parameters
 calmat = matfile('calibration.mat','Writable',true);
-
-% Determine path to app location
-% if isdeployed
-%     appRoot = ctfroot;
-%     if ismac
-%         appRootSplit = strsplit(appRoot,'MIRRORS.app');
-%     elseif ispc
-%         [~,pcroot] = system('path');
-%         appRoot = char(regexpi(pcroot, 'Path=(.*?);', 'tokens', 'once'));
-%         appRootSplit = strsplit(appRoot,'MIRRORS.exe');
-%     end
-% else
-%     appRootSplit = strsplit(pwd,'xxxx');
-% end
 
 % Promts user to select calibration file
 [calmat.name,test_dir] = uigetfile(strcat(calmat.path,'/*.tif*'),...
@@ -790,11 +776,31 @@ calmat.cal = im2double(cal_image);
 set(handles.text20,'String',calmat.name);
 
 %--------------------------------------------------------------------------
+% --- Executes when user clicks on the Update Hardware Parameters button
+function pushbutton6_Callback(~, ~, ~) 
+hardware_parameters
+
+%--------------------------------------------------------------------------
+% --- Executes when Update Test Data button is pushed
+function pushbutton7_Callback(~, ~, handles) 
+
+% Ask user to select folder containing example data    
+example_source = './example';
+
+% Delete existing benchmark data
+if exist(strcat(example_source,'/','benchmark_data'), 'file')==2
+  delete(strcat(example_source,'/','benchmark_data'));
+end
+
+% Run test_fit function
+test_fit(example_source,'benchmark_data',handles)
+
+%--------------------------------------------------------------------------
 % --- Executes when RUN TEST button is pushed
-function pushbutton5_Callback(~, ~, handles) 
+function pushbutton8_Callback(~, ~, handles) 
 
 % Load previous file path from .MAT file
-unkmat = matfile('unkmat.mat','Writable',true);
+unkmat = matfile('unknown.mat','Writable',true);
 
 % Ask user to select folder containing example data    
 unkmat.path = uigetdir(unkmat.path,'Select folder containing example data');
@@ -822,21 +828,6 @@ fprintf(fid,[repmat('%10.5f\t', 1, size(difference,2)) '\n'], difference');
 fclose(fid);
 
 %--------------------------------------------------------------------------
-% --- Executes when Update Test Data button is pushed
-function pushbutton9_Callback(~, ~, handles) 
-
-% Ask user to select folder containing example data    
-example_source = './example';
-
-% Delete existing benchmark data
-if exist(strcat(example_source,'/','benchmark_data'), 'file')==2
-  delete(strcat(example_source,'/','benchmark_data'));
-end
-
-% Run test_fit function
-test_fit(example_source,'benchmark_data',handles)
-
-%--------------------------------------------------------------------------
 % --- Executes fitting of example data
 function test_fit(example_source, output_name, handles)
 
@@ -849,7 +840,7 @@ for i = 1:length(full_list)
 end
 
 % Load .MAT file for storing list of unknown data to be fitted
-unkmat = matfile('unkmat.mat','Writable',true);
+unkmat = matfile('unknown.mat','Writable',true);
 
 % Update .MAT file with path to unknown files
 unkmat.path = example_source;

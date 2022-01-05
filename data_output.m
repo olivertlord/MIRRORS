@@ -54,7 +54,7 @@ function [timevector,elapsedSec] = data_output(handles,filename,c1,T_max,...
 %--------------------------------------------------------------------------
 
 % Load previous file path from .MAT file
-unkmat = matfile('unkmat.mat','Writable',true);
+unkmat = matfile('unknown.mat','Writable',true);
 
 %Get timestamp
 dir_content = dir(strcat(unkmat.path,'/',filename));
