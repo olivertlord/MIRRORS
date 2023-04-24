@@ -48,7 +48,7 @@ function varargout = hardware_parameters(varargin)
 
 % Edit the above text to modify the response to help hardware_parameters
 
-% Last Modified by GUIDE v2.5 20-Dec-2021 20:41:46
+% Last Modified by GUIDE v2.5 20-Apr-2023 11:32:59
 
 %--------------------------------------------------------------------------
 % Begin initialization code - DO NOT EDIT
@@ -170,23 +170,23 @@ handles.output = hObject;
 guidata(hObject, handles);
 
 % Load current hardware_parameters
-m = matfile('hardware_parameters.mat','Writable',true);
+hp = matfile('hardware_parameters.mat','Writable',true);
 
-set(handles.edit1, 'String', num2str(m.wa));
-set(handles.edit2, 'String', num2str(m.wb));
-set(handles.edit3, 'String', num2str(m.wc));
-set(handles.edit4, 'String', num2str(m.wd));
+set(handles.edit1, 'String', num2str(hp.wa));
+set(handles.edit2, 'String', num2str(hp.wb));
+set(handles.edit3, 'String', num2str(hp.wc));
+set(handles.edit4, 'String', num2str(hp.wd));
  
-set(handles.edit5, 'String', num2str(m.sr_wa));
-set(handles.edit6, 'String', num2str(m.sr_wb));
-set(handles.edit7, 'String', num2str(m.sr_wc));
-set(handles.edit8, 'String', num2str(m.sr_wd));
+set(handles.edit5, 'String', num2str(hp.sr_wa));
+set(handles.edit6, 'String', num2str(hp.sr_wb));
+set(handles.edit7, 'String', num2str(hp.sr_wc));
+set(handles.edit8, 'String', num2str(hp.sr_wd));
  
-set(handles.edit9, 'String', num2str(m.pixel_width));
+set(handles.edit9, 'String', num2str(hp.pixel_width));
  
-set(handles.edit10, 'String', num2str(m.system_mag));
+set(handles.edit10, 'String', num2str(hp.system_mag));
  
-set(handles.edit11, 'String', num2str(m.NA));
+set(handles.edit11, 'String', num2str(hp.NA));
 
 %--------------------------------------------------------------------------
 % --- Outputs from this function are returned to the command line.
@@ -255,23 +255,36 @@ check_numeric(box)
 % --- Executes on button press in pushbutton1.
 function pushbutton1_Callback(~, ~, handles)
 
-m = matfile('hardware_parameters.mat','Writable',true);
+hp = matfile('hardware_parameters.mat','Writable',true);
 
-m.wa = eval(get(handles.edit1,'String'));
-m.wb = eval(get(handles.edit2,'String'));
-m.wc = eval(get(handles.edit3,'String'));
-m.wd = eval(get(handles.edit4,'String'));
+hp.wa = eval(get(handles.edit1,'String'));
+hp.wb = eval(get(handles.edit2,'String'));
+hp.wc = eval(get(handles.edit3,'String'));
+hp.wd = eval(get(handles.edit4,'String'));
 
-m.sr_wa = eval(get(handles.edit5,'String'));
-m.sr_wb = eval(get(handles.edit6,'String'));
-m.sr_wc = eval(get(handles.edit7,'String'));
-m.sr_wd = eval(get(handles.edit8,'String'));
+hp.sr_wa = eval(get(handles.edit5,'String'));
+hp.sr_wb = eval(get(handles.edit6,'String'));
+hp.sr_wc = eval(get(handles.edit7,'String'));
+hp.sr_wd = eval(get(handles.edit8,'String'));
 
-m.pixel_width = eval(get(handles.edit9,'String'));
+hp.pixel_width = eval(get(handles.edit9,'String'));
 
-m.system_mag = eval(get(handles.edit10,'String'));
+hp.system_mag = eval(get(handles.edit10,'String'));
 
-m.NA = eval(get(handles.edit11,'String'));
+hp.NA = eval(get(handles.edit11,'String'));
+
+% Calculate CCD resolution at the image plane
+hp.resolution = hp.pixel_width/hp.system_mag;
+
+% Calculate the Abbe diffraction limit of the system
+hp.diff_limit = (max([hp.wa hp.wb hp.wc hp.wd])/1000)/(2*hp.NA);
+
+% Calculate bin size required to match diffraction limited system
+% resolution and force to be an odd number
+hp.bsz = 2*floor((hp.diff_limit/hp.resolution)/2)+1;
+
+% Calculate integer border width of bin
+hp.bhw = (hp.bsz-1)/2;
 
 close
 
@@ -279,7 +292,7 @@ close
 % --- Checks that entered data is numerical
 function check_numeric(box)
 str=get(box,'String');
-if isempty(str2num(str))
+if isempty(str2double(str))
     set(box,'string','0');
     warndlg('Input must be numerical');
 end

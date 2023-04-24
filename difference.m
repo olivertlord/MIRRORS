@@ -2,8 +2,7 @@ function [T_dif,T_dif_metric] = difference(T, sb_a, c1, background)
 %--------------------------------------------------------------------------
 % Function DIFFERENCE
 %--------------------------------------------------------------------------
-% Version 1.7.7
-% Written and tested on Matlab R2014a (Windows 7) & R2017a (OS X 10.13)
+% Written and tested on Matlab R2022b (mac)
 
 % Copyright 2018 Oliver Lord, Weiwei Wang
 % email: oliver.lord@bristol.ac.uk
@@ -23,26 +22,30 @@ function [T_dif,T_dif_metric] = difference(T, sb_a, c1, background)
 % You should have received a copy of the GNU General Public License
 % along with MIRRORS.  If not, see <http://www.gnu.org/licenses/>.
 %--------------------------------------------------------------------------
-%   Determines the difference map between the current and previous
-%   normaised temperature maps, modulated by the light intensity such that
-%   cooler pixels carry a lower weight, to reduce the influence of edge
-%   effects. Also computes the average of the difference across all pixels
-%   to yield the image difference metric, designed to be a quantitative
-%   description of the change in shape of the temperature field independent
-%   of the change in temperature.
+% Determines the difference map between the current and previous
+% normaised temperature maps, modulated by the light intensity such that
+% cooler pixels carry a lower weight, to reduce the influence of edge
+% effects. Also computes the average of the difference across all pixels
+% to yield the image difference metric, designed to be a quantitative
+% description of the change in shape of the temperature field independent
+% of the change in temperature.
 
-%   INPUTS: T = current temperature map
+% Inputs:
+% 
+%       T          = current temperature map
 
-%           sb = smoothed b quadrant
+%       sb         = smoothed b quadrant
 
-%           c1 = counter 1
+%       c1         = counter 1
 
-%           background = background intensity determined by averaging the
-%           corners of the fullframe image
+%       background = background intensity determined by averaging the
+%                    corners of the fullframe image
 
-%   OUTPUTS: T_dif = difference map
+% Outputs:
+% 
+%       T_dif        = difference map
 
-%            T_dif_metric = average of the difference map
+%       T_dif_metric = average of the difference map
 
 
 %--------------------------------------------------------------------------
@@ -50,7 +53,7 @@ function [T_dif,T_dif_metric] = difference(T, sb_a, c1, background)
 % T_dif_metric but still set T0_field to current T map
 if (c1 == 1) || (max(sb_a(:)) < background*4)
     setappdata(0,'T0_field',(T - min(T(:)))/(max(T(:)) - min(T(:))));
-    T_dif = NaN(length(T));
+    T_dif = NaN(size(T));
     T_dif_metric = NaN;
     
 % Else, determine value of T_dif and T_dif_metric
@@ -72,7 +75,7 @@ else
     T_dif = abs(T1_field-T0_field).*I1_field;
     
     % Compute average difference metric
-    T_dif_metric = nanmean(T_dif(:));
+    T_dif_metric = mean(T_dif(:),'omitnan');
     
     T0_field = T1_field;
     setappdata(0,'T0_field',T0_field);

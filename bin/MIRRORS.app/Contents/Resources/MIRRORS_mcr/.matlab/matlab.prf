@@ -1,13 +1,39 @@
 #MATLAB Preferences
-#Tue Dec 21 13:56:32 GMT 2021
+#Fri Apr 21 16:41:02 BST 2023
 RLHiddenB2_WB_2014b_1=I16376
 RLOrderB2_WB_2014b_1=S0:1:
+FindFilesLookinList2=S
 MatlabExitConfirm=Bfalse
-DeploytoollastOpenFile=S/Users/oliverlord/Dropbox/Work/Codebase/MatLab/MIRRORS/untitled1.prj
-EditorMRU2=S/Users/oliverlord/Dropbox/Work/Codebase/MatLab/MIRRORS/binaries/readme.txt
-EditorMRU1=S/Users/oliverlord/Dropbox/Work/Codebase/MatLab/MIRRORS-TEST/MIRRORS.m
+LayoutMRU9=S
+LayoutMRU8=S
+FindFilesIncludeSubdirs=Bfalse
+LayoutMRU7=S
+LayoutMRU6=S
+LayoutMRU5=S
+LayoutMRU4=S
+LayoutMRU3=S
+LayoutMRU2=S/Users/glotl/Dropbox/Work/Codebase/MatLab/MIRRORS/hardware_parameters.fig
+LayoutMRU1=S/Users/glotl/Dropbox/Work/Codebase/MatLab/MIRRORS/MIRRORS.fig
+FindFilesMaxFileSizeSearched=I500
+FindFilesWindowLocation=R0 0 300 300
+FindFilesFileSizeFilterState=Btrue
+EditorMRU8=S/Users/glotl/Dropbox/Work/Codebase/MatLab/MIRRORS/MIRRORS.m
+EditorMRU7=S/Users/glotl/Dropbox/Work/Codebase/MatLab/MIRRORS/peak_pixel.m
+EditorMRU6=S/Users/glotl/Dropbox/Work/Codebase/MatLab/MIRRORS/save_timestamps.m
+EditorMRU5=S/Users/glotl/Dropbox/Work/Codebase/MatLab/MIRRORS/test.m
+EditorMRU4=S/Users/glotl/Dropbox/Work/Codebase/MatLab/MIRRORS/hardware_parameters.m
+EditorMRU3=S/Users/glotl/Dropbox/Work/Codebase/MatLab/MIRRORS/mccExcludedFiles.log
+EditorMRU2=S/Users/glotl/Dropbox/Work/Codebase/MatLab/MIRRORS/unresolvedSymbols.txt
+EditorMRU1=S/Users/glotl/Dropbox/Work/Codebase/MatLab/MIRRORS/divide.m
+InspectorWindowBounds=R0 32 508 945
 CommandWindowClearConfirmation=Btrue
-DeploytoolrecentProjects=S/Users/oliverlord/Dropbox/Work/Codebase/MatLab/MIRRORS/untitled1.prj
 RLWidthB2_WB_2014b_1_1=I130
 RLWidthB2_WB_2014b_1_0=I130
+FindFilesWindowSize=R0 0 1271 455
+FindFilesMatchCaseState=Bfalse
+RLPrevInitB2_null=Btrue
+FindFilesShowFullPathState=Bfalse
+LayoutSnapToGrid=Btrue
 RLPrevInitB2_WB_2014b_1=Btrue
+FindFilesExclusionFilterState=Btrue
+FindFilesSearchType=I0

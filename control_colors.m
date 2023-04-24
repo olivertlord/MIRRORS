@@ -22,11 +22,18 @@ function [] = control_colors(flag,h)
 % You should have received a copy of the GNU General Public License
 % along with MIRRORS.  If not, see <http://www.gnu.org/licenses/>.
 %--------------------------------------------------------------------------
-%   Conrols colour and enabled state of buttons and edit boxes within the
-%   GUI. Input is a 12 element cell array where each element is either 0 or
-%   1. The first 6 elements control the colour of pushbutton1-3, edit1,
-%   edit2 and pusbutton4 in that order. The next 6 elements control the
-%   enabled state in the same order. 0 = red or 'off', 1 = green or 'on'.
+% Inputs:
+
+%   flag: a 12-element cell array where each element is either 0 or 1. The
+%         first 6 elements control the color of pushbutton1-3, edit1, 
+%         edit2, and pushbutton4 in that order. The next 6 elements control 
+%         the enabled state in the same order. 0 = red or 'off', 1 = green 
+%         or 'on'. 
+% 
+%   h:    a structure containing handles to the graphical elements in the 
+%         GUI.
+
+%--------------------------------------------------------------------------
 
 % Creates array of figure handles
 buttons = [h.pushbutton1 h.pushbutton2 h.pushbutton3 h.pushbutton4...

@@ -1,6 +1,6 @@
-function [] = data_plot(handles,nw,T_max,E_T_max,E_E_max,U_max,m_max,...
+function [] = data_plot(handles,nw,T_max,E_T_max,E_E_max,J_max,m_max,...
     C_max,i,filename,raw,timevector,elapsedSec,T_dif_metric,T,dx,dy,...
-    progress,T_dif,mu,E_T,sb_a,epsilon,plot_update)
+    progress,T_dif,mu_x,mu_y,E_T,sb,E,plot_update)
 %--------------------------------------------------------------------------
 % Function DATA_PLOT
 %--------------------------------------------------------------------------
@@ -25,96 +25,93 @@ function [] = data_plot(handles,nw,T_max,E_T_max,E_E_max,U_max,m_max,...
 % You should have received a copy of the GNU General Public License
 % along with MIRRORS.  If not, see <http://www.gnu.org/licenses/>.
 %--------------------------------------------------------------------------
-%   Performs all plotting tasks and is called after every new unknown file
-%   is processed.
+% Performs all plotting tasks and is called after every new unknown file
+% is processed.
 
-%   INPUTS: handles = data structure containing information on graphics
-%           elements within the GUI.
+% Inputs: 
 
-%           nw = array of normalised wavelengths computed for the four
-%           filter wavelngths used in Bristol.
+%         handles: handles of GUI objects
 
-%           T_max,E_T_max = peak temperature and associated error
+%         nw: normalised wavelengths
 
-%           E_E_max = error in the emissivity
+%         T_max: maximum temperature
 
-%           U_max = array of normalised intensities used to compute the
-%           peak temperature pixel
+%         E_T_max: error on maximum temperature
 
-%           m_max,c_max = gradient and y-intercept (emissivity) of the Wien
-%           fit at the peak temperature pixel
+%         E_E_max: error on maximum emissivity
 
-%           i = the current position within filenumber
+%         J_max: normalised intensity of the hottest pixel
 
-%           filenumber = list of filenumbers extrcated from filenames in
-%           working directory
+%         m_max: slope of linear fit to data
 
-%           raw = background corrected fullframe
+%         C_max: intercept of linear fit to data
 
-%           timevector = timestamp in vectorised format
+%         i: index to determine how many files were processed
 
-%           elapsedSec = time in seconds since first datatpoint
+%         filename: name of the processed file
 
-%           T_dif_metric = average of the difference map
+%         raw: raw image data
 
-%           T = computed temperature map
+%         timevector: vector containing timestamp in [hrs, min, sec]
 
-%           dx,dy = co-ordinates of peak pixel
+%         elapsedSec: elapsed time in seconds
 
-%           micorns = array containing distances in mu from the
-%           subframe center for each pixel
+%         T_dif_metric: difference metric of temperature profiles
 
-%           progress = percentage progress through current processing job
+%         T: temperature map
 
-%           T_dif = difference map
+%         dx: x location of peak pixel
 
-%           E_T = computed temperature error map
+%         dy: y location of peak pixel
 
-%           Clim_min,Clim_max = minimum and maximum colour limits for
-%           differnece map
+%         progress: progress of data processing in percentage
 
-%           sb_a = smoothed form of subframe b for contouring
+%         T_dif: difference map
 
-%           i = flag; only plot output data if == 1. Speeds up plotting
-%           during initial data checking when user presses the post
-%           processing button
+%         mu_x: x-axis in microns
 
-%   OUTPUTS: NONE
+%         mu_y: y-axis in microns
 
+%         E_T: error in temperature
+
+%         sb: smoothed intensity map for contouring
+
+%         E: emissivity map
+
+%         plot_update: flag to determine if the plots should be updated
+
+%--------------------------------------------------------------------------
+% Ignore MATLAB:contour:ConstantData warning in the case when the unknown
+% and the calibration file are the same and thus the matrices are flat
+warning('off','MATLAB:contour:ConstantData')
 
 %--------------------------------------------------------------------------
 % Close all open files
 fclose('all');
-
-persistent Clim_dif_min Clim_dif_max
 
 %-------------------------------------------------------------------------
 % Get colour map chosen by user
 contents = cellstr(get(handles.popupmenu1,'String'));
 colour_scheme = contents{get(handles.popupmenu1,'Value')};
 
+%-------------------------------------------------------------------------
+% Import required .mat files
+u = matfile('unknown.mat','Writable',true);
+
 %--------------------------------------------------------------------------
 % SUMMARY PLOT: raw image data
 axes(handles.axes1)
-cla
 imagesc(raw)
+
 % Set axes labels and plot title
 xlabel('X: pixels', 'FontSize', 14);
 ylabel('Y: pixels', 'FontSize', 14);
 title(filename,'FontSize',14,'Interpreter','none');
 
-% Deletes interactive ROI if one already exists
-hfindROI = findobj(handles.axes1,'Type','hggroup');    
-delete(hfindROI)
-
-% Deletes fixed ROI if one already exists
-hfindrect = findobj(handles.axes1,'Type','rectangle');
-delete(hfindrect)
-
 % Plot rectangle on summary plot except when this function is called from
 % pushbutton2_Callback
-if length(sb_a) > 2
-    rectangle('Position',getappdata(0,'subframe'),'EdgeColor','w',...
+if length(sb) > 2
+    rectangle('Position',u.ROI,'EdgeColor','w',...
         'LineWidth',2);
 end
 axis equal
@@ -131,7 +128,7 @@ axes(handles.axes2)
 cla
 pbaspect([1 1 1])
 
-plot(nw(:,2),U_max,'bO','LineWidth',1,'MarkerEdgeColor','b',...
+plot(nw(:),J_max,'bO','LineWidth',1,'MarkerEdgeColor','b',...
     'MarkerSize',10);
 
 % Set axes labels and plot title
@@ -139,11 +136,11 @@ xlabel('Normalised wavelength', 'FontSize', 14);
 ylabel('Normalised intensity', 'FontSize', 14);
 title((strcat({'Peak temperature: '},(num2str(round(T_max(end)))),...
     ' +/- ',(num2str(round(E_T_max(end)))))),'FontSize',14);
-xlim([min(nw(:,2))-0.02*max(nw(:,2)) max(nw(:,2))+0.02*max(nw(:,2))])
+xlim([min(nw)-0.02*max(nw) max(nw)+0.02*max(nw)])
 
 % Overlay linear fit to data
 hold on
-xline = linspace(min(nw(:,2)),max(nw(:,2)),100);
+xline = linspace(min(nw),max(nw),100);
 yline = polyval([m_max,C_max(end)],xline);
 plot(xline,yline,'-r')
 hold off
@@ -154,16 +151,15 @@ pbaspect([1 1 1])
 axes(handles.axes3)
 cla
 pbaspect([1 1 1])
-
 errorbar(elapsedSec,T_max,E_T_max,'--bO','LineWidth',1,'MarkerEdgeColor'...
     ,'b','MarkerFaceColor','b','MarkerSize',10);
 
 % Set axes labels and plot title
 xlabel('Elapsed Time (s)', 'FontSize', 14);
 ylabel('Temperature (K)', 'FontSize', 14);
-title(strcat(datestr(timevector),{'  '},num2str(progress),'%'),...
+title(strcat(string(timevector),{'  '},num2str(round(progress)),'%'),...
     'FontSize',14);
-xlim([min(elapsedSec) max(elapsedSec)+1])
+xlim([min(elapsedSec) max(elapsedSec)+1]);
 pbaspect([1 1 1])
 
 
@@ -181,14 +177,15 @@ if get(handles.radiobutton6,'Value') == 1
     xlabel('Elapsed Time (s)', 'FontSize', 14);
     ylabel('Image difference metric', 'FontSize', 14);
     title('Image difference metric','FontSize',14);
-    xlim([min(elapsedSec) max(elapsedSec)+1])
+    xlim([min(elapsedSec) max(elapsedSec)+1]);
     
 % Temperature cross Sections
 elseif get(handles.radiobutton7,'Value') == 1
     cla
+    
     % centre lines on middle of hotspot
-    plot(mu,T(dx,(1:length(T))),'r',mu,T(1:length(T),dy),'g');
-
+    plot(mu_x,T((1:length(T)),dy),'r',mu_y,T(dx,(1:width(T))),'g')
+    
     % Set axes labels and plot title
     xlabel('Distance (microns)', 'FontSize', 14);
     ylabel('Temperature (K)', 'FontSize', 14);
@@ -199,10 +196,10 @@ elseif get(handles.radiobutton7,'Value') == 1
 elseif get(handles.radiobutton8,'Value') == 1
     
     % centre lines on middle of hotspot
-    plot(epsilon(1:length(T),dy),T(1:length(T),dy),...
+    plot(E(1:length(T),dy),T(1:length(T),dy),...
         'go-','MarkerFaceColor','g');
     hold on
-    plot(epsilon(dx,(1:length(T))),T(dx,(1:length(T))),...
+    plot(E(dx,(1:length(T))),T(dx,(1:length(T))),...
         'ro-','MarkerFaceColor','r')
     hold off
     
@@ -233,120 +230,64 @@ pbaspect([1 1 1])
 %--------------------------------------------------------------------------
 %BOTTOM LEFT PLOT: temperature map
 axes(handles.axes5)  
-cla
 
-if ~isnan(U_max)
+if ~isnan(J_max)
     % Forces Clim values to be different if they are the same to prevent
     % error 
-    Clim_min=(min(min(T(T>0))));
-    Clim_max=max(T(:));
-    if Clim_min == Clim_max
-        Clim_max = Clim_max+1;
+    cmin=(min(min(T(T>0))));
+    cmax=max(T(:));
+    if cmin == cmax
+        cmax = cmax+1;
     end
-    
-    imagesc(mu,mu,T,[Clim_min Clim_max]);
-
-    % add colorbar and intensity contour
-    originalSize = get(gca, 'Position');
-    colormap(colour_scheme);
-    colorbar('location','NorthOutside');
-    set(gca, 'Position', originalSize);
-    hold on
-    
-    contour(mu,mu,sb_a,10,'k');
-    plot(mu(dy),mu(dx),'ws','LineWidth',2,'MarkerSize',10,...
-        'MarkerEdgeColor','w','MarkerFaceColor','w')
-    xlim([min(mu) max(mu)])
-    ylim([min(mu) max(mu)])
-    hold off
 end
 
-% Set axes labels and plot title
-xlabel('Distance (microns)', 'FontSize', 14);
-ylabel('Distance (microns)', 'FontSize', 14);
-title('TEMPERATURE MAP','FontSize',14); 
-pbaspect([1 1 1])
+map_plot(mu_x,mu_y,T,[cmin cmax],colour_scheme,...
+    sb,dx,dy,'TEMPERATURE MAP')
 
 %--------------------------------------------------------------------------
 %BOTTOM MIDDLE PLOT: error map
 axes(handles.axes6)
-cla
 
-if ~isnan(U_max)
+if ~isnan(J_max)
     % Forces Clim values to be different if they are the same to prevent
     % error 
-    Clim_min=(min(E_T(:)));
-    Clim_max=(max(E_T(:)));
-    if Clim_min == Clim_max
-        Clim_max = Clim_max+1;
+    cmin=(min(E_T(:)));
+    cmax=(max(E_T(:)));
+    if cmin == cmax
+        cmax = cmax+1;
     end
-    
-    imagesc(mu,mu,E_T,[Clim_min Clim_max]);
-
-    % add colorbar and intensity contour
-    originalSize = get(gca, 'Position');
-    colormap(colour_scheme);
-    colorbar('location','NorthOutside');
-    set(gca, 'Position', originalSize);
-    hold on
-    contour(mu,mu,sb_a,10,'k');
-    plot(mu(dy),mu(dx),'ws','LineWidth',2,'MarkerSize',10,...
-        'MarkerEdgeColor','w','MarkerFaceColor','w')
-    xlim([min(mu) max(mu)])
-    ylim([min(mu) max(mu)])
-    hold off
 end
 
-% Set axes labels and plot title
-xlabel('Distance (microns)', 'FontSize', 14);
-ylabel('Distance (microns)', 'FontSize', 14);
-title('ERROR MAP','FontSize',14);
-pbaspect([1 1 1])
-
+map_plot(mu_x,mu_y,E_T,[cmin cmax],colour_scheme,...
+    sb,dx,dy,'ERROR MAP')
 
 %--------------------------------------------------------------------------
 %BOTTOM RIGHT PLOT: difference map
-axes(handles.axes7)
-cla
+axes(handles.axes7);
 
-if ~isnan(U_max)
-    % Set Colour Limits for difference plot such that it is only
-    % extended but never reduced
-    
+if ~isnan(J_max)
+
     if i == 1
-        Clim_dif_min = 0;
-        Clim_dif_max = 0.001;
+        cmin = 0;
+        cmax = 0.001;
     else
-        if min(T_dif(:)) < Clim_dif_min
-            Clim_dif_min = min(T_dif(:));
+        ax = gca;
+
+        cmin = ax.CLim(1);
+        cmax = ax.CLim(2);
+
+        if min(T_dif(:)) < cmin
+            cmin = min(T_dif(:));
         end
 
-        if max(T_dif(:)) > Clim_dif_max
-            Clim_dif_max = max(T_dif(:));
+        if max(T_dif(:)) > cmax
+            cmax = max(T_dif(:));
         end
     end
-    
-    imagesc(mu,mu,T_dif,[Clim_dif_min Clim_dif_max]);
-
-    % add colorbar and intensity contour
-    originalSize = get(gca, 'Position');
-    colormap(colour_scheme)
-    colorbar('location','NorthOutside');
-    set(gca, 'Position', originalSize);
-    hold on
-    contour(mu,mu,sb_a,10,'k');
-    plot(mu(dy),mu(dx),'ws','LineWidth',2,'MarkerSize',10,...
-        'MarkerEdgeColor','w','MarkerFaceColor','w')
-    xlim([min(mu) max(mu)])
-    ylim([min(mu) max(mu)])
-    hold off
 end
 
-% Set axes labels and plot title
-xlabel('Distance (microns)', 'FontSize', 14);
-ylabel('Distance (microns)', 'FontSize', 14);
-title('DIFFERENCE MAP','FontSize',14);
-pbaspect([1 1 1])
+map_plot(mu_x,mu_y,T_dif,[cmin cmax],colour_scheme,...
+    sb,dx,dy,'DIFFERENCE MAP')
 
 end
 

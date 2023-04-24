@@ -2,33 +2,32 @@ function varargout = MIRRORS(varargin)
 %--------------------------------------------------------------------------
 % MIRRORS (MultIspectRal imaging RadiOmetRy Software)
 %--------------------------------------------------------------------------
-% Version 1.7.9
-% Written and tested on Matlab R2014a (Windows 7) & R2017a (OS X 10.13)
+% Version 1.7.9 Written and tested on Matlab R2014a (Windows 7) & R2017a
+% (OS X 10.13)
 
-% Copyright 2018 Oliver Lord, Weiwei Wang
-% email: oliver.lord@bristol.ac.uk
+% Copyright 2018 Oliver Lord, Weiwei Wang email: oliver.lord@bristol.ac.uk
  
 % This file is part of MIRRORS.
  
-% MIRRORS is free software: you can redistribute it and/or modify
-% it under the terms of the GNU General Public License as published by
-% the Free Software Foundation, either version 3 of the License, or
-% (at your option) any later version.
+% MIRRORS is free software: you can redistribute it and/or modify it under
+% the terms of the GNU General Public License as published by the Free
+% Software Foundation, either version 3 of the License, or (at your option)
+% any later version.
  
-% MIRRORS is distributed in the hope that it will be useful,
-% but WITHOUT ANY WARRANTY; without even the implied warranty of
-% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-% GNU General Public License for more details.
+% MIRRORS is distributed in the hope that it will be useful, but WITHOUT
+% ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+% FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+% more details.
  
-% You should have received a copy of the GNU General Public License
-% along with MIRRORS.  If not, see <http://www.gnu.org/licenses/>.
+% You should have received a copy of the GNU General Public License along
+% with MIRRORS.  If not, see <http://www.gnu.org/licenses/>.
 %--------------------------------------------------------------------------
 %MIRRORS M-file for MIRRORS.fig
 %      MIRRORS, by itself, creates a new MIRRORS or raises the existing
 %      singleton*.
 %
-%      H = MIRRORS returns the handle to a new MIRRORS or the handle to
-%      the existing singleton*.
+%      H = MIRRORS returns the handle to a new MIRRORS or the handle to the
+%      existing singleton*.
 %
 %      MIRRORS('Property','Value',...) creates a new MIRRORS using the
 %      given property value pairs. Unrecognized properties are passed via
@@ -42,9 +41,9 @@ function varargout = MIRRORS(varargin)
 %      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
 %      instance to run (singleton)".
 
-%      hObject    handle to checkbox1 (see GCBO)
-%      eventdata  reserved - to be defined in a future version of MATLAB
-%      handles    structure with handles and user data (see GUIDATA)
+%      hObject    handle to checkbox1 (see GCBO) eventdata  reserved - to
+%      be defined in a future version of MATLAB handles    structure with
+%      handles and user data (see GUIDATA)
 
 %      handles    structure with handles and user data (see GUIDATA)
 %      varargin   unrecognized PropertyName/PropertyValue pairs from the
@@ -56,7 +55,7 @@ function varargout = MIRRORS(varargin)
 
 % Edit the above text to modify the response to help MIRRORS
 
-% Last Modified by GUIDE v2.5 05-Jan-2022 14:30:26
+% Last Modified by GUIDE v2.5 20-Apr-2023 11:08:59
 
 
 %--------------------------------------------------------------------------
@@ -131,7 +130,7 @@ plots = [handles.axes2 handles.axes3 handles.axes4 handles.axes5...
     handles.axes6 handles.axes7];
 
 % VERSION NUMBER
-set(handles.text17,'String','1.7.9');
+set(handles.text17,'String','1.8.0');
 
 % Write current calibration file to GUI window
 load('calibration.mat','name');
@@ -143,16 +142,22 @@ for i=1:6
    pbaspect([1 1 1])
 end
 
-% Forces GUI to screen centre at start-up 
+% Forces GUI to screen centre at start-up
 movegui(gcf,'center');
 
 % Initialise button colors and enabled state
-flag = {0 0 0 0 0 0 0 0 1 1 0 0 1 1 1 1};
+flag = {0 0 0 0 0 0 1 0    1 1 0 0 1 1 1 1};
 control_colors(flag, handles);
 
 % Suppress non integer index and complex number warnings
 warning('off','MATLAB:colon:nonIntegerIndex');
 warning('off','MATLAB:plot:IgnoreImaginaryXYPart');
+
+% Load matfiles, clear axes
+[u,~,~] = initialise_mode(true);
+
+% Ensure test mode is disabled
+u.mode = 'op';
 
 %--------------------------------------------------------------------------
 % --- Outputs from this function are returned to the command line.
@@ -165,216 +170,136 @@ varargout{1} = handles.output;
 %--------------------------------------------------------------------------
 % UNUSED CALLBACK FUNCTIONS
 
+% --- Executes on button press in Fit saturated images chackbox.
+function checkbox1_Callback(~, ~, ~) 
+
 % --- Executes on button press in checkbox2.
 function checkbox2_Callback(~, ~, handles) %#ok<INUSD>
 
+% --- Executes on button press in checkbox3.
+function checkbox3_Callback(~, ~, ~)
+
 % --- Executes on selection change in popupmenu1.
 function popupmenu1_Callback(~, ~, handles) %#ok<INUSD>
+
 
 %--------------------------------------------------------------------------
 % --- Executes when user presses LIVE button
 function pushbutton1_Callback(~, ~, handles) 
 
-if get(handles.pushbutton1,'BackgroundColor') == [0 .8 0]
+% If user clicks live mode button while in live mode, reset
+if isequal(get(handles.pushbutton1,'BackgroundColor'),[0 .8 0])
     
     if get(handles.checkbox2,'Value') == 1
         
-        % Closes video file on loop exit
+        % Closes video file on when reinitialising live mode
         writerObj = getappdata(0,'writerObj');
         close(writerObj);
     end
-    
-    % Update button states and exit live mode
-    flag = {0 0 0 0 0 0 0 0 1 1 0 0 1 1 1 1};
-    control_colors(flag, handles);
-    return
-end
-% Clear all axes within GUI
-arrayfun(@cla,findall(0,'type','axes'))
-fclose('all');
 
-% Switch on Save Output and disable
-set(handles.checkbox2,'Value',1,'Enable','off');
+end
+
+% Switch on and disable saturated / blank checkboxes
+set(handles.checkbox1,'Value',1)
+set(handles.checkbox1,'Enable','off')
+set(handles.checkbox3,'Value',1)
+set(handles.checkbox3,'Enable','off')
+
+% Load matfiles, clear axes
+[u,c,hp] = initialise_mode(true);
+u.timestamps = {[]};
 
 % Update button states
-flag = {1 0 0 0 0 0 0 0 1 1 0 0 1 1 1 1};
+flag = {1 0 0 0 0 0 0 0    1 1 0 0 1 1 1 1};
 control_colors(flag, handles);
 
-% Deletes ROI if one already exists
-hfindROI = findobj(handles.axes1,'Type','hggroup');
-delete(hfindROI)
-
-% Default intensity cutoff to 25% and disable
-set(handles.slider1,'Value',0.25);
-set(handles.text12,'String','25 %');
-
-% Load previous file path from .MAT file
-unkmat = matfile('unknown.mat','Writable',true);
-
 % Ask user to point to folder containing .TIF files to be processed
-test_dir = uigetdir(unkmat.path,'Select Image(s)');
+test_dir = uigetdir(u.path,'Select Image(s)');
 
 % Test for valid directory, else return
 if isequal(test_dir,0)
     
     % Update button states
-    flag = {0 0 0 0 0 0 0 0 1 1 0 0 1 1 1 1};
+    flag = {0 0 0 0 0 0 1 0    1 1 0 0 1 1 1 1};
     control_colors(flag, handles);
     return
 end
-unkmat.path = test_dir;
+u.path = test_dir;
+
+% Prepares data output
+[savename, writerObj] = create_output(handles);
+
+% Set string of text5 to current folder path
+set(handles.text5,'string',u.path);
 
 % Collect list of current .TIFF files
-dir_content = dir(strcat(unkmat.path,'/*.tif*'));
+dir_content = dir(strcat(u.path,'/*.tif*'));
 initial_list = {dir_content.name};
+
+% Initialise progress bar
+ttwb = tooltipwaitbar(handles.text25, 0, 'Starting...', false, true);
+
+% Initialise arrays
+[elapsedSec,T_max,E_T_max,T_diff_metric] = deal([]);
 
 % Initialise counter c1
 c1 = 1;
 
-while get(handles.pushbutton1,'BackgroundColor') == [0 .8 0]
+while isequal(get(handles.pushbutton1,'BackgroundColor'),[0 .8 0])
     
     % Collects new list of filenames
-    pause(0.1);
-    dir_content = dir(strcat(unkmat.path,'/*.tif*'));
+    pause(1);
+    dir_content = dir(strcat(u.path,'/*.tif*'));
     new_list = {dir_content.name};
-    
-    % Executes if a new file appears in the target folder
-    if length(new_list) > length(initial_list)
-        
-        % Determines path to unknown file
-        filepath = char(strcat(unkmat.path,'/',(dir_content(end).name)));
-        
-        filename = dir_content(end).name;
-        
-        % Reads in unknown file and convert to double precision
-        raw_image = imread(filepath);
-        raw = im2double(raw_image);
-        
-        % Determines background intensity using image corners
-        background = mean(mean([raw(1:10,1:10) raw(1:10,end-9:end)...
-            raw(end-9:end,1:10) raw(end-9:end,end-9:end)]));
-        
-        % Subtracts background
-        raw = raw-background;
-        
-        if c1 == 1
-            
-            % Determine center of top right quadrant and set halfwidth
-            x = ceil(0.25*(length(raw(1,:))));
-            y = ceil(0.25*(length(raw(:,1))));
-            w = 100;
-            setappdata(0,'subframe',[x-(w) y-(w) 2*w 2*w]);
-            
-            % Call dataprep function
-            [~,~,~,savename] = data_prep(handles);
-            
-            % Sets up video recording of ouput screen
-            videofile = char(strcat(unkmat.path,'/',savename,'/','VIDEO.avi'));
-            writerObj = VideoWriter(videofile);
-            writerObj.FrameRate = 1;
-            open(writerObj)
-            setappdata(0,'writerObj',writerObj);
+    assignin('base','new_list',new_list)
+  
+    % Executes when new files appear: 1-camera mode
+    if (length(new_list) > length(initial_list)) && (~isequal(get...
+            (handles.pushbutton10,'BackgroundColor'), [0 .8 0]))
+
+        % Update timestamps
+        tmp = u.timestamps;
+        if ~isequal(u.mode,'test')
+            tmp(:,c1) = save_timestamps(u.path,new_list(end),1);
+        else
+            tmp(:,c1) = save_timestamps(u.path,new_list(end),0);
         end
-        
-        % Reads in calibration .MAT file
-        load('calibration.mat','cal');
-        
-        % Subtract background
-        cal = cal-background;
-        
-        % Divides background subtracted image into four quadrants
-        cal_a = cal(1:size(cal,1)/2,1:size(cal,2)/2,:);
-        cal_b = cal(size(cal,1)/2+1:size(cal,1),1:size(cal,2)/2,:);
-        cal_c = cal(1:size(cal,1)/2,size(cal,2)/2+1:size(cal,2),:);
-        cal_d = cal(size(cal,1)/2+1:size(cal,1),size(cal,2)/2+1:size(cal,2),:);
-        
-        % Divides background subtracted image into four quadrants
-        a = raw(1:size(raw,1)/2,1:size(raw,2)/2,:);
-        b = raw(size(raw,1)/2+1:size(raw,1),1:size(raw,2)/2,:);
-        c = raw(1:size(raw,1)/2,size(raw,2)/2+1:size(raw,2),:);
-        d = raw(size(raw,1)/2+1:size(raw,1),size(raw,2)/2+1:size...
-            (raw,2),:);
-        
-        % Wavelengths of each quadrant at Bristol
-        % a = top left (670 nm)
-        % b = top right (750 nm)
-        % c = bottom left (850 nm)
-        % d = bottom right (580 nm)
-        
-        % Returns spatial correlation parameters for first file in the
-        % dataset
-        if c1 == 1 
-            [bya,bxa,cya,cxa,dya,dxa] = correlate(a,b,c,d);
-        end
-        
-        % Shifts quadrants based on offsets and pads by 4 pixels
-        a = a(y-w-4:y+w+4,x-w-4:x+w+4);
-        b = b(y-w+bya-4:y+w+bya+4,x-w+bxa-4:x+w+bxa+4);
-        c = c(y-w+cya-4:y+w+cya+4,x-w+cxa-4:x+w+cxa+4);
-        d = d(y-w+dya-4:y+w+dya+4,x-w+dxa-4:x+w+dxa+4);
-        
-        % Returns spatial correlation parameters for the calibration
-        % file but only on the first pass through the loop. Note that
-        % with a sufficiently flat field, the offsets are likely to be
-        % zero and this procedure will have no effect.
-        if c1 == 1
-            [cal_bya,cal_bxa,cal_cya,cal_cxa,cal_dya,cal_dxa] = ...
-                correlate(cal_a(y-w:y+w,x-w:x+w),cal_b...
-                (y-w:y+w,x-w:x+w),cal_c(y-w:y+w,x-w:x+w),cal_d...
-                (y-w:y+w,x-w:x+w));
-        end
-        
-        % Shifts quadrants based on offsets and pads by 4 pixels
-        cal_a=cal_a(y-w-4:y+w+4,x-w-4:x+w+4);
-        cal_b=cal_b(y-w+cal_bya-4:y+w+cal_bya+4,x-w+cal_bxa-4:...
-            x+w+cal_bxa+4);
-        cal_c=cal_c(y-w+cal_cya-4:y+w+cal_cya+4,x-w+cal_cxa-4:...
-            x+w+cal_cxa+4);
-        cal_d=cal_d(y-w+cal_dya-4:y+w+cal_dya+4,x-w+cal_dxa-4:...
-            x+w+cal_dxa+4);
-        
-        % Calls mapper function to calculate temperature, error and
-        % emissivity maps, and also returns maximum T and associated
-        % errors, intensities, wien slope and intercept and map indices
-        % and smoothed b quadrant for plotting countours later
-        [T,E_T,E_E,epsilon,T_max(c1),E_T_max(c1),E_E_max(c1),U_max,...
-            m_max,C_max(c1),dx,dy,sb_a,nw] = mapper(cal_a,cal_b,cal_c,...
-            cal_d,d,a,c,b,handles,filepath); %#ok<AGROW>
-        
-        % Pixel to micron conversion
-        mu = linspace((-w*.18),(w*.18),length(T));
-        
-        % Calls difference function to calculate the difference map and
-        % associated metric.
-        [T_dif,T_dif_metric(c1)] = difference(T, sb_a, c1,background);
-        
-        % Create concatenated summary output array and save to
-        % workspace and save current map data to .txt file if Save
-        % OUtput checkbox is ticked
-        [timevector,elapsedSec(c1)] = data_output(handles,dir_content(end).name,...
-            c1,T_max(c1),E_T_max(c1),C_max(c1),E_E_max(c1),...
-            T_dif_metric(c1),T,E_T,epsilon,E_E,T_dif,mu,sb_a,...
-            savename); %#ok<AGROW>
-        
-        % Calculates job progress
-        progress = 'N/A';
-        
-        % Calls data_plot function
-        data_plot(handles,nw,T_max,E_T_max,E_E_max,U_max,m_max,C_max,c1,...
-            filename,raw,timevector,elapsedSec,T_dif_metric,T,...
-            dx,dy,progress,T_dif,mu,E_T,sb_a,epsilon,1);
-        
-        % Writes current GUI frame to movie
-        if get(handles.checkbox2,'Value') == 1
-            movegui(gcf,'center')
-            frame=getframe(gcf);
-            writeVideo(writerObj,frame);
-        end
-        
+        u.timestamps = tmp;
+
+        % Perform fit
+        [elapsedSec,T_max,E_T_max,T_diff_metric] =...
+            fit(dir_content(end).name,u.path,1,u,c,hp,c1,handles,...
+            savename,writerObj,elapsedSec,T_max,E_T_max,T_diff_metric,ttwb);
+
         % Increment counter c1
         c1 = c1 + 1;
-        
+
+        % Update list of exisiting files
         initial_list = new_list;
+
+    end
+    
+    % Executes when new files appear: 4-camera mode
+    if (length(new_list)-length(initial_list) >= 4) && (isequal(get...
+            (handles.pushbutton10,'BackgroundColor'), [0 .8 0]))
+
+        % Stitch four images into single image
+        dir_content(end).name = stitcher...
+            ({dir_content(end-3:end).name},u.path,c1);
+
+        % Perform fit
+        [elapsedSec,T_max,E_T_max,T_diff_metric] = ...
+            fit(dir_content(end).name,u.path,1,u,c,hp,c1,handles,...
+            savename,writerObj,elapsedSec,T_max,E_T_max,T_diff_metric,ttwb);
+
+        % Increment counter c1
+        c1 = c1 + 1;
+
+        % Update list of exisiting files
+        dir_content = dir(strcat(u.path,'/*.tif*'));
+        new_list = {dir_content.name};
+        initial_list = new_list;
+
     end
 
 end
@@ -388,344 +313,165 @@ function pushbutton2_Callback(~, ~, handles)
 arrayfun(@cla,findall(0,'type','axes'))
 fclose('all');
 
+% Re-enable saturated / blank checkboxes
+set(handles.checkbox1,'Enable','on')
+set(handles.checkbox3,'Enable','on')
+
+% Load matfiles, clear axes
+[u,~,~] = initialise_mode(false);
+
 % Update button states
-flag = {0 1 0 0 0 0 0 0 1 1 0 0 1 1 1 1};
+flag = {0 1 0 0 0 0 0 0    0 0 0 0 1 1 1 1};
 control_colors(flag, handles);
 
-% Deletes ROI if one already exists
-hfindROI = findobj(gca,'Type','hggroup');    
-delete(hfindROI);
+% Promts user to select unknown file(s), unless in test mode
+if ~isequal(u.mode,'test')
+    [u.names,test_dir] = uigetfile(strcat(u.path,'/*.tif*'),...
+        'Select Image(s)','Multiselect','on');
 
-% Default intensity cutoff to 25% and enable
-set(handles.slider1,'Value',0.25);
-set(handles.text12,'String','25 %');
-set(handles.slider1,'Enable','on');
-set(handles.checkbox2,'Enable','on');
+    % Test for valid directory, else return
+    if isequal(test_dir,0)
+        
+        % Update button states
+        flag = {0 0 0 0 0 0 1 0    1 1 0 0 1 1 1 1};
+        control_colors(flag, handles);
+        return
+    end
+    u.path = test_dir;
 
-% Load previous file path from .MAT file
-unkmat = matfile('unknown.mat','Writable',true);
+    % Convert to 1x1 cell array if single file selected
+    if ~isa(u.names,"cell")
+        u.names = {u.names};
+    end
 
-% Promts user to select unknown file(s)
-[unkmat.names,test_dir] = uigetfile(strcat(unkmat.path,'/*.tif*'),...
-    'Select Image(s)','Multiselect','on');
-
-% Test for valid directory, else return
-if isequal(test_dir,0)
-    
-    % Update button states
-    flag = {0 0 0 0 0 0 0 0 1 1 0 0 1 1 1 1};
-    control_colors(flag, handles);
-    return
+    % Save timestamps to unknown.mat
+    u.timestamps = save_timestamps(u.path,u.names,0);
 end
-unkmat.path = test_dir;
 
-% Determine number of .TIF files in folder
-if isa(unkmat.names, 'cell')
-    num_files = size(unkmat.names,2);
-else
-    num_files = 1;
+% If user chooses a four camera system
+if isequal(get(handles.pushbutton10,'BackgroundColor'),[0 .8 0])
+    u.names = stitcher(u.names,u.path,1);
 end
 
 % Set string of text5 to current folder path
-set(handles.text5,'string',unkmat.path);
-
-% Get state of checkbox one: 1 if user wants to attempt to fit saturated
-% images
-saturate = get(handles.checkbox1,'value');
-
-% Initialise listpos
-listpos = zeros(size(unkmat.names));
+set(handles.text5,'string',u.path);
 
 % Creates list of .TIF files to be fitted
-for i=1:num_files
-    
-    % Extract filename from cell array
-    if isa(unkmat.names, 'cell')
-        filename = unkmat.names(1,i);
-        filename = filename{1};
-    else
-        filename = unkmat.names;
-    end
-       
-    % Reads in unknown file  
-    raw=imread(char(strcat(unkmat.path,'/',(filename))));
+for i=1:length(u.names)
 
-    % Save example data to unknown.mat file
+    % Extract filename from cell array
+    filename = get_path(u.names,u.path,i);
+       
+    % Reads in unknown file and determines bit dpeth
+    raw=imread(char(strcat(u.path,'/',(filename))));
+
+    % Save correlation parmameters to unknown.mat file
     if i == 1
-        unkmat.unk = raw;
+        u.unk = raw;
+        [u.u_bya, u.u_bxa, u.u_cya, u.u_cxa, u.u_dya, u.u_dxa] =...
+            correlate(raw);
     end
     
     % Determines background intensity
-    background = mean(mean([raw(1:10,1:10) raw(1:10,end-9:end)...
-        raw(end-9:end,1:10) raw(end-9:end,end-9:end)]));
-    
-    % Forces top right plot option to 'difference'
-    set(handles.radiobutton5,'Value',1);
-    
-    % Divides background subtracted image into four quadrants
-    a = raw(1:round(size(raw,1))/2,1:round(size(raw,2))/2,:);
-    b = raw(size(raw,1)/2+1:size(raw,1),1:size(raw,2)/2,:);
-    c = raw(1:size(raw,1)/2,size(raw,2)/2+1:size(raw,2),:);
-    d = raw(size(raw,1)/2+1:size(raw,1),size(raw,2)/2+1:size(raw,2),:);
+    u.background = background(raw);
 
-    % Wavelengths of each quadrant at Bristol
-    % a = top left (670 nm)
-    % b = bottom left (850 nm)
-    % c = top right (750 nm)
-    % d = bottom right (580 nm)
-    
-    % Automaticlly determines the bit depth of the .TIFF files being used
-    % and sets the saturation limit to 99% of that value
-    image_info = imfinfo(char(strcat(unkmat.path,'/',(filename))));
-    saturation_limit = 2^image_info.BitDepth*.95;
-    
-    % Makes value of lispos = 1 if the weakest of
-    % the four hotspots is stronger than double the background if user has
-    % chosen to fit saturated images
-    if saturate == 1 
-        if min(max([d(:) a(:) c(:) b(:)])) > 2*background
-            listpos(i) = 1;
-            data_plot(handles,[0 1],[NaN NaN],[NaN NaN],[NaN NaN],NaN,...
-                NaN,NaN,i,filename,raw,0,[0 1],NaN,[1 2],1,1,[0 1],0,[-1,1],...
-                [0 1],[1 2],1,[NaN,NaN])
-        end
-    % Makes value of listpos = 1 if the weakest of
-    % the four hotspots is stronger than double the background AND none are 
-    %brighter than the detector bit depth if user has chosen NOT to fit
-    %saturated images    
-    else
-        if (min(max([d(:) a(:) c(:) b(:)])) > 2*background) &&...
-                (max(max([d(:) a(:) c(:) b(:)])) < saturation_limit)
-            listpos(i) = 1;
-            data_plot(handles,[0 1],[NaN NaN],[NaN NaN],[NaN NaN],NaN,...
-                NaN,NaN,i,filename,raw,0,[0 1],NaN,[1 2],1,1,[0 1],0,[-1,1],...
-                [0 1],[1 2],1,0)
-        end
-    end
+    data_plot(handles,[0 1],[NaN NaN],[NaN NaN],[NaN NaN],NaN,...
+             NaN,NaN,i,filename,raw,0,[0 1],NaN,[1 2],1,1,[0 1],0,...
+             [-1,1],[0 1],[1 2],1,[NaN,NaN],0)
 end
 
 % Update button states
-flag = {0 1 0 0 0 0 0 0 1 1 1 0 1 1 1 1};
+flag = {0 1 0 0 0 0 0 0   1 1 1 0 1 1 1 1};
 control_colors(flag, handles);
 
-% Make data available between functions within GUI
-setappdata(0,'listpos',listpos);
 
 %--------------------------------------------------------------------------
 % --- Executes on press of SELECT ROI button
 function pushbutton3_Callback(~, ~, handles) 
 
 % Update button states
-flag = {0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0};
+flag = {0 1 0 0 0 0 0 0   0 0 0 0 0 0 0 0};
 control_colors(flag, handles);
-
-% Deletes interactive ROI if one already exists
-hfindROI = findobj(handles.axes1,'Type','hggroup');    
-delete(hfindROI)
 
 % Deletes fixed ROI if one already exists
-hfindrect = findobj(handles.axes1,'Type','rectangle');
+hfindrect = findobj(handles.axes1,'Tag','redROI');
 delete(hfindrect)
 
-% Load current hardware_parameters
-unkmat = matfile('unknown.mat','Writable',true);
+% Load matfiles, clear axes
+[u,~,hp] = initialise_mode(false);
 
-% Determine the size, position and limits of the ROI based on the size of
-% the calibration file
-[y,x] = size(unkmat.unk);
+% Determine ROI parameters
+[area_x_tl,area_y_tl,area_width_x,area_width_y,ROI_x_tl,...
+    ROI_y_tl, ROI_width] = calculate_ROI(u,hp);
 
-% Determine centre of upper left quadrant
-xc = floor(x/4);
-yc = floor(y/4);
+% Creates resizeable ROI
+r = drawrectangle(handles.axes1,'Label','DOUBLE CLICK WHEN FINISHED',...
+    'Color',[1 0 0],'Position',[ROI_x_tl ROI_y_tl ROI_width, ROI_width],...
+    'DrawingArea',[area_x_tl area_y_tl area_width_x area_width_y],...
+    'Tag','redROI');
 
-% Determine width of largest possible square domain that can be fitted into
-% a quadrant with a ~10% border width
-max_w = floor((min(xc,yc)*2)*.8);
-
-% Determine the border width
-bw = floor(((min(xc,yc)*2)-max_w)/2);
-
-% Determine the X and Y co-ordinates of the top left corner of the ROI
-x_tl = floor(xc-(max_w/2));
-y_tl = floor(yc-(max_w/2));
-
-% Add tooltip
-tooltip = text(handles.axes1,x/2,y/2,...
-    'Resize, reposition and DOUBLE CLICK when ready','FontSize', 8,...
-    'HorizontalAlignment','Center','VerticalAlignment', 'middle',...
-    'Color', 'w');
-
-% Creates resizeable ROI rectangle and waits until user double clicks
-% inside it, and then reads out position pixel position of top left corner
-% and size (constrined to a square, and a region with a 20 pixel hold off
-% from the edge of the frame to allow space for misalignment and padding
-% pixel binning).
-ROI = imrect(handles.axes1, [x_tl y_tl max_w max_w]);
-fcn = makeConstrainToRectFcn('imrect',[bw floor(xc*2)-bw],[bw floor(yc*2)-bw]);
-setPositionConstraintFcn(ROI,fcn);
-setFixedAspectRatioMode(ROI,'True');
-subframe = wait(ROI);
-
-% Remove tooltip
-delete(tooltip)
-
-% Make ROI position avaialble to other functions
-setappdata(0,'subframe',subframe);
+% Listen for mouse clicks on the ROI unless test mode enabled
+if ~isequal(u.mode,'test')
+    u.ROI = customWait(r);
+end
 
 % Update button states
-flag = {0 1 1 1 0 0 0 0 1 1 1 1 1 1 1 1};
+flag = {0 1 1 1 0 0 0 0   1 1 1 1 1 1 1 1};
 control_colors(flag, handles);
+
 
 %--------------------------------------------------------------------------
 % --- Executes when user presses PROCESS button
 function pushbutton4_Callback(~, ~, handles) 
 
-% Load previous file path from .MAT file
-unkmat = matfile('unknown.mat','Writable',true);
+% Load matfiles, clear axes
+[unk,cal,hp] = initialise_mode(true);
 
-% Calls DATA_PREP function which returns parameters for the sequential
-% fitting
-[w,x,y,savename] = data_prep(handles);
-
-% Get list of positions in folder of files to be fitted
-listpos = getappdata(0,'listpos');
+% Prepares data output
+[savename, writerObj] = create_output(handles);
 
 % Initialise c1
 c1 = 1;
 
-% Sets up video recording of ouput screen
-videofile = char(strcat(unkmat.path,'/',savename,'/','VIDEO.avi'));
-writerObj = VideoWriter(videofile);
-writerObj.FrameRate = 1;
-open(writerObj)
+% Initialise progress bar
+ttwb = tooltipwaitbar(handles.text25, 0, 'Starting...', false, true);
+
+% Initialise arrays
+[elapsedSec,T_max,E_T_max,T_diff_metric] = deal([]);
+
+% Get state of checkbox one: 1 if user wants to attempt to fit saturated
+% images
+if isequal(get(handles.checkbox1,'value'),1)
+    saturate = 1;
+else
+    saturate = 0.98;
+end
+
+% Get state of checkbox three: 1 if user wants to attempt to fit blank
+% images
+if isequal(get(handles.checkbox3,'value'),1)
+    blank = 0;
+else
+    blank = 2*unk.background;
+end
 
 % Calculates temperature, error and difference maps and associated output
 % for each file and plots and stores the results.
-if isa(unkmat.names, 'cell')
-    num_files = size(unkmat.names,2);
-else
-    num_files = 1;
-end
-
-for i=1:num_files
+for i=1:length(unk.names)
     
-    if listpos(i) == 1
-        
-        % Extract filename from cell array
-        if isa(unkmat.names, 'cell')
-            filename = unkmat.names(1,i);
-            filename = filename{1};
-        else
-            filename = unkmat.names;
-        end
-        
-        % Determines path to unknown file
-        filepath = char(strcat(unkmat.path,'/',filename));
-        
-        % Reads in unknown file and convert to double precision
-        raw_image = imread(filepath);
-        raw = im2double(raw_image);
-        
-        % Determines background intensity using image corners of unknown file
-        background = mean(mean([raw(1:10,1:10) raw(1:10,end-9:end)...
-            raw(end-9:end,1:10) raw(end-9:end,end-9:end)]));
-        
-        % Subtracts background
-        raw = raw-background;
-        
-        % Divides background subtracted image into four quadrants
-        a = raw(1:size(raw,1)/2,1:size(raw,2)/2,:);
-        b = raw(size(raw,1)/2+1:size(raw,1),1:size(raw,2)/2,:);
-        c = raw(1:size(raw,1)/2,size(raw,2)/2+1:size(raw,2),:);
-        d = raw(size(raw,1)/2+1:size(raw,1),size(raw,2)/2+1:size(raw,2),:);
-        
-        % Wavelengths of each quadrant at Bristol
-        % a = top left (670 nm)
-        % b = top right (750 nm)
-        % c = bottom left (850 nm)
-        % d = bottom right (580 nm)
-        
-        % Reads in calibration .MAT file
-        load('calibration.mat','cal');
-        
-        % Subtract background. Note that this is the background determined from
-        % the current unknown, applied retrospectively to the calibration file.
-        % This is technically unreasonable, but determining a true background
-        % for the calibration file, which may consist of images that completely
-        % fill the frame, by looking at the corners or edges is risky.
-        cal = cal-background;
-        
-        % Divides background subtracted image into four quadrants
-        cal_a = cal(1:size(cal,1)/2,1:size(cal,2)/2,:);
-        cal_b = cal(size(cal,1)/2+1:size(cal,1),1:size(cal,2)/2,:);
-        cal_c = cal(1:size(cal,1)/2,size(cal,2)/2+1:size(cal,2),:);
-        cal_d = cal(size(cal,1)/2+1:size(cal,1),size(cal,2)/2+1:size(cal,2),:);
-        
-        % Returns spatial correlation parameters for first file in the dataset
-        % or if there is a gap of more than 1 between the last good file and
-        % the current file.
-        if c1 == 1 || (c1 > 1 && listpos(c1-1) == 0)
-            [bya,bxa,cya,cxa,dya,dxa] = correlate(a,b,c,d);
-        end
-        
-        % Shifts quadrants based on offsets and pads by 4 pixels
-        a = a(y-w-4:y+w+4,x-w-4:x+w+4);
-        b = b(y-w+bya-4:y+w+bya+4,x-w+bxa-4:x+w+bxa+4);
-        c = c(y-w+cya-4:y+w+cya+4,x-w+cxa-4:x+w+cxa+4);
-        d = d(y-w+dya-4:y+w+dya+4,x-w+dxa-4:x+w+dxa+4);
-        
-        % Returns spatial correlation parameters for the calibration file but
-        % only on the first pass through the loop. Note that with a
-        % sufficiently flat field, the offsets are likely to be zero and this
-        % procedure will have no effect.
-        if c1 == 1
-            [cal_bya,cal_bxa,cal_cya,cal_cxa,cal_dya,cal_dxa] = correlate(...
-                cal_a(y-w:y+w,x-w:x+w),cal_b(y-w:y+w,x-w:x+w),...
-                cal_c(y-w:y+w,x-w:x+w),cal_d(y-w:y+w,x-w:x+w));
-        end
-        
-        % Shifts quadrants based on offsets and pads by 4 pixels
-        cal_a=cal_a(y-w-4:y+w+4,x-w-4:x+w+4);
-        cal_b=cal_b(y-w+cal_bya-4:y+w+cal_bya+4,x-w+cal_bxa-4:x+w+cal_bxa+4);
-        cal_c=cal_c(y-w+cal_cya-4:y+w+cal_cya+4,x-w+cal_cxa-4:x+w+cal_cxa+4);
-        cal_d=cal_d(y-w+cal_dya-4:y+w+cal_dya+4,x-w+cal_dxa-4:x+w+cal_dxa+4);
-        
-        % Calls mapper function to calculate temperature, error and emissivity
-        % maps, and also returns maximum T and associated errors, intensities,
-        % wien slope and intercept and map indices and smoothed b quadrant for
-        % plotting countours later
-        [T,E_T,E_E,epsilon,T_max(c1),E_T_max(c1),E_E_max(c1),U_max,m_max,...
-            C_max(c1),dx,dy,sb_a,nw] = mapper(cal_a,cal_b,cal_c,cal_d,d,a,c,b,...
-            handles,filepath); %#ok<AGROW>
-        
-        % Pixel to micron conversion
-        mu = linspace((-w*.18),(w*.18),length(T));
-        
-        % Calls difference function to calculate the difference map and
-        % associated metric.
-        [T_dif,T_dif_metric(c1)] = difference(T, sb_a, c1, background);
-        
-        % Create concatenated summary output array and save to workspace and
-        % save current map data to .txt file if Save Output checkbox ticked
-        [timevector,elapsedSec(c1)] = data_output(handles,filename,...
-            c1,T_max(c1),E_T_max(c1),C_max(c1),E_E_max(c1),...
-            T_dif_metric(c1),T,E_T,epsilon,E_E,T_dif,mu,sb_a,savename);
-                
-        % Calculates job progress
-        progress = ceil((c1/sum(listpos == 1))*100);
+    % Reads in unknown file and determines bit dpeth
+    [~, filepath] = get_path(unk.names,unk.path,i);
+    raw=imread(filepath);
+    raw_metadata = imfinfo(filepath);
+    [a,b,c,d] = divide(raw);
+    
+    if (max(raw(:)) <= saturate*(2^raw_metadata.BitDepth)) &&...
+        (min(max([d(:) a(:) c(:) b(:)])) > blank)
 
-        % Calls data_plot function
-        data_plot(handles,nw,T_max,E_T_max,E_E_max,U_max,m_max,C_max,i,...
-            filename,raw,timevector,elapsedSec,T_dif_metric,T,dx,dy,...
-            progress,T_dif,mu,E_T,sb_a,epsilon,1);
-        
-        % Writes current GUI frame to movie
-        if get(handles.checkbox2,'Value') == 1
-            
-            movegui(gcf,'center')
-            frame=getframe(gcf);
-            writeVideo(writerObj,frame);
-        end
+        % Perform fit
+        [elapsedSec,T_max,E_T_max,T_diff_metric] = fit(unk.names,unk.path,...
+            i,unk,cal,hp,c1,handles,savename,writerObj,elapsedSec,T_max,...
+            E_T_max,T_diff_metric,ttwb);
         
         % Increment counter c1
         c1 = c1 + 1;
@@ -734,10 +480,9 @@ end
 
 % Closes video file on loop exit
 if get(handles.checkbox2,'Value') == 1
-        
     close(writerObj);
-        
 end
+
 
 %--------------------------------------------------------------------------
 % --- Executes on slider movement.
@@ -749,31 +494,37 @@ slider_val = get(handles.slider1,'Value')*100;
 %Set textbox to current slider value
 set(handles.text12,'String',strcat(num2str(round(slider_val)),{' '},'%'));
 
-%--------------------------------------------------------------------------
-% --- Executes on button press in Fit saturated images chackbox.
-function checkbox1_Callback(~, ~, ~) 
 
 %--------------------------------------------------------------------------
 % --- Executes when user clisks on the Update Calibration Image button
 function pushbutton5_Callback(~, ~, handles) 
 
+% Update button states
+flag = {0 1 0 0 0 0 0 0   1 1 1 0 1 1 1 1};
+control_colors(flag, handles);
+
 % Load current hardware_parameters
-calmat = matfile('calibration.mat','Writable',true);
+cal = matfile('calibration.mat','Writable',true);
 
 % Promts user to select calibration file
-[calmat.name,test_dir] = uigetfile(strcat(calmat.path,'/*.tif*'),...
+[cal.name,test_dir] = uigetfile(strcat(cal.path,'/*.tif*'),...
     'Select new Calibration Image');
 if isequal(test_dir,0)
     return
 end
-calmat.path = test_dir;
+cal.path = test_dir;
 
 % Read in data and convert to double
-cal_image = imread(strcat(calmat.path,calmat.name));
-calmat.cal = im2double(cal_image);
+cal_image = imread(strcat(cal.path,cal.name));
+cal.cal = im2double(cal_image);
+
+% Returns spatial correlation parameters for the calibration file
+[cal.c_bya, cal.c_bxa, cal.c_cya, cal.c_cxa, cal.c_dya, cal.c_dxa] =...
+    correlate(cal.cal);
 
 % Write current calibration name to GUI
-set(handles.text20,'String',calmat.name);
+set(handles.text20,'String',cal.name);
+
 
 %--------------------------------------------------------------------------
 % --- Executes when user clicks on the Update Hardware Parameters button
@@ -781,145 +532,66 @@ function pushbutton6_Callback(~, ~, ~)
 hardware_parameters
 
 %--------------------------------------------------------------------------
-% --- Executes when Update Test Data button is pushed
-function pushbutton7_Callback(~, ~, handles) 
-
-% Ask user to select folder containing example data    
-example_source = './example';
-
-% Delete existing benchmark data
-if exist(strcat(example_source,'/','benchmark_data'), 'file')==2
-  delete(strcat(example_source,'/','benchmark_data'));
-end
-
-% Run test_fit function
-test_fit(example_source,'benchmark_data',handles)
-
-%--------------------------------------------------------------------------
 % --- Executes when RUN TEST button is pushed
 function pushbutton8_Callback(~, ~, handles) 
 
 % Load previous file path from .MAT file
-unkmat = matfile('unknown.mat','Writable',true);
+[u,~,~] = initialise_mode('true');
 
-% Ask user to select folder containing example data    
-unkmat.path = uigetdir(unkmat.path,'Select folder containing example data');
-
-% Delete existing test data
-if exist(strcat(unkmat.path,'/','test_data'), 'file')==2
-  delete(strcat(unkmat.path,'/','test_data'));
-end
-if exist(strcat(unkmat.path,'/','result'), 'file')==2
-  delete(strcat(unkmat.path,'/','result'));
-end
+% Ask user to select folder containing example data
+u.path = uigetdir(u.path,'Select folder containing example data');
 
 % Run test_fit function
-test_fit(unkmat.path,'test_data',handles)
+test(u.path,'test_data',handles)
 
-% Determine difference
-benchmark = readmatrix(strcat(unkmat.path,'/','benchmark_data'));
-test_result = readmatrix(strcat(unkmat.path,'/','test_data'));
-difference = benchmark - test_result;
-
-% Save result to file
-assignin("base","difference",difference)
-fid = fopen(strcat(unkmat.path,'/','result'),'a+');
-fprintf(fid,[repmat('%10.5f\t', 1, size(difference,2)) '\n'], difference');
-fclose(fid);
 
 %--------------------------------------------------------------------------
-% --- Executes fitting of example data
-function test_fit(example_source, output_name, handles)
+% --- Executes on button press in pushbutton9.
+function pushbutton9_Callback(~, ~, handles)
 
-% First remove any old folders
-full_list = dir(example_source);
-for i = 1:length(full_list)
-    if full_list(i).isdir == 1 & full_list(i).name ~= '.' %#ok<AND2>
-        rmdir(strcat(example_source,'/',full_list(i).name),'s');
-    end
+% Update button states
+if isequal(get(handles.pushbutton9,'BackgroundColor'),[.8 .8 .8])
+    set(handles.pushbutton9,'BackgroundColor', [0 .8 0])
+    set(handles.pushbutton10,'BackgroundColor', [.8 .8 .8])  
+
+    % Update button states
+    flag = {0 0 0 0 0 0 1 0    1 1 0 0 1 1 1 1};
+    control_colors(flag, handles);
 end
 
-% Load .MAT file for storing list of unknown data to be fitted
-unkmat = matfile('unknown.mat','Writable',true);
 
-% Update .MAT file with path to unknown files
-unkmat.path = example_source;
+%--------------------------------------------------------------------------
+% --- Executes on button press in pushbutton10.
+function pushbutton10_Callback(~, ~, handles)
 
-% Extract list of items in target directory
-test_list = dir(strcat(example_source,'/example_0*'));
+% Update button states
+if isequal(get(handles.pushbutton10,'BackgroundColor'),[.8 .8 .8])
+    set(handles.pushbutton10,'BackgroundColor', [0 .8 0])
+    set(handles.pushbutton9,'BackgroundColor', [.8 .8 .8])
 
-% Update .MAT file with list of files for fitting
-for i = 1:length(test_list)
-    if i == 1
-        unkmat.names = {test_list(i).name};
-    else
-        unkmat.names(:,i) = {test_list(i).name};
-    end
+    % Update button states
+    flag = {0 0 0 0 0 0 1 0    1 1 0 0 1 1 1 1};
+    control_colors(flag, handles);
 end
 
-% Save directory content and listpos into appdata
-setappdata(0,'listpos',ones(size(test_list)))
 
-% Fix subframe position
-setappdata(0,'subframe',[91 28 200 200])
+%--------------------------------------------------------------------------
+% --- Executes on button press in pushbutton14.
+function pushbutton14_Callback(~, ~, handles)
 
-% Set user options
-set(handles.slider1,'Value',0.25)
-set(handles.checkbox1,'Value',1)
-set(handles.checkbox2,'Value',1)
-
-% Initialise counter
-t1 = 1;
-
-% Load current calibration file
-calmat = matfile('calibration.mat','Writable',true);
-
-% Read in data and convert to double
-cal_image = imread(strcat(example_source,'/tc_example.tiff'));
-calmat.cal = im2double(cal_image);
-calmat.name = 'tc_example.tiff';
-
-% Write current calibration name to GUI
-set(handles.text20,'String',calmat.name);
-
-% Update timestamps by reading and re-writing a single byte IF they are
-% equal
-for i = 1:length(test_list)
-    pause(2)
-    fid = fopen(strcat(unkmat.path,'/',test_list(i).name),'r+');
-    byte = fread(fid, 1);
-    fseek(fid, 0, 'bof');
-    fwrite(fid, byte);
-    fclose(fid);
+% Update button states
+if isequal(get(handles.pushbutton14,'BackgroundColor'),[.8 .8 .8])
+    set(handles.pushbutton14,'BackgroundColor', [0 .8 0])
+    set(handles.pushbutton15,'BackgroundColor', [.8 .8 .8])  
 end
 
-for m = 1:5
-    for n = 6:9
-        
-        % Set peak temperature radiobutton
-        set(handles.(['radiobutton' num2str(m)]),'Value',1)
-        
-        % Set optional plot radiobutton
-        set(handles.(['radiobutton' num2str(n)]),'Value',1)
 
-        % Run PROCESS button
-        pushbutton4_Callback([], [], handles)
+%--------------------------------------------------------------------------
+% --- Executes on button press in pushbutton15.
+function pushbutton15_Callback(~, ~, handles)
 
-        % Get current directory content
-        full_list = dir(example_source);
-
-        % Remove existing folders and concatenate SUMMARY data into benchmark
-        for i = 1:length(full_list) 
-            if full_list(i).isdir == 1 & full_list(i).name ~= '.' %#ok<AND2>
-                fid = fopen(strcat(example_source,'/',output_name),'a+');
-                st = readmatrix(strcat(example_source,'/',full_list(i).name,'/SUMMARY.txt'),delimitedTextImportOptions);
-                fprintf(fid,'%s\n',st{2:4});
-                fclose(fid);
-                rmdir(strcat(example_source,'/',full_list(i).name),'s');
-            end
-        end
-
-        % Increment counter
-        t1 = t1 + 1;
-    end
+% Update button states
+if isequal(get(handles.pushbutton15,'BackgroundColor'),[.8 .8 .8])
+    set(handles.pushbutton15,'BackgroundColor', [0 .8 0])
+    set(handles.pushbutton14,'BackgroundColor', [.8 .8 .8])  
 end
