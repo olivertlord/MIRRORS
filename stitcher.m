@@ -37,7 +37,7 @@ function stitched_filenames = stitcher(names,path,j)
 
 %       path  = path to location of files to be stitched
 
-%       i     = file counter in live mode
+%       j     = file counter in live mode
 
 % Outputs:
 

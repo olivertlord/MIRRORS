@@ -503,27 +503,46 @@ function pushbutton5_Callback(~, ~, handles)
 flag = {0 1 0 0 0 0 0 0   1 1 1 0 1 1 1 1};
 control_colors(flag, handles);
 
-% Load current hardware_parameters
-cal = matfile('calibration.mat','Writable',true);
+% Load matfiles, clear axes
+[~,c,~] = initialise_mode(false);
 
 % Promts user to select calibration file
-[cal.name,test_dir] = uigetfile(strcat(cal.path,'/*.tif*'),...
-    'Select new Calibration Image');
+[names,test_dir] = uigetfile(strcat(c.path,'/*.tif*'),...
+    'Select new Calibration Image','Multiselect','on');
+
+% Check for valid directory
 if isequal(test_dir,0)
     return
 end
-cal.path = test_dir;
+c.path = test_dir;
+
+% Convert to 1x1 cell array if single file selected
+if ~isa(names,"cell")
+    names = {names};
+end
+
+% Determine if 1 or 4 calibration images have been selected
+if (length(names) ~= 1) && (length(names) ~= 4)
+    msgbox('Please select either 1 or 4 images','Error');
+else
+    if length(names) == 4
+        c.name = stitcher(names,c.path,1);
+    else
+        c.name = names;
+    end
 
 % Read in data and convert to double
-cal_image = imread(strcat(cal.path,cal.name));
-cal.cal = im2double(cal_image);
+cal_image = imread(strcat(c.path,char(c.name)));
+c.cal = im2double(cal_image);
 
 % Returns spatial correlation parameters for the calibration file
-[cal.c_bya, cal.c_bxa, cal.c_cya, cal.c_cxa, cal.c_dya, cal.c_dxa] =...
-    correlate(cal.cal);
+[c.c_bya, c.c_bxa, c.c_cya, c.c_cxa, c.c_dya, c.c_dxa] =...
+    correlate(c.cal);
 
 % Write current calibration name to GUI
-set(handles.text20,'String',cal.name);
+set(handles.text20,'String',c.name);
+
+end
 
 
 %--------------------------------------------------------------------------
