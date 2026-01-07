@@ -133,7 +133,7 @@ The four boxes represent the four quadrants of your CCD image (or four separate 
 * **Bottom Left**: Wavelength (nm) for quadrant C (e.g., 851.32 nm)
 * **Bottom Right**: Wavelength (nm) for quadrant D (e.g., 578.61 nm)
 
-If you are using a 4 camera setup, each camera must produce files appended with different letter from the list `_a`, `_b`, `_c` or `_d` where a = top left, b = top right, c = bottom left, d = bottom right of a stitched image as represented by the quadrants in the hardware parameter window.
+If you are using a 4 camera setup, each camera must produce files appended with different letters from the list `_a`, `_b`, `_c` or `_d` where a = top left, b = top right, c = bottom left, d = bottom right of a stitched image as represented by the quadrants in the hardware parameter window.
 
 **Spectral Radiance Section**
 
@@ -193,7 +193,7 @@ The selected button will turn green.
 On the right side of the GUI, configure these settings:
 
 #### Checkboxes
-- **Fit Saturated images**: Check to process images where some pixels are saturated (maxed out)
+- **Fit Saturated images**: Check to process images where some pixels are saturated. Note that the saturated pixels themselves will always be ignored regardless of the status of the box. The reason for providing this choice is that images containing saturated pixels often contain 'blooming' effects that will badly affect temperature measurement accuracy for adjacent pixels that are not themselves saturated.
 - **Fit blank images**: Check to process images where the signal is very weak
 - **Save Output**: Check to save results to disk (highly recommended)
 
@@ -208,7 +208,7 @@ Select how to identify the peak temperature:
 - **Maximum Intensity**: Uses the brightest pixel (default, good for most cases)
 - **Minimum Error**: Uses the pixel with smallest fitting error (good when noise is an issue)
 - **Maximum Temperature**: Uses hottest pixel where error ≤ 5× minimum error
-- **9th percentile**: Averages temperature across top 20% of intensity values (good for larger hot spots)
+- **80th percentile**: Averages temperature across the top 20% of intensity values (good for larger hot spots)
 - **Centre pixel**: Uses the pixel at the center of the ROI (good when hot spot is perfectly centered)
 
 #### Optional Plot (Radio Buttons)
@@ -260,7 +260,7 @@ The first selected image will appear in the bottom-right panel of the GUI showin
 
 ### Step 7: View Results
 
-As processing completes, the GUI will populate with results:
+As processing progresses, the GUI will populate with results:
 
 #### Top Row Plots
 - **Top Left**: Wien fit for the peak pixel (normalized intensity vs. normalized wavelength with linear fit)
@@ -341,15 +341,12 @@ The software will now:
 - Process each new image (or set of four images) automatically
 - Update all plots and maps in real-time
 
-The first new image detected will trigger the ROI selection workflow.
+#### Step 4: Define ROI (First Image Only)
 
-### Step 4: Define ROI (First Image Only)
-
-When the first new image is detected:
-1. The **ROI** button will automatically become active
-2. Click the **ROI** button
-3. Select your region of interest as described in Post-Processing Step 5
-4. **Double-click inside the rectangle** to confirm
+When the first new image is detected and displayed in the bottom-right panel:
+1. Manually click the **ROI** button (it will turn green)
+2. Select your region of interest as described in Post-Processing Step 5
+3. **Double-click inside the rectangle** to confirm
 
 The same ROI will be used for all subsequent images.
 
@@ -369,8 +366,6 @@ To stop Live Mode and finish processing:
 - Click the **LIVE** button again (it will turn gray)
 - Processing will complete for any queued images
 - If **Save Output** was checked, all results will be written to disk
-
----
 
 ## Understanding the Output Plots
 
@@ -403,8 +398,8 @@ Use this to monitor:
 - Shows how the *shape* of the temperature field changes over time
 - Independent of absolute temperature changes
 - Useful for detecting:
-  - Melting (hot spot becomes more circular)
-  - Sample movement
+  - Melting
+  - Sample motion
   - Laser mode changes
 
 #### Temperature Cross-Sections
@@ -419,7 +414,7 @@ Use this to monitor:
 
 #### Emissivity vs Peak T
 - Shows time evolution of emissivity at the hottest point
-- Useful for studying surface oxidation or changes in sample reflectivity
+- Useful for studying changes in sample reflectivity
 
 ### Temperature Map (Bottom Left)
 - **Color scale**: Temperature in Kelvin
@@ -443,8 +438,7 @@ Use this to monitor:
 ## Tips and Best Practices
 
 ### ROI Selection
-- **Keep it square**: The analysis requires a square ROI for optimal binning
-- **Avoid edges**: Stay away from the edge of the quadrants where spatial correlation may be poor
+- **Avoid edges**: Stay away from the edge of the quadrants where light from adjacent quadrants could 'bleed' into the ROI (at least, in a 1-camera system).
 - **Center on hot spot**: For best results, center the ROI on your heated region
 - **Not too large**: Larger ROIs increase processing time; select only the region of interest
 
@@ -452,7 +446,7 @@ Use this to monitor:
 - **Start with defaults**: Maximum Intensity peak method with 25% intensity cutoff works well for most cases
 - **Low temperature measurements**: Switch to 3-color fitting and lower the intensity cutoff
 - **High temperature measurements**: Use 4-color fitting for best accuracy
-- **Noisy data**: Try Minimum Error or 9th percentile peak methods
+- **Noisy data**: Try Minimum Error or 80th percentile peak methods
 
 ### Calibration
 - **Match conditions**: Calibration should be collected with the same optical setup, filters, and camera settings
@@ -492,7 +486,6 @@ Use this to monitor:
 
 **Four-camera mode not grouping files correctly**
 - Ensure filenames follow the exact pattern: basename_a.tiff, basename_b.tiff, etc.
-- Check that all four files are present for each timestamp
 - Verify file extensions are consistent (.tif or .tiff, not mixed)
 
 ## Output File Formats
@@ -514,7 +507,7 @@ x_index y_index x_microns y_microns intensity temperature error emissivity emiss
 Load into plotting software to create custom visualizations or perform additional analysis.
 
 ### VIDEO.avi
-Standard uncompressed AVI format showing the GUI evolution. Useful for presentations or reviewing the entire experiment progression.
+Standard uncompressed AVI format showing the GUI during processing. Useful for presentations or reviewing the entire experiment.
 
 ## Related Documentation
 
